@@ -30,7 +30,7 @@ import economy as E
 TOKEN = os.environ["BOT_TOKEN"]
 # адрес игры: APP_URL, иначе домен Railway, иначе локальный — чужих адресов по умолчанию нет
 APP_URL = (os.environ.get("APP_URL") or (f"https://{os.environ['RAILWAY_PUBLIC_DOMAIN']}/np/" if os.environ.get("RAILWAY_PUBLIC_DOMAIN") else "http://127.0.0.1:8000/np/"))
-BOT_NAME = os.environ.get("BOT_USERNAME", "NePridymalhzbot")
+BOT_NAME = os.environ.get("BOT_USERNAME", "bot")   # имя своего бота без @; чужих имён по умолчанию нет
 VIA_BOT = ContextVar("via_bot", default=0)        # франшиза: id дочернего бота, через которого пришёл запрос (0 — главный)
 CUR_TOKEN = ContextVar("cur_token", default=None)  # франшиза: ответы на апдейт дочернего бота — его токеном
 DEV = os.environ.get("DEV") == "1"

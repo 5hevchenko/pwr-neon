@@ -42,7 +42,14 @@ def main():
         im = draw(i, len(cases), str(i) if c["price"] else "0")
         for size in (64, 128, 256, 512):
             im.resize((size, size), Image.LANCZOS).save(os.path.join(ASSETS, f"{c['cover']}_{size}.webp"), quality=84, method=4)
-    print(len(cases), "запасных обложек")
+    # кейсы скинов и кейсы пропуска: тоже свои запасные обложки (в исходных картинках был логотип)
+    data = json.load(open(os.path.join(ROOT, "data.json"), encoding="utf-8"))
+    extra = [(c["cover"], c["title"][:1]) for c in data["cases"]] + [("pass_free", "F"), ("pass_pwr", "+"), ("pass_vip", "★")]
+    for i, (name, label) in enumerate(extra):
+        im = draw(i * 2.6, len(extra) * 2.6, label)
+        for size in (64, 128, 256, 512):
+            im.resize((size, size), Image.LANCZOS).save(os.path.join(ASSETS, f"{name}_{size}.webp"), quality=84, method=4)
+    print(len(cases), "+", len(extra), "запасных обложек")
 
 
 if __name__ == "__main__":
