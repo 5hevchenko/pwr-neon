@@ -148,3 +148,14 @@ html .ghub .gcard .gfav{top:8px!important;right:8px!important;bottom:auto!import
 .pp-tier img,.pp-t-art img,.pp-hero img{border-radius:18px}
 /* скрытые карточки остаются скрытыми (вкладки витрины, отложенная отрисовка) */
 .case.pwr-hide,.case.defer,.gcard.pwr-hide,.case[hidden],.gcard[hidden]{display:none!important}
+/* метки на карточке кейса (шанс охоты, уровень, «хит»): компактный чип в левом верхнем углу, без растягивания */
+.case .hunttag,.case .lvtag,.case .hot{bottom:auto!important;width:auto!important;height:auto!important;max-width:calc(100% - 20px);display:inline-flex!important;align-items:center;gap:4px;line-height:1.2!important;
+  background:rgba(11,9,21,.68)!important;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--tx)!important;transform:none!important;z-index:3;white-space:nowrap}
+.case .hot{background:var(--mg)!important;color:#fff!important}
+.case.hunt{box-shadow:none!important}
+.case.hunt .gl-art{box-shadow:inset 0 0 0 2px rgba(60,231,255,.55)!important;border-radius:22px 22px 0 0!important}
+.case:has(.hunttag) .cfoot{padding:12px 12px 14px!important;align-self:stretch!important}
+/* закрытый по уровню кейс: замок — чип по центру арта, без дубля уровня и без полосы под карточкой */
+.case .lock{position:absolute!important;left:50%!important;top:76px!important;right:auto!important;bottom:auto!important;width:auto!important;height:auto!important;transform:translate(-50%,-50%)!important;margin:0!important;
+  display:inline-flex!important;align-items:center;gap:6px;padding:8px 14px!important;border-radius:999px!important;background:rgba(11,9,21,.78)!important;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--tx)!important;font-size:12.5px!important;font-weight:700!important;white-space:nowrap;z-index:3}
+.case:has(.lock) .lvtag{display:none!important}
