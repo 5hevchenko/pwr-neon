@@ -2859,6 +2859,7 @@ import idletax  # noqa: E402,F401 — сбор с брошенных больш�
 import legacy  # noqa: E402,F401 — наследие: итоги прошлых сезонов в профиле
 import share  # noqa: E402,F401 — карточка большого выигрыша
 import pwr  # noqa: E402,F401 — слияние с PWR SKINBOX: боевой пропуск и задания
+import withdraw  # noqa: E402,F401 — вывод скинов CS в Steam через market.csgo.com
 
 
 # ---------------- картинки подарков (api.changes.tg); на проде перед этим стоит кэш nginx ----------------

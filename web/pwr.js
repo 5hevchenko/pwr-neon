@@ -5,7 +5,7 @@
 // Подключается последним: оборачивает renderCases / openCase / fillQuests, как это делают остальные модули.
 let PWR = null;
 let CTAB = (() => { try { return localStorage.getItem("np_ctab") || "all"; } catch (e) { return "all"; } })();
-const CTABS = [["all", "Все"], ["tg", "Подарки"], ["cs", "CS"], ["ru", "RubUp"]];
+const CTABS = [["all", "Все"], ["tg", "Подарки"], ["cs", "CS"], ["ru", "Тиры"]];
 const pwrLoad = async () => { try { PWR = await api("pwr"); } catch (e) {} return PWR; };
 const pwrImg = (name, s = 256) => A.orig(name, s);
 // арт и ролики из Higgsfield (tools/fetch_art.py → web/gen/): используем только то, что скачалось при сборке
@@ -230,3 +230,47 @@ fillQuests = async function (el) {
 function pwrQuestDot() { const e = document.getElementById("tq-n"); if (!e) return; const n = ME && ME.quests ? ME.quests : 0; e.textContent = n ? (n > 9 ? "9+" : n) : ""; e.classList.toggle("on", !!n); }
 const _rhPwr = renderHeader;
 renderHeader = function () { const r = _rhPwr.apply(this, arguments); pwrQuestDot(); return r; };
+
+/* ---------------- вывод скинов CS в Steam ---------------- */
+const _gshPwr = giftSheetHTML;
+giftSheetHTML = function (o, mine) {
+  let h = _gshPwr(o, mine);
+  const g = o.g;
+  if (mine && g.src === "cs" && g.price == null)
+    h = h.replace('<div class="btns"><button class="btn gold" data-act="present"', `<div class="btns"><button class="btn cta" data-act="wd-open" data-id="${g.id}">${ic("send")}Вывести в Steam</button></div><div class="btns"><button class="btn gold" data-act="present"`);
+  return h;
+};
+let WD = null, WD_G = null;
+const usd = v => "$" + (Math.round(v * 100) / 100).toFixed(2);
+function wdHTML() {
+  const d = WD, g = WD_G, price = g ? g.value / d.rate : 0;
+  const hist = d.items.length ? `<div class="sec-t">Заявки</div><div class="box">${d.items.map(x => `<div class="row"><div class="grow"><div class="t">${esc(x.col)}</div><div class="s">${esc(x.text)}</div></div><b class="tw">${usd(x.usd)}</b></div>`).join("")}</div>` : "";
+  if (!d.on) return `<h2 class="gtitle">Вывод в Steam</h2><div class="box"><div class="hint" style="padding:14px">Вывод скинов пока не включён. Скин остаётся в сумке — его можно продать за полную ценность.</div></div>${hist}`;
+  return `<h2 class="gtitle">Вывод в Steam</h2>
+    ${g ? `<div class="box"><div class="row kv"><span class="k">Скин</span><span class="v">${esc(g.col)}</span></div><div class="row kv"><span class="k">Цена</span><span class="v">${usd(price)}</span></div>
+      <div class="row kv"><span class="k">Доступно к выводу</span><span class="v">${usd(d.left)} из ${usd(d.limit)}</span></div></div>` : ""}
+    <div class="sec-t">Трейд-ссылка Steam</div>
+    <div class="box" style="padding:12px"><input id="wd-link" class="wd-inp" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://steamcommunity.com/tradeoffer/new/?partner=…&token=…" value="${esc(d.link)}">
+      <div class="btns" style="margin-top:10px"><button class="btn ghost" data-act="wd-link">Сохранить ссылку</button></div></div>
+    ${g ? `<div class="btns"><button class="btn cta" data-act="wd-go" data-id="${g.id}"${d.link && d.left + 1e-9 >= price ? "" : " disabled"}>Вывести ${usd(price)}</button></div>` : ""}
+    <p class="hint">${!d.limit ? "Вывод открывается после первой покупки за Telegram Stars." : "Лимит вывода растёт с покупками за Telegram Stars."} Скин покупается на торговой площадке и приходит обменом в Steam; если обмен сорвётся, скин вернётся в сумку.</p>${hist}`;
+}
+function wdPaint() { const el = document.querySelector(".sheet.wdsheet"); if (el) { const b = el.querySelector(".wd-body"); if (b) b.innerHTML = wdHTML(); } }
+Object.assign(ACT, {
+  "wd-open": async el => {
+    const sh = el.closest(".sheet"), o = sh && sh._o;
+    WD_G = o ? o.g : null;
+    WD = await api("withdraw");
+    closeSheet();
+    openSheet(`<div class="wd-body">${wdHTML()}</div>`, "wdsheet");
+  },
+  "wd-link": async () => {
+    const v = (document.getElementById("wd-link") || {}).value || "";
+    WD = await post("withdraw/link", { link: v.trim() }); H.ok(); toast("Ссылка сохранена", "ok"); wdPaint();
+  },
+  "wd-go": async el => {
+    el.disabled = true;
+    try { WD = await post("withdraw/" + el.dataset.id); WD_G = null; H.ok(); toast("Заявка принята — скин придёт обменом в Steam", "ok"); wdPaint(); if (TAB === "inv") renderInventory(); }
+    catch (e) { el.disabled = false; }
+  },
+});

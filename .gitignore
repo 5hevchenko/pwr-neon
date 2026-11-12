@@ -16,3 +16,4 @@ venv/
 __pycache__/
 server/.asset_cache/
 *.part
+server/pwr/assets/*.hf

@@ -132,3 +132,7 @@ nav.tabs .tab-quests{position:relative;color:var(--yl)!important}
 nav.tabs .tab-quests i{color:var(--yl)!important;filter:drop-shadow(0 0 7px rgba(255,225,74,.55))!important}
 nav.tabs .tq-n{display:none;position:absolute;top:2px;left:calc(50% + 5px);min-width:15px;height:15px;padding:0 4px;border-radius:8px;background:var(--mg);color:#fff;font:700 9px/15px inherit;font-style:normal;letter-spacing:0;box-shadow:0 0 10px rgba(255,47,208,.8)}
 nav.tabs .tq-n.on{display:block}
+
+/* вывод скинов */
+.wd-inp{width:100%;box-sizing:border-box;padding:12px 12px;border-radius:10px;border:1px solid rgba(34,233,255,.35);background:rgba(10,6,26,.7);color:#fff;font:500 13px/1.3 inherit;outline:none}
+.wd-inp:focus{border-color:var(--cy);box-shadow:0 0 0 2px rgba(34,233,255,.18)}
