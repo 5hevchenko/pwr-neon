@@ -1,0 +1,114 @@
+/* ================= «Самолётик» ================= */
+/* небо: глубокий синий сверху → тёплый закат у горизонта; солнце садится в море */
+.avsc{position:relative;height:300px;border-radius:24px;overflow:hidden;isolation:isolate;
+  background:linear-gradient(180deg,#0f1b4d 0%,#23409a 30%,#5b62d6 52%,#c06fd0 70%,#ff9f7a 86%,#ffd29a 100%);
+  box-shadow:0 20px 44px -18px #5b62d6,inset 0 0 0 1px rgba(255,255,255,.14)}
+.avsc::before{content:"";position:absolute;inset:0;z-index:7;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(130% 100% at 50% 40%,transparent 60%,rgba(5,8,30,.35) 100%)}
+.avstars{position:absolute;inset:0 0 55%;opacity:.8;pointer-events:none;
+  background:radial-gradient(circle,#fff 0 .9px,transparent 1.4px) 0 0/47px 41px,radial-gradient(circle,rgba(255,255,255,.75) 0 .7px,transparent 1.2px) 23px 13px/67px 59px;
+  -webkit-mask:linear-gradient(#000 20%,transparent);mask:linear-gradient(#000 20%,transparent);animation:avtw 4s ease-in-out infinite alternate}
+@keyframes avtw{to{opacity:.45}}
+.avmoon{position:absolute;right:22%;bottom:44px;width:86px;height:86px;border-radius:50%;z-index:0;
+  background:radial-gradient(circle at 50% 45%,#fffbe6 0,#ffe3a1 45%,#ffb36b 70%,rgba(255,150,90,0) 72%);filter:blur(.3px);
+}
+/* дальние гряды облаков: три слоя с разной скоростью (параллакс), только transform — без лагов */
+.avfar{position:absolute;left:0;top:0;width:200%;height:100%;pointer-events:none;will-change:transform;animation:avpar 60s linear infinite;
+  background:
+    radial-gradient(70px 20px at 6% 34%,rgba(255,255,255,.22) 96%,transparent),radial-gradient(110px 26px at 18% 30%,rgba(255,255,255,.18) 96%,transparent),
+    radial-gradient(90px 22px at 36% 52%,rgba(255,230,240,.2) 96%,transparent),radial-gradient(130px 28px at 56% 40%,rgba(255,255,255,.16) 96%,transparent),
+    radial-gradient(80px 20px at 76% 58%,rgba(255,220,230,.2) 96%,transparent),radial-gradient(120px 26px at 92% 36%,rgba(255,255,255,.18) 96%,transparent);
+  filter:blur(3px)}
+.avfar::after{content:"";position:absolute;left:0;right:0;bottom:48px;height:60px;will-change:transform;
+  background:radial-gradient(60px 26px at 10% 100%,rgba(255,200,190,.5) 96%,transparent),radial-gradient(90px 34px at 27% 100%,rgba(255,190,180,.45) 96%,transparent),
+    radial-gradient(70px 28px at 48% 100%,rgba(255,205,190,.5) 96%,transparent),radial-gradient(100px 36px at 70% 100%,rgba(255,190,180,.45) 96%,transparent),
+    radial-gradient(70px 26px at 90% 100%,rgba(255,200,190,.5) 96%,transparent);filter:blur(2px)}
+@keyframes avpar{to{transform:translateX(-50%)}}
+/* море с бликами солнца */
+.avsea{position:absolute;left:0;right:0;bottom:0;height:52px;z-index:1;overflow:hidden;
+  background:linear-gradient(180deg,#3b3f9a 0%,#252a73 45%,#141a4d 100%);box-shadow:0 -1px 0 rgba(255,220,170,.8)}
+.avsea i{position:absolute;inset:0;width:200%;will-change:transform;animation:avsea 7s linear infinite;
+  background:repeating-linear-gradient(90deg,transparent 0 26px,rgba(255,255,255,.22) 26px 38px,transparent 38px 70px) 0 12px/100% 2px no-repeat,
+    repeating-linear-gradient(90deg,transparent 0 44px,rgba(255,255,255,.14) 44px 58px,transparent 58px 96px) 0 26px/100% 2px no-repeat,
+    repeating-linear-gradient(90deg,transparent 0 34px,rgba(255,255,255,.1) 34px 50px,transparent 50px 84px) 0 40px/100% 2px no-repeat}
+@keyframes avsea{to{transform:translateX(-50%)}}
+.avworld{position:absolute;left:0;top:0;bottom:0;z-index:2;will-change:transform}
+
+/* облако-бонус: пушистое, светлое сверху и сиреневое снизу, мягкое свечение */
+.avc{position:absolute;width:116px;height:64px;display:grid;place-items:center;will-change:transform,opacity;transition:transform .4s cubic-bezier(.2,1.4,.4,1),opacity .35s}
+.avc .puff{position:absolute;left:10px;right:10px;bottom:8px;height:30px;border-radius:999px;
+  background:linear-gradient(180deg,#fff 0%,#f3f0ff 55%,#d9d2f5 100%);box-shadow:0 10px 18px -8px rgba(40,20,100,.45),0 0 22px rgba(255,255,255,.25)}
+.avc .puff::before,.avc .puff::after{content:"";position:absolute;border-radius:50%;background:radial-gradient(circle at 45% 35%,#fff 0,#fbfaff 55%,#e2dcf8 100%)}
+.avc .puff::before{width:50px;height:50px;left:16px;top:-28px}
+.avc .puff::after{width:38px;height:38px;right:16px;top:-19px}
+.avc b{position:relative;z-index:1;margin-top:-6px;font-size:21px;font-weight:900;color:#16a05a;letter-spacing:-.01em}
+.avc.mul .puff{background:linear-gradient(180deg,#fffaf0 0%,#ffefcc 60%,#ffd59a 100%);box-shadow:0 10px 18px -8px rgba(160,80,0,.5),0 0 26px rgba(255,200,90,.55)}
+.avc.mul .puff::before,.avc.mul .puff::after{background:radial-gradient(circle at 45% 35%,#fffef8 0,#fff3d9 55%,#ffdca8 100%)}
+.avc.mul b{color:#ff6a00;font-size:25px}
+.avc.rocket .puff{background:linear-gradient(180deg,#e9e6f2,#c7c1db);box-shadow:0 10px 18px -8px rgba(40,20,60,.5),0 0 20px rgba(255,80,90,.35)}
+.avc.rocket .puff::before,.avc.rocket .puff::after{background:radial-gradient(circle at 45% 35%,#f1eef8,#cfc8e2)}
+.avc.rocket b{display:grid;margin-top:-2px}.avc.rocket b svg{width:44px;height:18px;transform:scaleX(-1);filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.avc.hit{transform:scale(1.4) translateY(-8px);opacity:0}
+
+/* самолёт: вектор, смотрит вправо, наклон по направлению полёта */
+.avplane{position:absolute;left:0;top:0;width:86px;height:43px;z-index:4;will-change:transform}
+.avplane span{position:absolute;inset:0;display:block;transform:rotate(var(--tilt,0deg));transition:transform .45s cubic-bezier(.3,1.3,.5,1)}
+.avplane .avpl{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 5px rgba(10,10,50,.4))}
+.avplane .trail{position:absolute;right:70px;top:24px;height:3px;width:0;border-radius:2px;opacity:0;transform-origin:right;transition:width .4s,opacity .4s;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.85))}
+.avplane.fly .trail{width:120px;opacity:1}
+.avplane.fly .avpl{animation:avbob 1.2s ease-in-out infinite}
+@keyframes avbob{50%{transform:translateY(-3px)}}
+/* попадание ракеты: тряска + вспышка-звезда */
+.avplane.boom .avpl{animation:avshake .55s}
+@keyframes avshake{20%{transform:translate(-6px,4px) rotate(-8deg)}45%{transform:translate(6px,-3px) rotate(6deg)}70%{transform:translate(-3px,2px)}}
+.avplane.boom::after{content:"";position:absolute;left:18px;top:-14px;width:60px;height:60px;z-index:2;pointer-events:none;
+  background:radial-gradient(circle,#fff6c8 0,#ffd23f 30%,#ff6a2a 60%,rgba(255,60,40,0) 72%);
+  clip-path:polygon(50% 0,61% 33%,96% 20%,70% 50%,100% 72%,63% 68%,55% 100%,42% 70%,6% 88%,30% 55%,0 30%,38% 34%);animation:avpow .55s ease-out forwards}
+@keyframes avpow{from{transform:scale(.2) rotate(0)}60%{opacity:1}to{transform:scale(1.5) rotate(25deg);opacity:0}}
+.avplane.sunk{opacity:0;transition:opacity .45s .15s}
+.avfloat{position:absolute;left:50%;top:-10px;transform:translateX(-50%);font-size:21px;font-weight:900;white-space:nowrap;pointer-events:none;
+  text-shadow:0 2px 8px rgba(0,0,0,.55);animation:avfloat .9s ease-out forwards}
+.avfloat.add{color:#8dffbf}.avfloat.mul{color:#ffd23f;font-size:26px}.avfloat.bad{color:#ff7b7b}
+@keyframes avfloat{to{transform:translate(-50%,-46px);opacity:0}}
+
+/* авианосец */
+.avship{position:absolute;bottom:18px;width:170px;height:56px;z-index:3}
+.avship .avshp{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 6px 6px rgba(0,0,20,.45));animation:avship 3.2s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes avship{50%{transform:rotate(-1.2deg) translateY(-2px)}}
+.avship .wake{position:absolute;left:-40px;right:20px;bottom:0;height:10px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.5),transparent)}
+
+/* брызги при промахе: кольцо + капли */
+.avsc.splash::after{content:"";position:absolute;left:var(--sx,50%);bottom:30px;z-index:5;width:110px;height:70px;margin-left:-55px;pointer-events:none;
+  background:radial-gradient(4px 7px at 30% 40%,#fff 90%,transparent),radial-gradient(5px 8px at 50% 20%,#fff 90%,transparent),radial-gradient(4px 7px at 70% 40%,#fff 90%,transparent),
+    radial-gradient(3px 5px at 40% 60%,#e8f3ff 90%,transparent),radial-gradient(3px 5px at 62% 58%,#e8f3ff 90%,transparent),
+    radial-gradient(55% 22% at 50% 92%,rgba(255,255,255,.85) 60%,transparent 62%);
+  animation:avsplash .9s ease-out forwards}
+@keyframes avsplash{from{transform:scale(.3) translateY(10px)}50%{opacity:1}to{transform:scale(1.4) translateY(-22px);opacity:0}}
+
+/* счётчик сверху по центру */
+.avhud{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:8;display:flex;flex-direction:column;align-items:center;
+  padding:6px 18px 7px;border-radius:16px;background:rgba(12,14,48,.48);backdrop-filter:blur(6px);color:#fff;transition:background .3s;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 6px 18px rgba(0,0,0,.25)}
+.avhud b{font-size:30px;font-weight:900;line-height:1.05;font-variant-numeric:tabular-nums;text-shadow:0 2px 10px rgba(0,0,0,.35)}
+.avhud span{font-size:11.5px;opacity:.85;white-space:nowrap}.avhud .xtr svg{width:1em;height:1em;vertical-align:-.12em}
+.avhud.pop b{animation:avpop .35s cubic-bezier(.2,1.8,.4,1)}
+@keyframes avpop{from{transform:scale(1.35)}}
+.avhud.good{background:rgba(22,150,85,.78)}
+.avhud.mul{background:linear-gradient(135deg,rgba(255,196,40,.94),rgba(255,120,0,.92));color:#3a1a00}
+.avhud.bad{background:rgba(220,40,60,.84)}
+.avhud.burn{background:rgba(45,45,70,.78)}.avhud.burn b{text-decoration:line-through;opacity:.65}
+.av-s .ghead img{border-radius:16px}
+/* --- v3: стартовый авианосец, линии скорости, плашки бонусов --- */
+.avship.start{z-index:3}
+.avspeed{position:absolute;inset:30px 0 70px;z-index:2;pointer-events:none;opacity:0;transition:opacity .4s;will-change:transform;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent) 0 22%/90px 1.5px no-repeat,
+    linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent) 40% 48%/120px 1.5px no-repeat,
+    linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent) 75% 70%/80px 1.5px no-repeat,
+    linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent) 20% 85%/110px 1.5px no-repeat}
+.avsc.flying .avspeed{opacity:1;animation:avspd .45s linear infinite}
+@keyframes avspd{from{transform:translateX(60px)}to{transform:translateX(-60px)}}
+.avc b{padding:2px 10px;border-radius:12px;background:rgba(255,255,255,.92);box-shadow:0 3px 10px rgba(40,20,100,.25),inset 0 -2px 0 rgba(0,0,0,.06)}
+.avc.mul b{background:linear-gradient(180deg,#fff7df,#ffe2a1);color:#e85d00}
+.avc.rocket b{background:none;box-shadow:none;padding:0}
+.avc:not(.hit) b{color:#b9b2d6}

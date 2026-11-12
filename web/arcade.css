@@ -1,0 +1,75 @@
+/* ================= общий слой новых игр (Насос, Бур, Дартс, Рыбалка): сцена, зерно, HUD, лесенка, кнопки ================= */
+.ar-stage{position:relative;border-radius:28px;overflow:hidden;isolation:isolate;margin-bottom:12px;
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.07),inset 0 1px 0 rgba(255,255,255,.12)}
+/* плёночное зерно + виньетка поверх сцены */
+.ar-stage::after{content:"";position:absolute;inset:0;z-index:30;pointer-events:none;border-radius:inherit;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.07;mix-blend-mode:overlay;box-shadow:inset 0 0 80px rgba(0,0,0,.55)}
+.ar-stage.shake{animation:ar-shake .42s cubic-bezier(.36,.07,.19,.97)}
+@keyframes ar-shake{10%,90%{transform:translate(-1px,1px)}20%,80%{transform:translate(3px,-2px)}30%,50%,70%{transform:translate(-5px,2px)}40%,60%{transform:translate(5px,-1px)}}
+
+/* HUD: крупный множитель с металлическим градиентом */
+.ar-hud{position:absolute;left:0;right:0;top:14px;z-index:20;display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.ar-x{font-weight:900;font-size:46px;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;
+  background:linear-gradient(180deg,#fff 0%,#fff 38%,#ffe7a3 62%,#ffb41f 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.35)) drop-shadow(0 0 18px rgba(255,190,60,.35))}
+.ar-x.dim{background:linear-gradient(180deg,#fff,#c9cbe0);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35));opacity:.92}
+.ar-x.bad{background:linear-gradient(180deg,#ffd0d0,#ff4d5e);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 18px rgba(255,60,80,.5))}
+.ar-x.good{background:linear-gradient(180deg,#eafff4,#4cf0a0 60%,#14b06c);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 22px rgba(76,240,160,.55))}
+.ar-x.bump{animation:ar-bump .32s cubic-bezier(.2,1.8,.4,1)}
+@keyframes ar-bump{0%{transform:scale(1.18)}100%{transform:none}}
+.ar-sub{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.ar-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:800;color:rgba(255,255,255,.88);
+  background:rgba(10,8,22,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.ar-pill b{color:#fff}.ar-pill .ic{width:12px;height:12px}
+.ar-pill.warn{color:#ffd0d0;box-shadow:inset 0 0 0 1px rgba(255,90,100,.45)}
+
+/* баннер итога посреди сцены */
+.ar-banner{position:absolute;left:50%;top:50%;z-index:25;transform:translate(-50%,-50%) scale(.6);opacity:0;pointer-events:none;
+  padding:14px 22px 12px;border-radius:22px;text-align:center;white-space:nowrap;
+  background:linear-gradient(180deg,rgba(18,14,34,.86),rgba(8,6,18,.92));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 20px 50px -10px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.14)}
+.ar-banner.on{animation:ar-ban 2.6s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes ar-ban{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}12%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-60%) scale(.96)}}
+.ar-banner small{display:block;font-size:10.5px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.ar-banner b{display:block;font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:1.1;margin-top:2px}
+.ar-banner em{display:block;font-style:normal;font-size:13px;font-weight:800;color:rgba(255,255,255,.75);margin-top:2px}
+.ar-banner.win{box-shadow:0 20px 50px -10px rgba(0,0,0,.8),inset 0 0 0 1px rgba(76,240,160,.55),0 0 40px -6px rgba(76,240,160,.45)}
+.ar-banner.win b{color:#5cf5ab;text-shadow:0 0 24px rgba(76,240,160,.6)}
+.ar-banner.lose{box-shadow:0 20px 50px -10px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,90,100,.5)}
+.ar-banner.lose b{color:#ff6b78}
+
+/* лесенка множителей (горизонтальная лента) */
+.ar-ladder{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;margin:0 0 10px;scroll-behavior:smooth;-webkit-mask:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
+.ar-ladder::-webkit-scrollbar{display:none}
+.ar-step{flex:none;min-width:58px;padding:7px 8px 6px;border-radius:12px;text-align:center;background:var(--card);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--text) 7%,transparent);transition:all .25s}
+.ar-step b{display:block;font-size:13px;font-weight:900;font-variant-numeric:tabular-nums}
+.ar-step span{display:block;font-size:9.5px;font-weight:800;color:var(--hint);letter-spacing:.04em;margin-top:1px}
+.ar-step.done{opacity:.45}
+.ar-step.cur{background:linear-gradient(180deg,#ffd76a,#ffa31a);color:#3a2300;box-shadow:0 6px 16px -6px #ffa31a}
+.ar-step.cur span{color:rgba(58,35,0,.7)}
+.ar-step.nx{box-shadow:inset 0 0 0 1.5px #ffd76a}
+
+/* сегмент с цветной точкой (сложность/риск) */
+.ar-seg button{display:flex;align-items:center;justify-content:center;gap:6px}
+.ar-seg button i{width:7px;height:7px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
+.ar-btns{display:flex;gap:8px}.ar-btns .btn{flex:1;min-width:0}
+.ar-btns .btn.cta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn.cta.ar-dark{background:linear-gradient(180deg,#2c2c3a,#1c1c26);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.btn.cta:disabled{opacity:.55;filter:saturate(.6);animation:none}
+
+/* летящие искры / частицы */
+.ar-spark{position:absolute;z-index:22;width:var(--s,6px);height:var(--s,6px);border-radius:50%;pointer-events:none;background:var(--c,#ffd76a);box-shadow:0 0 10px var(--c,#ffd76a);
+  animation:ar-spk var(--d,.8s) cubic-bezier(.2,.7,.4,1) forwards}
+@keyframes ar-spk{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.ar-legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;margin-bottom:10px}
+.ar-legend span{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:12px;background:var(--card);font-size:12px;font-weight:700;color:var(--hint);min-width:0}
+.ar-legend span i{flex:none;width:10px;height:10px;border-radius:3px;background:var(--c)}
+.ar-legend span b{margin-left:auto;color:var(--text);font-weight:900;font-variant-numeric:tabular-nums}
+.ar-legend span.hit{background:color-mix(in srgb,var(--c) 22%,var(--card));color:var(--text);box-shadow:inset 0 0 0 1.5px var(--c)}
+@media (prefers-reduced-motion:reduce){.ar-stage.shake,.ar-x.bump{animation:none}}
+/* двухстрочная кнопка: действие сверху, сумма/множитель снизу — влезает в любую ширину */
+.btn.cta.ar-two{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:10px 6px;line-height:1.1;min-width:0}
+.btn.cta.ar-two b{display:inline-flex;align-items:center;gap:5px;font-size:16px;white-space:nowrap}
+.btn.cta.ar-two b .ic{width:17px;height:17px}
+.btn.cta.ar-two small{font-size:12.5px;font-weight:800;opacity:.8;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}

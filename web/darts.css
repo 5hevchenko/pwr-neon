@@ -1,0 +1,43 @@
+/* ================= «Дартс» ================= */
+.dt-stage{height:380px;display:grid;place-items:center;background:#0e1016}
+/* стена паба: тёмные панели и пятно света сверху */
+.dt-wall{position:absolute;inset:0;z-index:0;
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 1px,transparent 1px 58px),
+    linear-gradient(180deg,#1d2433 0%,#141a26 55%,#0b0e15 100%)}
+.dt-wall::after{content:"";position:absolute;left:0;right:0;bottom:0;height:42px;background:linear-gradient(180deg,#3a2414,#22140a);box-shadow:inset 0 2px 0 rgba(255,220,170,.12),0 -6px 20px rgba(0,0,0,.5)}
+.dt-spot{position:absolute;left:50%;top:-40px;z-index:1;width:420px;height:440px;margin-left:-210px;pointer-events:none;
+  background:radial-gradient(50% 50% at 50% 50%,rgba(255,236,200,.22),transparent 70%);animation:dt-spot 6s ease-in-out infinite alternate}
+@keyframes dt-spot{to{opacity:.75}}
+.dt-board{position:relative;z-index:2;width:min(300px,82vw);aspect-ratio:1;margin-top:8px}
+.dt-bsvg,.dt-fx{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dt-bsvg{filter:drop-shadow(0 22px 28px rgba(0,0,0,.7)) drop-shadow(0 0 1px rgba(0,0,0,.8))}
+.dt-board.thud{animation:dt-thud .32s cubic-bezier(.3,1.6,.5,1)}
+@keyframes dt-thud{30%{transform:scale(.985) translateY(2px)}}
+.dt-fx{pointer-events:none}
+.dt-glow{fill-opacity:.0;animation:dt-glow 1.8s ease-out forwards;filter:drop-shadow(0 0 6px currentColor)}
+.dt-glow *{mix-blend-mode:screen}
+@keyframes dt-glow{0%{fill-opacity:.85}25%{fill-opacity:.35}45%{fill-opacity:.75}100%{fill-opacity:.25}}
+/* прицел: в простое плавает по мишени, при броске фиксируется в точке */
+.dt-aim{position:absolute;left:50%;top:50%;z-index:4;width:38px;height:38px;margin:-19px 0 0 -19px;pointer-events:none;border-radius:50%;
+  box-shadow:0 0 0 1.5px rgba(255,255,255,.75),0 0 14px rgba(255,255,255,.3);animation:dt-drift 5.5s ease-in-out infinite;transition:left .2s,top .2s}
+.dt-aim::before,.dt-aim::after{content:"";position:absolute;background:rgba(255,255,255,.85)}
+.dt-aim::before{left:50%;top:-7px;bottom:-7px;width:1.5px;margin-left:-.75px;-webkit-mask:linear-gradient(#000 0 9px,transparent 9px calc(100% - 9px),#000 0);mask:linear-gradient(#000 0 9px,transparent 9px calc(100% - 9px),#000 0)}
+.dt-aim::after{top:50%;left:-7px;right:-7px;height:1.5px;margin-top:-.75px;-webkit-mask:linear-gradient(90deg,#000 0 9px,transparent 9px calc(100% - 9px),#000 0);mask:linear-gradient(90deg,#000 0 9px,transparent 9px calc(100% - 9px),#000 0)}
+.dt-aim i{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:#ff3b4e;box-shadow:0 0 8px #ff3b4e}
+@keyframes dt-drift{0%{transform:translate(0,0)}20%{transform:translate(34px,-22px)}40%{transform:translate(-18px,-40px)}60%{transform:translate(-40px,14px)}80%{transform:translate(16px,34px)}100%{transform:translate(0,0)}}
+.dt-aim.lock{animation:none;transform:scale(.7);box-shadow:0 0 0 2px #ffd76a,0 0 18px rgba(255,215,106,.6)}
+.dt-stage:has(.dt-dart.fly) .dt-aim{opacity:.9}
+/* дротики */
+.dt-darts{position:absolute;inset:0;z-index:5;pointer-events:none}
+.dt-dart{position:absolute;width:26px;height:60px;margin:-2.6px 0 0 -3.9px;transform-origin:15% 4.35%;transition:opacity .3s}
+.dt-dsvg{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(5px 8px 4px rgba(0,0,0,.55))}
+.dt-dart.fly{animation:dt-fly .43s cubic-bezier(.55,0,.9,.55) forwards}
+@keyframes dt-fly{0%{transform:translate(var(--fx),var(--fy)) scale(3.4) rotate(-24deg);opacity:.2}25%{opacity:1}100%{transform:none}}
+.dt-dart.hit{animation:dt-wob .5s ease-out}
+@keyframes dt-wob{0%{transform:rotate(-6deg)}30%{transform:rotate(5deg)}55%{transform:rotate(-3deg)}80%{transform:rotate(1.5deg)}100%{transform:none}}
+.dt-dart.out{opacity:0}
+.dt-hud{top:auto;bottom:10px}
+.dt-s .ghead img{background:#160608;border-radius:50%;padding:2px}
+.dt-stage .ar-banner{top:87%}
+.dt-s .ar-legend{grid-template-columns:repeat(2,1fr)}

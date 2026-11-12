@@ -1,0 +1,103 @@
+/* ================= окно «Звёзды»: пополнение за Telegram Stars + бонус дня (подключается после motion.css) ================= */
+.st-hero{position:relative;text-align:center;margin:46px 0 12px}
+.st-hero-ic{position:relative;display:inline-grid;place-items:center;width:84px;height:84px;margin-bottom:6px}
+.st-hero-ic svg{position:relative;z-index:1;width:64px;height:64px;filter:drop-shadow(0 10px 18px rgba(255,170,30,.55));animation:np-efloat 3.2s ease-in-out infinite}
+.st-hero-ic i{position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(circle,rgba(255,200,80,.45),transparent 65%);animation:np-etw 2.4s ease-in-out infinite alternate}
+.st-hero h2{margin:0 0 12px;font-size:26px;font-weight:900;letter-spacing:-.02em}
+.st-tabs{margin:0}
+.st-tabs button{display:flex;align-items:center;justify-content:center;gap:6px;position:relative}
+.st-tabs .ic{width:16px;height:16px}
+.st-dot{position:absolute;top:6px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 2px var(--card)}
+.st-pane{display:none}
+.st-s[data-stab=shop] .st-pane[data-p=shop],.st-s[data-stab=daily] .st-pane[data-p=daily]{display:block;animation:np-vin .3s cubic-bezier(.2,.8,.2,1) both}
+.st-s.no-shop .st-tabs{display:none}
+
+/* --- магазин --- */
+.st-s .shop{margin:0;padding:0;background:none;box-shadow:none;border-radius:0}
+.shop-h{display:flex;justify-content:center;margin:0 0 4px}
+.shop-rate{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:800;color:var(--hint);
+  background:var(--card);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--text) 7%,transparent)}
+.shop-rate .ic{width:15px;height:15px;color:#2aabee}
+.st-s .shop-first{margin:12px 0 0}
+.st-s .sec-t{margin-top:18px}
+/* пакеты: сетка карточек; последний («лучший курс») — во всю ширину */
+.shop-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pk{position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:16px 10px 12px;border-radius:20px;text-align:center;color:var(--text);
+  background:radial-gradient(120% 90% at 50% 0%,color-mix(in srgb,#ffc53d calc(8% + var(--lv,0) * 3%),transparent),transparent 70%),
+    linear-gradient(180deg,color-mix(in srgb,var(--text) 6%,var(--card)),var(--card));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px color-mix(in srgb,#ffc53d calc(6% + var(--lv,0) * 4%),transparent),0 10px 22px -16px rgba(0,0,0,.7);
+  transition:transform .15s}
+.pk:active{transform:scale(.96)}
+.pk-tag{position:absolute;top:8px;right:8px;padding:3px 7px;border-radius:8px;font-style:normal;font-size:10.5px;font-weight:900;color:#06301e;background:linear-gradient(135deg,#7dffb8,#22d083)}
+.pk-tag.best{color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffb52e)}
+.pk-art{position:relative;display:flex;justify-content:center;height:40px;margin-top:2px}
+.pk-art svg{width:36px;height:36px;filter:drop-shadow(0 6px 10px rgba(255,170,30,.45))}
+.pk-art svg+svg{margin-left:-16px;transform:translateY(6px) scale(.8)}
+.pk-art svg+svg+svg{margin-left:-16px;transform:translateY(-4px) scale(.7)}
+.pk-v{display:flex;flex-direction:column;align-items:center;min-width:0;line-height:1.1}
+.pk-v b{font-size:24px;font-weight:900;letter-spacing:-.02em;white-space:nowrap;font-family:"NP Num",-apple-system,Roboto,"Segoe UI",sans-serif}
+.pk-v small{font-size:11px;font-weight:700;color:var(--hint)}
+.pk-v small .xtr{width:12px;height:12px}
+.pk-v s{font-size:11.5px;color:var(--hint);margin-top:1px}
+.pk.best{grid-column:1/-1;flex-direction:row;justify-content:space-between;gap:12px;padding:16px 14px;text-align:left;
+  background:radial-gradient(120% 140% at 0% 0%,rgba(255,200,80,.32),transparent 55%),linear-gradient(135deg,#3a2a08,#1c1405 70%);
+  box-shadow:inset 0 0 0 1.5px rgba(255,197,61,.55),0 14px 30px -16px #ffb52e;color:#fff}
+.pk.best .pk-art{height:48px;margin:0;flex:none;width:72px}
+.pk.best .pk-art svg{width:44px;height:44px}
+.pk.best .pk-v{align-items:flex-start;flex:1}
+.pk.best .pk-v b{font-size:28px;color:#ffe08a}
+.pk.best .pk-v small,.pk.best .pk-v s{color:rgba(255,255,255,.65)}
+.pk.best .tgp{flex:none;width:auto}
+/* цена в Telegram Stars — фирменная голубая таблетка, белое число */
+.tgp{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:6px 12px;border-radius:999px;white-space:nowrap;
+  background:linear-gradient(135deg,#37bbfe,#1f8fd8);color:#fff;font-size:14px;box-shadow:0 6px 14px -8px #1f8fd8,inset 0 1px 0 rgba(255,255,255,.35)}
+.tgp b{font-weight:900;font-variant-numeric:tabular-nums}
+.tgp .ic{width:15px;height:15px;color:#fff}
+.pk .tgp{width:100%;margin-top:4px;padding:8px 10px}
+.btn .tgp{padding:3px 10px;margin-left:4px;background:rgba(0,0,0,.2);box-shadow:none;color:inherit;font-size:inherit}
+.btn .tgp .ic{color:inherit}
+.btn.sm .tgp{margin:0;padding:2px 8px}
+/* подарить другу */
+.gf-open{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:12px;border-radius:16px;text-align:left;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--pink) 16%,var(--card)),var(--card));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pink) 30%,transparent)}
+.gf-open>span{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#ff8ac4,#e0338a)}
+.gf-open>span .ic{width:19px;height:19px}
+.gf-open b{display:block;font-size:14.5px}
+.gf-open small{display:block;font-size:11.5px;color:var(--hint)}
+.gf-open>b{flex:1;min-width:0}
+.gf-open>.ic{flex:none;width:16px;height:16px;color:var(--hint)}
+.gf-open{display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;column-gap:10px}
+.gf-open>span{grid-row:1/3}.gf-open>b{grid-column:2;align-self:end}.gf-open>small{grid-column:2;grid-row:2}.gf-open>.ic{grid-column:3;grid-row:1/3;align-self:center}
+/* своя сумма */
+.st-s .shop-cust{margin-top:10px;padding:14px;border-radius:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--text) 5%,var(--card)),var(--card))}
+.shop-c{border-radius:14px!important}
+.shop-c input::placeholder{font-size:13px}
+.shop-buy{background:linear-gradient(135deg,#37bbfe,#1f8fd8)!important;color:#fff!important;margin-top:10px}
+.shop-note{display:flex;gap:8px;align-items:flex-start;margin:14px 2px 4px;font-size:11.5px;line-height:1.4;color:var(--hint)}
+.shop-note .ic{flex:none;width:14px;height:14px;margin-top:1px}
+/* особые предложения: кнопки в одну строку */
+.pr-offer .btn,.pr-c-btn{white-space:nowrap;font-size:15px}
+.qb-cur{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11.5px;font-weight:700;color:var(--hint)}
+.qb-cur .ic{width:13px;height:13px;color:#2aabee}
+.qb-p .tgp{margin-top:4px;font-size:13px;padding:5px 10px}
+
+/* --- бонус дня --- */
+.dl-hero{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:22px;color:#fff;
+  background:radial-gradient(120% 140% at 100% 0%,rgba(255,200,80,.32),transparent 55%),linear-gradient(135deg,#3a2a08,#1a1206 70%);
+  box-shadow:inset 0 0 0 1px rgba(255,214,120,.25),0 16px 34px -20px #ffb52e}
+.dl-h-t span{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.7}
+.dl-h-t b{display:block;margin:2px 0 4px;font-size:24px;font-weight:900;letter-spacing:-.02em;color:#ffe08a}
+.dl-h-t small{display:block;font-size:12.5px;line-height:1.4;opacity:.75}
+.dl-best{display:inline-flex;align-self:flex-start;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;background:rgba(255,120,40,.2);color:#ffb27a}
+.dl-best .ic{width:14px;height:14px}
+.dl-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:10px}
+.dl-d{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;padding:8px 0 10px;border-radius:12px;background:var(--card);text-align:center}
+.dl-d span{font-size:9.5px;color:var(--hint);white-space:nowrap}
+.dl-d b{font-size:12.5px;font-weight:900;white-space:nowrap}
+.dl-d i{position:absolute;bottom:-5px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#3a2300}
+.dl-d i .ic{width:10px;height:10px}
+.dl-d.done{background:color-mix(in srgb,var(--gold) 20%,var(--card))}
+.dl-d.done i{background:var(--green);color:#06301e}
+.dl-d.now{box-shadow:inset 0 0 0 2px var(--gold),0 0 18px -6px var(--gold)}
+.dl-ms{display:flex;align-items:center;gap:10px;margin-top:12px}
+.pr-chest .pr-c-ic img{width:52px!important;height:52px!important}

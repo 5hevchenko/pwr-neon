@@ -1,0 +1,41 @@
+/* ================= Маркет v2 ================= */
+.mk2-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.mk2-tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;border-radius:14px;background:var(--card);color:var(--hint);font-size:12px;font-weight:800;transition:transform .12s,background .2s,color .2s}
+.mk2-tabs button .ic{width:19px;height:19px}
+.mk2-tabs button:active{transform:scale(.95)}
+.mk2-tabs button.on{color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffab2e);box-shadow:0 8px 18px -10px #ffab2e}
+.mk2-hero{display:flex;align-items:center;gap:12px;padding:14px;border-radius:20px;margin-bottom:10px;color:#fff;overflow:hidden;position:relative}
+.mk2-hero.shop{background:radial-gradient(120% 120% at 100% 0%,#7c5cff,#1d1450 70%);box-shadow:0 14px 30px -16px #7c5cff}
+.mk2-hero.orders{background:radial-gradient(120% 120% at 100% 0%,#16b874,#06301e 70%);box-shadow:0 14px 30px -16px #16b874}
+.mk2-hero>div:first-child{flex:1;min-width:0}.mk2-hero b{display:block;font-size:18px}.mk2-hero span{font-size:12.5px;opacity:.85;line-height:1.35}
+.mk2-timer{flex:none;text-align:center;padding:7px 10px;border-radius:12px;background:rgba(0,0,0,.28)}
+.mk2-timer span{display:block;font-size:10px;opacity:.75;white-space:nowrap}.mk2-timer b{font-size:16px;font-variant-numeric:tabular-nums}
+.mk2-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.mk2-lot{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:18px;background:var(--card);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 7%,transparent),0 8px 20px -14px rgba(0,0,0,.6)}
+.mk2-lot.t-gold{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--gold) 60%,transparent),0 10px 22px -12px var(--gold)}
+.mk2-lot.t-pink{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--pink) 55%,transparent)}
+.mk2-lot.t-purple{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--purple) 50%,transparent)}
+.mk2-g{position:relative}.mk2-g .gift{border-radius:14px}
+.mk2-sold{position:absolute;inset:0;display:grid;place-items:center;border-radius:14px;background:rgba(0,0,0,.55);color:#fff;font-weight:900;letter-spacing:.06em;text-transform:uppercase;font-size:13px}
+.mk2-lot.sold{opacity:.6}
+.mk2-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mk2-info>b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mk2-info>span{font-size:11.5px;color:var(--hint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk2-meta{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:11px;color:var(--hint);margin:2px 0 4px}.mk2-meta .xtr svg{width:1em;height:1em;vertical-align:-.12em}
+.mk2-info .btn{width:100%;padding:9px 6px;font-size:13px}
+.mk2-lot.big{flex-direction:row;align-items:center;gap:12px;margin-bottom:8px;padding:10px;
+  background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 16%,var(--card)),var(--card) 60%)}
+.mk2-lot.big .mk2-g{width:44%;flex:none}.mk2-lot.big .mk2-info{flex:1}.mk2-lot.big .mk2-info>b{font-size:17px}
+.mk2-ord{padding:12px;border-radius:18px;background:var(--card);margin-bottom:8px;box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 7%,transparent)}
+.mk2-ord.done{opacity:.55}
+.mk2-oh{display:flex;align-items:center;gap:10px}.mk2-oh img{width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
+.mk2-oh .grow{min-width:0}.mk2-oh b{display:block;font-size:15px}.mk2-oh .grow span{font-size:12px;color:var(--hint)}
+.mk2-pct{flex:none;text-align:center;padding:6px 10px;border-radius:12px;background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
+.mk2-pct b{font-size:18px;display:block}.mk2-pct span{font-size:10px;font-weight:700}
+.mk2-prog{position:relative;height:20px;border-radius:10px;background:var(--card2);overflow:hidden;margin:10px 0 8px}
+.mk2-prog i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#16b874,#4cf0a0);border-radius:10px}
+.mk2-prog span{position:relative;display:grid;place-items:center;height:100%;font-size:11.5px;font-weight:800}
+.mk2-mine{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}.mk2-mine::-webkit-scrollbar{display:none}
+.mk2-mg{flex:none;width:86px;display:flex;flex-direction:column;gap:5px}.mk2-mg .gift{border-radius:12px}
+.mk2-mg .btn{width:100%;padding:6px 2px;font-size:12px}
+.mk2-none{font-size:12.5px;text-align:center;padding:6px 0}

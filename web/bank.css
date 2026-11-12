@@ -1,0 +1,286 @@
+/* банк казино */
+.bankbar.tap{cursor:pointer;transition:transform .15s}.bankbar.tap:active{transform:scale(.98)}
+.bankbar>.ic{width:18px;height:18px;opacity:.6;flex:none;margin-left:-4px}
+.bkhero{text-align:center;padding:22px 14px 18px;border-radius:24px;color:#fff;background:radial-gradient(120% 100% at 50% 0%,#c08a1e,#2b1a03);box-shadow:0 16px 36px -16px #c08a1e;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bkhero>span:not(.bk-big){font-size:12px;text-transform:uppercase;letter-spacing:.08em;opacity:.75;font-weight:700}
+.bkhero>b{font-size:32px;font-weight:900}
+.bk-big{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,#ffe17a,#ffab2e);color:#3a2300;margin-bottom:6px}
+.bk-big .ic{width:30px;height:30px}
+.bk-chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.bk-chips em{font-style:normal;font-size:12.5px;font-weight:800;padding:4px 10px;border-radius:9px;background:rgba(0,0,0,.3)}
+.bk-chips em.up{color:#4cf0a0}.bk-chips em.down{color:#ff8a8a}
+.bk-ch{width:100%;height:110px;display:block}
+.bk-ch line{stroke:var(--hint);stroke-opacity:.35;stroke-width:1;vector-effect:non-scaling-stroke}
+.bk-ch rect.up{fill:var(--green)}.bk-ch rect.dn{fill:var(--red)}.bk-ch rect.now{opacity:.55}
+.bk-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--hint);margin-top:4px}
+.bk-ext{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--hint);margin-top:8px}
+.bk-ext b{font-weight:800}
+.bkme{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 0;padding:13px 16px;border-radius:18px;background:var(--card)}
+.bkme span{font-size:13.5px;color:var(--hint);font-weight:600}.bkme b{font-size:18px;font-weight:900}
+.bkme.win b{color:var(--green)}.bkme.lose b{color:var(--red)}
+.bks-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.bks-top>div{background:var(--card2);border-radius:14px;padding:10px;text-align:center;min-width:0}
+.bks-top span{display:block;font-size:11px;color:var(--hint);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.bks-top b{font-size:16px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.bks-row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:6px 2px;border-top:1px solid color-mix(in srgb,var(--hint) 15%,transparent)}
+.bks-row span{color:var(--hint)}.bks-row b{font-weight:800;text-align:right}
+.bks-buy{margin-top:10px}
+.bks-sell{width:100%;margin-top:8px}
+.bks-how{font-size:12px;margin-top:10px;line-height:1.45}
+/* ярлык на экран телефона */
+.homecard{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:18px;margin:0 0 12px;background:var(--card)}
+.hc-i{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--blue) 22%,transparent);color:var(--blue);flex:none}
+.hc-i .ic{width:22px;height:22px}
+.hc-t{flex:1;min-width:0}.hc-t b{display:block;font-size:14px}.hc-t small{display:block;font-size:12px;color:var(--hint);line-height:1.3}
+.hc-x{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;color:var(--hint);flex:none;background:none;border:0}
+.hc-x .ic{width:16px;height:16px}
+.bankbar>div{min-width:0}
+.bankbar b{white-space:nowrap;font-size:clamp(16px,5vw,20px)}
+.bankbar em{white-space:nowrap}
+.bk-empty{padding:14px;font-size:13px;text-align:center}
+/* покупка акций — золотые кнопки, видно сразу */
+.bks-buy button{position:relative;overflow:hidden;background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);color:#3a2300;
+  box-shadow:0 6px 18px -6px rgba(255,170,30,.75),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .12s}
+.bks-buy button:active{transform:scale(.95)}
+.bks-buy button b{font-size:17px;font-weight:900}
+.bks-buy button span{color:#5a3800;font-weight:800}
+.bks-buy button::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);
+  transform:translateX(-120%);animation:bks-shine 2.8s ease-in-out infinite}
+.bks-buy button:nth-child(2)::after{animation-delay:.15s}.bks-buy button:nth-child(3)::after{animation-delay:.3s}.bks-buy button:nth-child(4)::after{animation-delay:.45s}
+@keyframes bks-shine{0%,55%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.bks-buy-t{display:flex;align-items:center;gap:6px;margin:12px 0 0;font-size:13px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.05em}
+.bks-buy-t .ic{width:16px;height:16px}
+@media (prefers-reduced-motion:reduce){.bks-buy button::after{animation:none}}
+
+/* ---------- v2: экран банка ---------- */
+.bkh{position:relative;overflow:hidden;padding:18px;border-radius:24px;color:#fff;
+  background:radial-gradient(130% 120% at 100% 0%,#8a5a0c 0%,#4a2c05 45%,#1a1003 100%);
+  box-shadow:0 18px 40px -22px #e0a020,inset 0 0 0 1px rgba(255,214,120,.18)}
+.bkh::after{content:"";position:absolute;right:-50px;top:-60px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,110,.32),transparent 70%);pointer-events:none}
+.bkh-top{display:flex;align-items:center;gap:14px}
+.bkh-i{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);color:#3a2300;box-shadow:0 8px 20px -8px #ffb52e,inset 0 1px 0 rgba(255,255,255,.6)}
+.bkh-i .ic{width:28px;height:28px}
+.bkh-top>div>span{display:block;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;opacity:.7}
+.bkh-top>div>b{display:block;font-size:clamp(24px,8vw,32px);font-weight:900;letter-spacing:-.02em;white-space:nowrap}
+.bkh-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:16px}
+.bkh-stats>div{background:rgba(0,0,0,.28);border-radius:13px;padding:8px 6px;text-align:center;min-width:0}
+.bkh-stats>div>span{display:block;font-size:11px;font-weight:700;opacity:.65}
+.bkh-stats b{font-size:15px;font-weight:900;white-space:nowrap}
+.bkh-stats b.up{color:#5cf2a8}.bkh-stats b.dn{color:#ff9a9a}
+.bkme2{display:flex;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;border-radius:18px;background:var(--card)}
+.bkme2 .t{font-weight:700;font-size:14.5px}.bkme2 .s{font-size:12px;color:var(--hint)}
+.bkme2>b{font-size:17px;font-weight:900;white-space:nowrap}
+.bkc{position:relative;touch-action:pan-y}
+.bkc svg{width:100%;height:120px;display:block}
+.bkc line{stroke:var(--hint);stroke-opacity:.3;stroke-width:1;vector-effect:non-scaling-stroke}
+.bkc rect{transition:opacity .15s}
+.bkc rect.up{fill:var(--green)}.bkc rect.dn{fill:var(--red)}.bkc rect.z{fill:var(--hint);opacity:.35}
+.bkc rect.now{stroke:var(--text);stroke-opacity:.5;stroke-width:1;vector-effect:non-scaling-stroke}
+.bkc:has(rect.sel) rect:not(.sel){opacity:.35}
+.bkc-tip{position:absolute;top:-8px;display:none;flex-direction:column;align-items:center;padding:4px 9px;border-radius:10px;background:var(--card2);box-shadow:0 6px 16px rgba(0,0,0,.3);pointer-events:none;white-space:nowrap}
+.bkc-tip b{font-size:13px}.bkc-tip span{font-size:11px;color:var(--hint)}
+.bk-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--hint);margin-top:4px}
+.bk-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--hint);margin-top:8px}
+.bk-legend span{display:flex;align-items:center;gap:6px}
+.bk-legend i{width:10px;height:10px;border-radius:3px}.bk-legend i.up{background:var(--green)}.bk-legend i.dn{background:var(--red)}
+.bksh{background:var(--card);border-radius:20px;padding:14px;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--gold) 45%,transparent),0 14px 30px -22px var(--gold)}
+.bksh-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.bksh-top>div>span{display:block;font-size:11.5px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.05em}
+.bksh-top b{display:block;font-size:26px;font-weight:900;margin:1px 0 2px}
+.bksh-top em{font-style:normal;font-size:12.5px;font-weight:800}
+.bksh-top em.up{color:var(--green)}.bksh-top em.dn{color:var(--red)}
+.bksh-top .spark{width:110px;height:44px}
+.bksh-div{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:14px;margin-bottom:10px;background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.bksh-div>.ic{width:24px;height:24px;color:var(--gold);flex:none}
+.bksh-div b{display:block;font-size:13.5px}.bksh-div .grow>span{display:block;font-size:12px;color:var(--hint);line-height:1.35}
+.bks-foot{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin-top:12px;font-size:12px;color:var(--hint)}
+.bks-foot b{color:var(--text);font-size:12.5px}
+.bks-foot .cbar{margin:0}
+.bk-how{margin-top:10px;background:var(--card);border-radius:16px;padding:0 14px}
+.bk-how summary{display:flex;align-items:center;gap:8px;padding:12px 0;font-weight:700;font-size:14px;cursor:pointer;list-style:none}
+.bk-how summary::-webkit-details-marker{display:none}
+.bk-how summary .ic{width:18px;height:18px;color:var(--hint)}
+.bk-how p{margin:0 0 10px;font-size:13px;line-height:1.45;color:var(--hint)}
+.bk-tabs{margin:16px 0 8px}
+.bankbar>div{flex:1;min-width:0}
+.bankbar b{display:block;overflow:hidden;text-overflow:ellipsis;font-size:clamp(15px,4.6vw,20px)}
+.bankbar em{flex:none;font-size:11.5px;padding:3px 7px}
+.loan-bar{height:4px;margin-top:5px;border-radius:4px;background:color-mix(in srgb,var(--hint) 25%,transparent);overflow:hidden}
+.loan-bar i{display:block;height:100%;border-radius:4px;background:#2fd47a}
+/* адрес банка и перевод в банк */
+.bkh-addr{position:relative;z-index:1;display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;padding:9px 12px;border-radius:13px;text-align:left;color:#fff;
+  background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px rgba(255,214,120,.14)}
+.bkh-addr span{flex:none;font-size:11px;font-weight:700;opacity:.65}
+.bkh-addr b{flex:1;min-width:0;font:700 12.5px/1.2 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.02em;color:#ffe7a3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bkh-addr .ic{flex:none;width:16px;height:16px;opacity:.75}
+.bkh-gift{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;width:100%;margin-top:8px;padding:11px 12px;border-radius:13px;
+  font-weight:800;font-size:14.5px;color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);box-shadow:0 8px 20px -10px #ffb52e,inset 0 1px 0 rgba(255,255,255,.6)}
+.bkh-gift .ic{width:17px;height:17px}
+.bkh-gift em{flex-basis:100%;font-style:normal;font-size:11.5px;font-weight:700;opacity:.7;text-align:center;margin-top:-2px}
+.bkg{text-align:center;padding:18px 8px 4px}
+.bkg-i{width:68px;height:68px;margin:0 auto 12px;border-radius:22px;display:grid;place-items:center;color:#3a2300;
+  background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);box-shadow:0 14px 30px -10px #ffb52e,inset 0 1px 0 rgba(255,255,255,.6)}
+.bkg-i .ic{width:34px;height:34px}
+.bkg h2{margin:0 0 8px;font-size:22px}
+.bkg p{margin:0 auto;max-width:320px;color:var(--hint);font-size:14px}
+.bkg-addr{display:inline-block;margin-top:12px;padding:7px 12px;border-radius:10px;background:var(--card);font:700 12px ui-monospace,Menlo,Consolas,monospace;color:var(--gold)}
+/* кризис банка */
+.bkcr{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;padding:14px;border-radius:20px;color:#fff;
+  background:radial-gradient(120% 140% at 0% 0%,#7a0f1c,#3a0810 60%,#1c0408);box-shadow:inset 0 0 0 1px rgba(255,90,100,.45),0 14px 34px -18px #ff3b4e;animation:bkcr 2.4s ease-in-out infinite}
+@keyframes bkcr{50%{box-shadow:inset 0 0 0 1px rgba(255,90,100,.8),0 14px 40px -12px #ff3b4e}}
+.bkcr-i{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#ff6b6b,#d1102e);box-shadow:0 6px 16px -6px #ff3b4e}
+.bkcr-i .ic{width:22px;height:22px}
+.bkcr b{display:block;font-size:16px;font-weight:900;letter-spacing:.02em;text-transform:uppercase}
+.bkcr span{display:block;font-size:12.5px;opacity:.82;margin-top:2px}
+.bkcr em{display:block;font-style:normal;font-size:12.5px;font-weight:800;color:#ffd76a;margin-top:6px}
+.bkh.crisis{background:radial-gradient(130% 120% at 100% 0%,#8a1a1a 0%,#4a0c0c 45%,#1a0404 100%);box-shadow:0 18px 40px -22px #ff3b4e,inset 0 0 0 1px rgba(255,120,120,.25)}
+/* плашка банка в «Играх»: кризис и тикер выигрышей */
+.bankbar{position:relative}
+.bankbar.crisis{background:linear-gradient(135deg,#3a0810,#1c0408);box-shadow:inset 0 0 0 1px rgba(255,90,100,.45)}
+.bk-crt{display:inline-flex;align-self:flex-start;width:max-content;align-items:center;gap:3px;margin-top:2px;padding:2px 7px;border-radius:7px;font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;
+  color:#fff;background:linear-gradient(135deg,#ff6b6b,#d1102e);animation:bkcr-b 1.2s ease-in-out infinite}
+.bk-crt .ic{width:11px;height:11px}
+@keyframes bkcr-b{50%{opacity:.6}}
+.bankbar.hit #bank-v{animation:bk-hit 1.2s ease-out}
+@keyframes bk-hit{0%,30%{color:#ff6b78;text-shadow:0 0 12px rgba(255,80,100,.7)}100%{color:inherit}}
+.bk-tick{position:absolute;right:10px;top:50%;z-index:2;display:flex;flex-direction:column;align-items:flex-end;gap:1px;padding:6px 10px;border-radius:12px;pointer-events:none;
+  background:#16060b;box-shadow:0 8px 20px -6px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,90,100,.5);animation:bk-tick 4.2s cubic-bezier(.2,1.4,.4,1) forwards}
+.bk-tick b{font-size:14px;font-weight:900;color:#ff6b78;white-space:nowrap}
+.bk-tick span{text-transform:none;letter-spacing:0;opacity:1;font-size:10.5px;font-weight:700;color:rgba(255,255,255,.7);white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+@keyframes bk-tick{0%{opacity:0;transform:translate(30px,-50%)}10%{opacity:1;transform:translate(0,-50%)}85%{opacity:1;transform:translate(0,-50%)}100%{opacity:0;transform:translate(0,-80%)}}
+/* акции банка у клана */
+.clsh{margin-top:6px;padding:10px;border-radius:14px;background:rgba(0,0,0,.18)}
+.clsh-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:6px}
+.clsh-top>div{text-align:center;min-width:0}
+.clsh-top span{display:block;font-size:11px;color:var(--hint);font-weight:700}
+.clsh-top b{font-size:15px;font-weight:900;white-space:nowrap}
+.bks-buy button:disabled{opacity:.38;filter:grayscale(.7)}
+
+/* шапка банка — тап открывает хранилище */
+button.bkh-top{width:100%;text-align:left;color:inherit;position:relative;z-index:1}
+.bkh-tap{cursor:pointer;transition:transform .15s}.bkh-tap:active{transform:scale(.98)}
+.bkh-tap>div{flex:1;min-width:0}
+.bkh-vlt{flex:none;display:inline-flex;align-items:center;gap:4px;padding:6px 6px 6px 9px;border-radius:12px;font-style:normal;background:rgba(0,0,0,.3);box-shadow:inset 0 0 0 1px rgba(255,214,120,.2)}
+.bkh-vlt b{font-size:14px!important;font-weight:900;letter-spacing:0!important}
+.bkh-vlt .ic{width:15px;height:15px;opacity:.85}
+.bkh-vlt .ic:last-child{width:14px;height:14px;opacity:.6}
+/* хранилище банка */
+.vlh{position:relative;display:flex;align-items:center;gap:16px;margin-top:44px;padding:18px;border-radius:24px;color:#fff;overflow:hidden;
+  background:radial-gradient(120% 140% at 100% 0%,rgba(255,200,80,.3),transparent 55%),linear-gradient(135deg,#2a2112,#120d06 70%);
+  box-shadow:0 18px 40px -22px #e0a020,inset 0 0 0 1px rgba(255,214,120,.2),inset 0 1px 0 rgba(255,255,255,.12)}
+.vlh-door{position:relative;flex:none;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;color:#3a2300;
+  background:radial-gradient(circle at 35% 30%,#fff1b8,#ffc53d 45%,#b07400);box-shadow:0 10px 24px -8px #ffb52e,inset 0 -4px 8px rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.6)}
+.vlh-door::before{content:"";position:absolute;inset:9px;border-radius:50%;border:2px dashed rgba(58,35,0,.35);animation:vl-spin 16s linear infinite}
+.vlh-door i{position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(58,35,0,.45)}
+.vlh-door i:nth-child(1){top:6px;left:35px}.vlh-door i:nth-child(2){bottom:6px;left:35px}.vlh-door i:nth-child(3){top:35px;right:6px}
+.vlh-door .ic{width:30px;height:30px}
+@keyframes vl-spin{to{transform:rotate(360deg)}}
+.vlh-t{min-width:0}
+.vlh-t span{display:block;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;opacity:.7}
+.vlh-t b{display:block;font-size:24px;font-weight:900;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vlh-t em{display:block;font-style:normal;font-size:15px;font-weight:800;color:#ffe08a}
+.vl-how{margin:12px 2px;font-size:13px;line-height:1.45;color:var(--hint)}
+.vl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.vl-it{display:flex;flex-direction:column;gap:3px;min-width:0;padding:8px;border-radius:16px;cursor:pointer;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--text) 6%,var(--card)),var(--card));box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 0 0 1px rgba(255,255,255,.04)}
+.vl-it.mine{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--gold) 60%,transparent)}
+.vl-g{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;filter:saturate(.85)}
+.vl-g .gift{width:100%;height:100%;border-radius:0}
+.vl-mine{position:absolute;left:5px;top:5px;padding:2px 6px;border-radius:7px;font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#3a2300;background:var(--gold)}
+.vl-it>b{font-size:13.5px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vl-from{font-size:11px;color:var(--hint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vl-bar{height:4px;border-radius:2px;background:color-mix(in srgb,var(--text) 10%,transparent);overflow:hidden;margin-top:2px}
+.vl-bar i{display:block;height:100%;border-radius:2px;background:linear-gradient(90deg,#ff9f1a,#ffd76a)}
+.vl-left{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:var(--hint);white-space:nowrap}
+.vl-left .ic{width:11px;height:11px}
+.bkh-vrow{position:relative;z-index:1;display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:9px 12px;border-radius:13px;text-align:left;color:#fff;
+  background:linear-gradient(90deg,rgba(255,214,120,.16),rgba(0,0,0,.25));box-shadow:inset 0 0 0 1px rgba(255,214,120,.22);transition:transform .15s}
+.bkh-vrow:active{transform:scale(.98)}
+.bkh-vi{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00)}
+.bkh-vi .ic{width:17px;height:17px}
+.bkh-vt{flex:1;min-width:0}
+.bkh-vt b{display:block;font-size:14px}
+.bkh-vt small{display:block;font-size:11.5px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bkh-vrow>.ic{flex:none;width:16px;height:16px;opacity:.6}
+
+/* курс банка */
+.bkk{margin:0 0 12px;padding:14px;border-radius:20px;background:var(--card)}
+.bkk-h{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.bkk-h span{display:block;font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--hint)}
+.bkk-h b{font-size:28px;font-weight:900;letter-spacing:-.02em;font-family:"NP Num",-apple-system,Roboto,sans-serif}
+.bkk-h em{font-style:normal;font-size:12.5px;font-weight:800;padding:4px 10px;border-radius:999px}
+.bkk-h em.up{color:#35d07f;background:color-mix(in srgb,#35d07f 14%,transparent)}.bkk-h em.dn{color:#ff6b78;background:color-mix(in srgb,#ff6b78 14%,transparent)}
+.bkk-bar{position:relative;height:8px;margin:12px 2px 14px;border-radius:4px;background:linear-gradient(90deg,#ff4d5e,#ffb21f 33%,#35d07f 55%,#2fd4ff)}
+.bkk-bar i{position:absolute;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px var(--card),0 2px 8px rgba(0,0,0,.5);transition:left .6s cubic-bezier(.2,.8,.3,1)}
+.bkk-bar span{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--text);opacity:.35;border-radius:1px}
+.bkk-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.bkk-t{display:flex;flex-direction:column;align-items:center;gap:1px;padding:9px 4px;border-radius:14px;background:var(--card2);text-align:center;min-width:0}
+.bkk-t .ic{width:16px;height:16px;color:var(--hint);margin-bottom:2px}
+.bkk-t span{font-size:11px;font-weight:800;color:var(--hint)}
+.bkk-t b{font-size:17px;font-weight:900;font-family:"NP Num",-apple-system,Roboto,sans-serif}
+.bkk-t small{font-size:10px;color:var(--hint);line-height:1.2;max-width:100%}
+.bkk-t.up b{color:#35d07f}.bkk-t.dn b{color:#ff6b78}
+.bkk-n{margin-top:10px;font-size:11.5px;color:var(--hint);text-align:center}
+
+/* ============================================================
+   Вклады в банк + уровень банка
+   ============================================================ */
+.bklvl{flex:none;display:inline-flex;align-items:center;gap:4px;margin-left:auto;padding:5px 10px;border-radius:999px;
+  font-size:11.5px;font-weight:700;color:#ffd76a;background:color-mix(in srgb,#ffd76a 12%,transparent);
+  border:1px solid color-mix(in srgb,#ffd76a 30%,transparent)}
+.bklvl .ic{width:13px;height:13px}
+.bkdep{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
+.bkdep-lvl{display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:8px}
+.bkdep-lvl span{display:flex;justify-content:space-between;align-items:baseline}
+.bkdep-lvl small{color:var(--hint);font-size:11.5px}
+.bkdep .cbar{height:6px;border-radius:4px;background:color-mix(in srgb,var(--hint) 15%,transparent);overflow:hidden}
+.bkdep .cbar div{height:100%;border-radius:4px;background:linear-gradient(90deg,#ffd76a,#ff9d4d)}
+.bk-lvl{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:2px 7px;border-radius:999px;
+  font-size:10.5px;font-weight:700;font-style:normal;color:#ffd76a;background:color-mix(in srgb,#ffd76a 14%,transparent)}
+.bk-lvl .ic{width:11px;height:11px}
+.row.dep .s{white-space:normal}
+
+/* вклады */
+.dep-terms{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px}
+.dep-terms button{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:11px 4px;border-radius:14px;background:var(--card);border:1px solid var(--line);transition:background-color .15s,border-color .15s}
+.dep-terms b{font-size:14.5px;white-space:nowrap}
+.dep-terms span{font-size:12.5px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+.dep-terms button.on{background:color-mix(in srgb,var(--ac) 16%,var(--card));border-color:var(--ac)}
+.dep-form{margin-top:10px}
+.dep-sum{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:12px 2px}
+.dep-sum span{min-width:0;font-size:13px;color:var(--hint)}
+.dep-sum b{flex:none;font-size:17px;font-variant-numeric:tabular-nums}
+.dep-form>.btn{width:100%}
+.dep-meta{display:flex;justify-content:space-between;gap:12px;margin:12px 2px 0;font-size:12px;color:var(--hint)}
+.dep-meta span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dep-meta span:last-child{text-align:right}
+.dep-meta b{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;font-variant-numeric:tabular-nums}
+.dep-warn{margin-top:10px;font-size:12.5px;color:#ff8a8a;text-align:center}
+.dep-list{display:flex;flex-direction:column;gap:8px}
+.dep-it{padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.dep-it-h{display:flex;align-items:center;gap:8px}
+.dep-it-h b{min-width:0;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.dep-it-h em{flex:none;font-style:normal;font-size:12.5px;font-weight:700;color:var(--gold)}
+.dep-it-h .btn{flex:none;margin-left:auto}
+.dep-it .cbar{height:5px;margin:10px 0 7px;border-radius:4px;background:color-mix(in srgb,var(--hint) 15%,transparent);overflow:hidden}
+.dep-it .cbar div{height:100%;border-radius:4px;background:var(--ac)}
+.dep-it-s{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--hint);font-variant-numeric:tabular-nums}
+.dep-empty{padding:18px 12px;border-radius:16px;background:var(--card);border:1px solid var(--line);text-align:center;font-size:13px;color:var(--hint)}
+.dep-note{margin:12px 4px 0;font-size:12.5px;line-height:1.5;color:var(--hint)}
+.bkdep>.hint{white-space:normal}
+.bkh-top{position:relative}
+.bkh-top>div{min-width:0}
+.bkh-top .bklvl{position:absolute;top:-4px;right:0;margin:0}
+.bkk{margin:12px 0}
+/* бизнесы */
+.bz-sum{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.bz-sum>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.bz-sum span{font-size:12px;color:var(--hint)}
+.bz-sum b{font-size:16px;font-variant-numeric:tabular-nums}
+.bz-sum>div:last-child{text-align:right;flex:none}
+.bz-profit{color:#4ee0ad}
+.bz-b{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;min-width:0}
+.bz-b>span{min-width:0;white-space:nowrap}
+.bz-b>em{flex:none;font-style:normal;font-weight:800;font-variant-numeric:tabular-nums}
+.bz-b .ic,.bz-b img{flex:none}
+@media (max-width:370px){.bz-b>em{font-size:12px}}

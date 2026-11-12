@@ -1,0 +1,33 @@
+/* ================= «Звездопад» ================= */
+.sfhero{position:relative;overflow:hidden;text-align:center;padding:16px 14px 16px;border-radius:24px;color:#fff;
+  background:radial-gradient(120% 90% at 50% 0%,#3b2a9e,#140c3a 70%);box-shadow:0 16px 36px -14px #7c6bff}
+.sfsky{position:absolute;inset:0;pointer-events:none;opacity:.8;
+  background:radial-gradient(circle,#fff 0 1px,transparent 1.6px) 0 0/37px 41px,radial-gradient(circle,#ffe8a3 0 1.2px,transparent 1.8px) 13px 19px/53px 47px;
+  animation:sfsky 18s linear infinite}
+.sfsky::after{content:"";position:absolute;top:-10%;left:70%;width:2px;height:90px;background:linear-gradient(#fff,transparent);transform:rotate(35deg);animation:sfshoot 4s ease-in infinite;opacity:0}
+@keyframes sfsky{to{background-position:0 410px,13px 489px}}
+@keyframes sfshoot{0%{opacity:0;transform:translate(0,0) rotate(35deg)}5%{opacity:1}25%{opacity:0;transform:translate(-160px,230px) rotate(35deg)}100%{opacity:0}}
+.sfprize{position:relative;height:120px;margin:0 auto 4px;width:140px}
+.sfprize img{position:absolute;inset:0;width:120px;height:120px;margin:auto;object-fit:contain;opacity:0;filter:drop-shadow(0 8px 18px rgba(255,210,90,.45));
+  animation:sfcycle 16s infinite;animation-delay:calc(var(--i) * 2s)}
+@keyframes sfcycle{0%{opacity:0;transform:scale(.7) rotate(-8deg)}3%,11%{opacity:1;transform:none}14%,100%{opacity:0;transform:scale(.8) rotate(6deg)}}
+.sfprize em{position:absolute;right:-18px;bottom:6px;font-style:normal;font-weight:900;font-size:12px;padding:3px 8px;border-radius:9px;background:linear-gradient(135deg,#ffe17a,#ffab2e);color:#3a2300}
+.sfhero h2{margin:2px 0 2px;position:relative}.sfhero>span{position:relative;font-size:13px;opacity:.8}
+.sfbar{position:relative;height:40px;margin-top:16px;border-radius:20px;padding:4px;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.25));
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.6),0 0 0 2px rgba(255,215,106,.35),0 0 24px -6px rgba(255,215,106,.6)}
+.sfbar>i{position:relative;display:block;height:100%;width:0;min-width:32px;border-radius:16px;transition:width .9s cubic-bezier(.3,1.1,.5,1);
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%),linear-gradient(90deg,#ff9d0a,#ffd23f 60%,#fff2a8);
+  box-shadow:0 0 18px rgba(255,200,60,.8),inset 0 -3px 0 rgba(180,90,0,.35)}
+.sfbar>i::after{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(115deg,rgba(255,255,255,.22) 0 10px,transparent 10px 22px);animation:sfstripes 1.2s linear infinite}
+@keyframes sfstripes{to{background-position:44px 0}}
+.sfbar>i em{position:absolute;right:-14px;top:50%;width:30px;height:30px;margin-top:-15px;display:grid;place-items:center;border-radius:50%;z-index:2;
+  background:radial-gradient(circle,#fffbe0,#ffd23f 60%,#ff9d0a);box-shadow:0 0 16px 4px rgba(255,220,100,.85);color:#7a4b00;animation:sfhead 1.4s ease-in-out infinite}
+.sfbar>i em .ic{width:16px;height:16px}
+@keyframes sfhead{50%{transform:scale(1.15) rotate(20deg)}}
+.sfbar>i.hot::before{content:"";position:absolute;inset:-4px;border-radius:20px;box-shadow:0 0 28px 4px rgba(255,120,40,.95);opacity:0;animation:sfhot .7s ease-in-out infinite;pointer-events:none}
+@keyframes sfhot{50%{opacity:1}}
+.sfticks{position:absolute;inset:4px;display:flex;justify-content:space-evenly;pointer-events:none}
+.sfticks s{width:2px;border-radius:1px;background:rgba(255,255,255,.18)}
+.sfnums{position:relative;display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:8px}
+.sfnums b{font-size:26px;font-weight:900;color:#ffe17a;text-shadow:0 0 14px rgba(255,210,90,.6)}
+.sfnums span{font-size:12.5px;opacity:.85;text-align:right}.sfnums .xtr svg{width:1em;height:1em;vertical-align:-.12em}

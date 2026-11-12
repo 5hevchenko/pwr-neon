@@ -1,0 +1,52 @@
+/* Опросы (polls.js): плашка-голосование в игре, карточка на главной, вкладка в админке */
+.st-poll{background:linear-gradient(135deg,#2a2208,#1b1430);border-color:#ffd76a40}
+.st-poll .stc-i{background:#ffd76a26;color:#ffd76a}
+.st-poll .stc-t b{color:#ffe7a0}
+.pl-ov{position:fixed;inset:0;z-index:9000;display:flex;align-items:flex-end;justify-content:center;padding:16px;background:rgba(5,4,12,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .25s}
+.pl-ov.on{opacity:1}
+.pl-card{position:relative;width:100%;max-width:440px;margin-bottom:max(12px,env(safe-area-inset-bottom));padding:22px 18px 16px;border-radius:24px;color:#fff;
+  background:radial-gradient(120% 80% at 50% 0%,#3b2d0c 0%,#1c1526 55%,#120d1c 100%);border:1px solid #ffd76a55;box-shadow:0 20px 60px #000a,0 0 0 1px #ffffff0d inset,0 0 40px #ffd76a22;
+  transform:translateY(40px) scale(.97);transition:transform .35s cubic-bezier(.2,.9,.3,1.2)}
+.pl-ov.on .pl-card{transform:none}
+.pl-x{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;border:0;background:#ffffff14;color:#fffc;display:grid;place-items:center}
+.pl-x svg{width:16px;height:16px}
+.pl-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;background:#ffd76a1f;color:#ffd76a;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.pl-badge svg{width:14px;height:14px}
+.pl-q{margin:14px 0 6px;font-size:22px;line-height:1.2;font-weight:800;background:linear-gradient(180deg,#fff,#ffe3a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pl-d{font-size:13.5px;line-height:1.45;color:#ffffffb3;margin-bottom:6px}
+.pl-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.pl-btns .btn{height:52px;font-size:17px;font-weight:800;border-radius:16px}
+.pl-y{background:linear-gradient(180deg,#ffe08a,#f5b83d)!important;color:#2a1a00!important;box-shadow:0 6px 20px #f5b83d55}
+.pl-n{border:1px solid #ffffff2a!important}
+.pl-bar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;height:42px;margin-top:10px;padding:0 14px;border-radius:13px;background:#ffffff0f;overflow:hidden;font-size:14px}
+.pl-bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#f5b83d55,#ffd76a33);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.pl-bar.no i{background:linear-gradient(90deg,#8a7bff44,#8a7bff22)}
+.pl-bar span,.pl-bar b{position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-bar.my{outline:1.5px solid #ffd76a}
+.pl-tot{margin-top:10px;font-size:12px;color:#ffffff80;text-align:center}
+.pl-ch{display:block;margin:10px auto 0;border:0;background:none;color:#ffd76acc;font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.pl-foot{margin-top:14px;font-size:11.5px;color:#ffffff66;text-align:center}
+.pl-new{padding:12px;display:flex;flex-direction:column;gap:8px}
+.pl-new .adm-oi{width:100%;box-sizing:border-box}
+.pl-new textarea.adm-oi{resize:vertical;font:inherit}
+.pl-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pl-2 label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut,#999)}
+.pl-adm{padding:12px 14px;margin-bottom:10px}
+.pl-adm.on{border-color:#ffd76a55}
+.pl-ah{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.pl-ah b{font-size:15px;line-height:1.25}
+.pl-am{font-size:11.5px;color:var(--mut,#999);margin-top:4px}
+.pl-bar.big{height:38px;font-size:13.5px}
+.pl-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;text-align:center}
+.pl-stats div{padding:8px 4px;border-radius:12px;background:#ffffff0a}
+.pl-stats b{display:block;font-size:17px}
+.pl-stats span{font-size:11px;color:var(--mut,#999)}
+.pl-hist{display:flex;align-items:flex-end;gap:3px;height:48px;margin-top:12px}
+.pl-hist i{flex:1;position:relative;min-width:3px;border-radius:3px 3px 0 0;background:#8a7bff55;overflow:hidden}
+.pl-hist u{position:absolute;left:0;right:0;bottom:0;background:#ffd76a}
+.pl-last{margin-top:10px}
+.pl-last summary{font-size:13px;color:var(--mut,#999);cursor:pointer}
+.pl-ov.must{z-index:99999;align-items:center;background:rgba(5,4,12,.82)}
+.pl-ov.must .pl-card{border-color:#ffd76a;box-shadow:0 20px 60px #000c,0 0 0 1px #ffffff0d inset,0 0 60px #ffd76a44;animation:plGlow 2.4s ease-in-out infinite}
+@keyframes plGlow{50%{box-shadow:0 20px 60px #000c,0 0 0 1px #ffffff0d inset,0 0 90px #ffd76a77}}
+.pl-ov.must .pl-badge{background:#ff5c6a2a;color:#ffb0b6}

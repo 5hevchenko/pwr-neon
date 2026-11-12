@@ -1,0 +1,27 @@
+/* ================= эффекты выигрыша ================= */
+.bw-fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:120}
+.bw-ov{position:fixed;inset:0;z-index:110;display:grid;place-items:center;background:radial-gradient(circle at 50% 45%,rgba(40,20,0,.55),rgba(0,0,0,.88));opacity:0;transition:opacity .35s;overflow:hidden}
+.bw-ov.on{opacity:1}
+.bw-rays{position:absolute;left:50%;top:45%;width:180vmax;height:180vmax;margin:-90vmax 0 0 -90vmax;opacity:.55;
+  background:repeating-conic-gradient(from 0deg,rgba(255,210,90,.28) 0 7deg,transparent 7deg 18deg);
+  -webkit-mask:radial-gradient(circle,#000 0,transparent 55%);mask:radial-gradient(circle,#000 0,transparent 55%);animation:bwspin 14s linear infinite}
+.bw-ov.mega .bw-rays{background:repeating-conic-gradient(from 0deg,rgba(255,111,181,.3) 0 7deg,transparent 7deg 18deg);animation-duration:9s}
+.bw-ov.epic .bw-rays{background:repeating-conic-gradient(from 0deg,rgba(124,194,255,.34) 0 6deg,rgba(255,215,106,.22) 6deg 12deg,transparent 12deg 18deg);animation-duration:6s;opacity:.8}
+@keyframes bwspin{to{transform:rotate(360deg)}}
+.bw-box{position:relative;text-align:center;padding:0 20px;transform:scale(.6);transition:transform .5s cubic-bezier(.2,1.6,.4,1)}
+.bw-ov.on .bw-box{transform:scale(1)}
+.bw-t{font-size:clamp(28px,10vw,46px);font-weight:900;line-height:1.02;letter-spacing:.01em;
+  background:linear-gradient(180deg,#fffbe0 0%,#ffd76a 45%,#ff9d0a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 3px 0 #7a3f00) drop-shadow(0 0 18px rgba(255,190,40,.7))}
+.bw-ov.mega .bw-t{background-image:linear-gradient(180deg,#fff 0%,#ffb3d9 40%,#ff3d8b 100%);filter:drop-shadow(0 3px 0 #6e0f3a) drop-shadow(0 0 22px rgba(255,80,160,.8))}
+.bw-ov.epic .bw-t{background-image:linear-gradient(180deg,#fff 0%,#a9e1ff 35%,#7c6bff 70%,#ff6fb5 100%);filter:drop-shadow(0 3px 0 #1d1660) drop-shadow(0 0 26px rgba(124,160,255,.9))}
+.bw-t.pop{animation:bwpop .6s cubic-bezier(.2,1.8,.4,1)}
+@keyframes bwpop{0%{transform:scale(.3) rotate(-6deg)}100%{transform:none}}
+.bw-n{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:clamp(34px,12vw,56px);font-weight:900;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 3px 0 rgba(0,0,0,.4),0 0 24px rgba(255,210,90,.6)}
+.bw-n .xtr svg{width:.9em;height:.9em}
+.bw-x{display:inline-block;margin-top:10px;padding:5px 14px;border-radius:12px;background:rgba(255,255,255,.12);color:#ffe9a8;font-weight:900;font-size:18px}
+.bw-tap{margin-top:22px;font-size:12px;color:rgba(255,255,255,.5);letter-spacing:.04em}
+.bw-ov.end .bw-n{animation:bwbeat .9s ease-in-out infinite}
+@keyframes bwbeat{50%{transform:scale(1.06)}}
+body.bw-shake main,body.bw-shake .sheet.on{animation:bwshake .45s}
+@keyframes bwshake{20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-3px,-2px)}80%{transform:translate(3px,2px)}}

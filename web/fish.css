@@ -1,0 +1,66 @@
+/* ================= «Рыбалка» ================= */
+.fs-stage{height:400px;background:#06182e}
+/* закат: небо, солнце у горизонта, горы и ели силуэтами */
+.fs-sky{position:absolute;left:0;right:0;top:0;height:52%;z-index:0;
+  background:linear-gradient(180deg,#121640 0%,#3b2a6e 34%,#b4547a 68%,#ff9a62 92%,#ffc58a 100%)}
+.fs-sky::before{content:"";position:absolute;inset:0 0 40% 0;background:radial-gradient(1px 1px at 10% 20%,#fff,transparent),radial-gradient(1px 1px at 24% 46%,#fff,transparent),
+  radial-gradient(1.4px 1.4px at 40% 14%,#fff,transparent),radial-gradient(1px 1px at 58% 36%,#fff,transparent),radial-gradient(1px 1px at 72% 10%,#fff,transparent),radial-gradient(1.2px 1.2px at 88% 30%,#fff,transparent);opacity:.75}
+.fs-sun{position:absolute;left:62%;bottom:-26px;width:84px;height:84px;margin-left:-42px;border-radius:50%;
+  background:radial-gradient(circle at 50% 40%,#fff6e0,#ffd08a 45%,#ff9150 75%);box-shadow:0 0 50px 14px rgba(255,160,90,.55)}
+.fs-mnt{position:absolute;left:-4%;right:-4%;z-index:1;pointer-events:none}
+.fs-mnt.b{top:30%;height:23%;background:#4e3263;clip-path:polygon(0 100%,0 62%,10% 40%,19% 58%,31% 22%,42% 50%,51% 36%,63% 60%,74% 18%,86% 48%,94% 34%,100% 52%,100% 100%)}
+.fs-mnt.f{top:38%;height:15%;background:#2b1f45;clip-path:polygon(0 100%,0 50%,8% 70%,18% 30%,27% 62%,39% 42%,52% 72%,66% 38%,78% 64%,90% 46%,100% 66%,100% 100%)}
+.fs-pines{position:absolute;left:0;right:0;top:44%;height:9%;z-index:2;pointer-events:none;
+  background:
+    conic-gradient(from 160deg at 50% 0,transparent 0 0,#140f26 0 40deg,transparent 0) 0 100%/18px 100% repeat-x;
+  -webkit-mask:linear-gradient(90deg,#000 0 22%,transparent 22% 78%,#000 78%);mask:linear-gradient(90deg,#000 0 22%,transparent 22% 78%,#000 78%)}
+/* вода: глубина, блики солнца, бегущая рябь */
+.fs-water{position:absolute;left:0;right:0;top:52%;bottom:0;z-index:2;overflow:hidden;
+  background:linear-gradient(180deg,#3d3a6b 0%,#164a6e 18%,#0b3150 55%,#051a2c 100%);box-shadow:inset 0 1px 0 rgba(255,200,150,.5)}
+.fs-glit{position:absolute;left:62%;top:0;width:90px;height:100%;margin-left:-45px;
+  background:repeating-linear-gradient(180deg,rgba(255,206,150,.75) 0 2px,transparent 2px 9px);
+  -webkit-mask:radial-gradient(50% 100% at 50% 0,#000,transparent 85%);mask:radial-gradient(50% 100% at 50% 0,#000,transparent 85%);
+  animation:fs-glit 1.6s steps(4) infinite;opacity:.8}
+@keyframes fs-glit{50%{transform:scaleX(.8) translateY(2px);opacity:.55}}
+.fs-wave{position:absolute;inset:0;
+  background:repeating-linear-gradient(176deg,transparent 0 16px,rgba(160,220,255,.06) 16px 18px),repeating-linear-gradient(184deg,transparent 0 23px,rgba(255,255,255,.04) 23px 24px);
+  animation:fs-wave 6s linear infinite}
+@keyframes fs-wave{to{background-position:120px 0,-80px 0}}
+/* рыба — тень под водой */
+.fs-fish{position:absolute;left:0;top:0;z-index:3;width:60px;height:22px;opacity:0;transition:opacity .4s;pointer-events:none;
+  background:radial-gradient(60% 50% at 40% 50%,rgba(3,10,20,.75),transparent 70%);filter:blur(1.5px)}
+.fs-fish::after{content:"";position:absolute;right:2px;top:3px;width:16px;height:16px;background:rgba(3,10,20,.6);clip-path:polygon(0 50%,100% 0,80% 50%,100% 100%)}
+.fs-fish.on{opacity:1}
+/* удочка, леска, катушка */
+.fs-rig{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;overflow:visible}
+.fs-rod{fill:none;stroke:#2a1a10;stroke-width:5;stroke-linecap:round;filter:drop-shadow(0 3px 4px rgba(0,0,0,.6))}
+.fs-rodh{fill:none;stroke:#7a4a26;stroke-width:9;stroke-linecap:round}
+.fs-line{fill:none;stroke:rgba(235,245,255,.85);stroke-width:1.1}
+.fs-reel{fill:#c9ced8;stroke:#3a3e4c;stroke-width:3}
+/* поплавок */
+.fs-bob{position:absolute;left:0;top:0;z-index:5;width:0;height:0;will-change:transform}
+.fs-bob i{position:absolute;left:-6px;top:-20px;width:12px;height:24px;border-radius:50% 50% 45% 45%/60% 60% 40% 40%;
+  background:linear-gradient(180deg,#ff3b4e 0 48%,#fff 48% 62%,#2a2d38 62%);box-shadow:0 0 10px rgba(255,80,90,.6),inset -2px 0 3px rgba(0,0,0,.3);transition:transform .25s}
+.fs-bob i::before{content:"";position:absolute;left:50%;top:-6px;width:2px;height:7px;margin-left:-1px;background:#ffd76a;border-radius:1px}
+.fs-bob.under i{transform:translateY(12px) scaleY(.6);opacity:.8}
+.fs-ring{position:absolute;z-index:4;width:12px;height:4px;margin:-2px 0 0 -6px;border-radius:50%;pointer-events:none;
+  box-shadow:0 0 0 1.5px rgba(220,240,255,.7);animation:fs-ring 1.4s ease-out forwards}
+@keyframes fs-ring{to{transform:scale(9);opacity:0}}
+.fs-drop{position:absolute;z-index:7;width:4px;height:4px;border-radius:50%;background:#cfefff;box-shadow:0 0 4px #9fdcff;pointer-events:none;
+  animation:fs-drop .85s cubic-bezier(.2,.6,.5,1) forwards}
+@keyframes fs-drop{60%{opacity:1}100%{transform:translate(var(--dx),calc(var(--dy) * -.2 + 40px));opacity:0}}
+/* улов выпрыгивает из воды и летит к центру */
+.fs-catch{position:absolute;z-index:26;width:80px;height:80px;pointer-events:none;animation:fs-jump 2.5s cubic-bezier(.3,.8,.4,1) forwards}
+.fs-cg{width:100%;height:100%;border-radius:22px;overflow:hidden;box-shadow:0 0 0 2px rgba(255,255,255,.7),0 0 40px rgba(120,220,255,.8),0 20px 30px rgba(0,0,0,.5)}
+.fs-cg .gift{width:100%;height:100%;border-radius:0}
+@keyframes fs-jump{0%{transform:translateY(30px) scale(.3) rotate(-30deg);opacity:0}15%{opacity:1}40%{transform:translate(-30%,-150px) scale(1.15) rotate(8deg)}60%{transform:translate(-30%,-140px) scale(1.1) rotate(0)}85%{opacity:1}100%{transform:translate(-30%,-150px) scale(1.1);opacity:0}}
+/* натяжение лески */
+.fs-tens{position:absolute;left:14px;right:14px;bottom:12px;z-index:20;display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:12px;opacity:0;transform:translateY(10px);transition:.3s;
+  background:rgba(4,12,24,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.fs-tens.on{opacity:1;transform:none}
+.fs-tens span{font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.fs-tens div{position:relative;flex:1;height:7px;border-radius:4px;background:linear-gradient(90deg,#4cf0a0,#ffd76a 55%,#ff4d5e);overflow:hidden}
+.fs-tens i{position:absolute;right:0;top:0;bottom:0;width:92%;background:#0d1626;transition:width .15s linear}
+.fs-tens.hot{animation:fs-hot .12s linear infinite}
+@keyframes fs-hot{50%{transform:translateX(1px)}}
+.fs-s .ghead img{border-radius:14px}

@@ -1,0 +1,66 @@
+/* ===== живая лента ===== */
+.lv-tick{display:flex;align-items:center;gap:8px;width:100%;margin:0 0 12px;padding:7px 10px;border-radius:14px;border:1px solid color-mix(in srgb,var(--gold) 22%,transparent);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 10%,var(--card)),var(--card));color:inherit;font:inherit;text-align:left;overflow:hidden;cursor:pointer}
+.lv-on{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:12px;font-weight:700;color:#4ade80;white-space:nowrap}
+.lv-on i{position:relative;width:7px;height:7px;border-radius:50%;background:#4ade80}
+/* пульс — кольцом-псевдоэлементом через transform/opacity (анимация тени перерисовывалась каждый кадр) */
+.lv-on i::after{content:"";position:absolute;inset:0;border-radius:50%;background:#4ade8088;animation:lvPulse 1.8s infinite}
+@keyframes lvPulse{0%{transform:scale(1);opacity:1}70%,100%{transform:scale(3);opacity:0}}
+.lv-track{flex:1;min-width:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.lv-run{display:inline-flex;gap:18px;white-space:nowrap;animation:lvRun 40s linear infinite;will-change:transform}
+@keyframes lvRun{to{transform:translateX(-50%)}}
+.lv-it{display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.lv-it .ava{--s:18px}
+.lv-it i{font-style:normal;color:var(--hint)}
+.lv-it em{font-style:normal;font-weight:800;color:var(--gold)}
+.lite .lv-run{animation-duration:80s!important}
+.lv-head{display:flex;justify-content:space-between;align-items:center;margin:-4px 0 10px;gap:8px}
+.lv-row{align-items:flex-start}
+.lv-row>.tw{font-weight:800;white-space:nowrap}
+.lv-reacts{display:flex;gap:6px;margin-top:6px}
+.lv-reacts button{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:12px;border:1px solid transparent;background:color-mix(in srgb,var(--hint) 14%,transparent);font-size:14px;color:inherit;transition:transform .15s}
+.lv-reacts button:active{transform:scale(.88)}
+.lv-reacts button.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,transparent)}
+.lv-reacts button:disabled{opacity:.55}
+.lv-reacts b{font-size:11px}
+.gcard{position:relative}
+.gc-play{position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border-radius:10px;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);
+  font-size:10px;font-weight:700;color:#fff;z-index:2;pointer-events:none}
+.gc-play i{width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80}
+.ttl{display:inline-block;margin-left:4px;padding:0 6px;border-radius:7px;font-size:10px;font-weight:700;vertical-align:middle;color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,transparent)}
+/* ===== сезон ===== */
+.ss-hero{position:relative;padding:16px;border-radius:18px;overflow:hidden;background:radial-gradient(120% 90% at 100% 0,#ff8a3d40,transparent 60%),linear-gradient(140deg,#2a1640,#151026);
+  border:1px solid #ffb35a33;display:flex;flex-direction:column;gap:2px}
+.ss-hero>span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#ffb35a}
+.ss-hero>b{font-size:22px}
+.ss-hero>em{font-style:normal;font-size:12px;color:var(--hint)}
+.ss-hero small{margin-top:10px;font-size:11px;color:var(--hint);line-height:1.4}
+.ss-pr{display:flex;flex-direction:column;gap:5px;margin-top:10px;font-size:12px;font-weight:600}
+.ss-pr>div{display:flex;align-items:center;gap:8px}
+.ss-pr .fr{width:16px;height:16px;border-radius:50%;border:3px solid;flex:none}
+.fr.gold{border-color:#ffd25e;box-shadow:0 0 8px #ffd25e88}.fr.silver{border-color:#cfd8e6}.fr.bronze{border-color:#d08a52}
+.ss-me{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 14px;border-radius:14px;background:var(--card)}
+.ss-me span{color:var(--hint);font-size:12px}.ss-me b{flex:1}.ss-me em{font-style:normal;font-weight:800}
+.ss-tt{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:12px 14px;border-radius:14px;border:0;background:var(--card);color:inherit;font:inherit;text-align:left}
+.ss-tt>span{flex:1;display:flex;flex-direction:column;font-size:12px;color:var(--hint)}.ss-tt b{font-size:14px;color:var(--text,inherit)}
+.ss-tt>.ic:first-child{color:var(--gold);width:22px;height:22px}
+/* ===== рамки аватарок ===== */
+.ava.fr-gold,.ava.fr-silver,.ava.fr-bronze{box-shadow:0 0 0 2px var(--bg),0 0 0 calc(2px + max(2px,var(--s)*.06)) var(--frc)}
+.ava.fr-gold{--frc:#ffd25e;animation:frGlow 2.6s ease-in-out infinite}
+.ava.fr-silver{--frc:#cfd8e6}
+.ava.fr-bronze{--frc:#d08a52}
+@keyframes frGlow{50%{box-shadow:0 0 0 2px var(--bg),0 0 0 calc(2px + max(2px,var(--s)*.06)) var(--frc),0 0 14px 2px #ffd25e66}}
+.lite .ava.fr-gold{animation:none}
+/* ===== титулы ===== */
+.ptitle{display:inline-flex;align-items:center;gap:5px;margin:4px auto 2px;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:700;color:var(--gold);
+  background:color-mix(in srgb,var(--gold) 14%,transparent);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent)}
+.ptitle .ic{width:14px;height:14px}
+.ptitle.add{color:var(--hint);background:transparent;border-style:dashed;border-color:color-mix(in srgb,var(--hint) 40%,transparent);font:inherit;font-size:12px}
+.tt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tt-grid .tt{position:relative;display:flex;flex-direction:column;gap:3px;padding:12px;border-radius:14px;border:1px solid transparent;background:var(--card);color:inherit;font:inherit;text-align:left;min-height:68px}
+.tt-grid .tt b{font-size:13px}.tt-grid .tt span{font-size:11px;color:var(--hint)}
+.tt-grid .tt:not(.got){opacity:.55}
+.tt-grid .tt>i{position:absolute;top:10px;right:10px}.tt-grid .tt>i .ic{width:14px;height:14px}
+.tt-grid .tt.got{border-color:color-mix(in srgb,var(--gold) 25%,transparent)}
+.tt-grid .tt.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--card))}
+.tt-grid .tt.on span{color:var(--gold)}

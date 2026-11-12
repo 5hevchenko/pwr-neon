@@ -1,0 +1,98 @@
+/* ============ оформление профиля ============ */
+/* рамки аватара (купленные) */
+.ava.fr-neon,.ava.fr-ice,.ava.fr-fire,.ava.fr-toxic,.ava.fr-rainbow,.ava.fr-diamond{--frw:calc(2px + max(2px,var(--s)*.07))}
+.ava.fr-neon{box-shadow:0 0 0 2px var(--bg),0 0 0 var(--frw) #3ff0ff,0 0 12px 2px #3ff0ffaa;animation:frNeon 1.8s ease-in-out infinite}
+@keyframes frNeon{50%{box-shadow:0 0 0 2px var(--bg),0 0 0 var(--frw) #b06bff,0 0 16px 3px #b06bffaa}}
+.ava.fr-ice{box-shadow:0 0 0 2px var(--bg),0 0 0 var(--frw) #bfeaff,0 0 0 calc(var(--frw) + 2px) #5ab8ff,0 0 14px 2px #8fd8ff99}
+.ava.fr-fire{box-shadow:0 0 0 2px var(--bg),0 0 0 var(--frw) #ff7a1f,0 0 14px 3px #ff4a1faa;animation:frFire 1.1s ease-in-out infinite alternate}
+@keyframes frFire{to{box-shadow:0 0 0 2px var(--bg),0 0 0 var(--frw) #ffc23d,0 -2px 18px 4px #ff6a1fcc}}
+.ava.fr-toxic{box-shadow:0 0 0 2px var(--bg),0 0 0 var(--frw) #7dff3f,0 0 16px 3px #5fd02faa;animation:frToxic 2.2s ease-in-out infinite}
+@keyframes frToxic{50%{box-shadow:0 0 0 2px var(--bg),0 0 0 var(--frw) #c8ff3f,0 0 22px 5px #7dff3f88}}
+.ava.fr-rainbow,.ava.fr-diamond{box-shadow:0 0 0 2px var(--bg);isolation:isolate}
+.ava.fr-rainbow::before,.ava.fr-diamond::before{content:"";position:absolute;inset:calc(-2px - var(--frw));border-radius:50%;z-index:-1;
+  background:conic-gradient(from var(--fra,0deg),#ff5a6e,#ffc93d,#4fd67a,#3fa8ff,#c86bff,#ff5a6e);animation:frSpin 3s linear infinite}
+.ava.fr-diamond::before{background:conic-gradient(from var(--fra,0deg),#fff,#9fe8ff,#e0c8ff,#fff,#bff6ff,#fff);filter:drop-shadow(0 0 6px #bfefff)}
+@property --fra{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes frSpin{to{--fra:360deg}}
+.lite .ava[class*="fr-"],.lite .ava[class*="fr-"]::before{animation:none!important}
+
+/* эффекты ника */
+.unm{min-width:0}
+.nk{font-weight:800}
+.nk-gold{background:linear-gradient(90deg,#ffe08a,#ffb52e,#ffe9a8,#ffb52e);-webkit-background-clip:text;background-clip:text;color:transparent}
+.nk-neon{color:#7ff6ff;text-shadow:0 0 6px #3ff0ff,0 0 12px #3ff0ff88}
+.nk-fire{background:linear-gradient(0deg,#ff3d1f,#ff8a1f 50%,#ffd23d);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 4px #ff6a1f88)}
+.nk-rainbow{background:linear-gradient(90deg,#ff5a6e,#ffc93d,#4fd67a,#3fa8ff,#c86bff,#ff5a6e);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:nkRb 3s linear infinite}
+@keyframes nkRb{to{background-position:200% 0}}
+.lite .nk-rainbow{animation:none}
+h2.nk{display:inline-block}
+
+/* акцентный цвет профиля */
+.pwrap.acc .phead .ava.ring{background:conic-gradient(var(--pac) var(--p,0%),color-mix(in srgb,var(--hint) 35%,transparent) 0)}
+.pwrap.acc .plv,.pwrap.acc .ptitle{color:var(--pac)}
+.pwrap.acc .pacts .btn:not(.ghost):not(.gold),.pwrap.acc .ptabs button.on{background:var(--pac);color:#fff}
+.pwrap.acc .pworth{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--pac) 45%,transparent)}
+.pwrap.acc .lvbar>div{background:var(--pac)}
+.pstatus{margin-top:4px;font-size:13px;font-weight:600;color:var(--text);opacity:.85;text-align:center;overflow-wrap:anywhere}
+.pwrap.acc .pstatus{color:var(--pac);opacity:1}
+.pbadges.chosen{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.pbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px 3px 6px;border-radius:10px;background:var(--card);font-size:11.5px;font-weight:700;white-space:nowrap}
+.pbadge .ic{width:13px;height:13px}
+.pwrap.acc .pbadge{background:color-mix(in srgb,var(--pac) 18%,var(--card));color:var(--text)}
+.pwrap .pmenu+.pacts{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pwrap .pmenu+.pacts .btn{font-size:12.5px;padding-left:6px;padding-right:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s.ust{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* окно оформления */
+.sty-prev{display:flex;align-items:center;gap:14px;padding:14px;border-radius:18px;background:radial-gradient(120% 140% at 0 0,color-mix(in srgb,var(--pac) 28%,transparent),transparent 65%),var(--card);margin-bottom:6px}
+.sty-prev>div{min-width:0;display:flex;flex-direction:column;gap:3px}
+.sty-prev b{font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sty-prev span{font-size:12.5px;color:var(--pac);font-weight:600;overflow-wrap:anywhere}
+.sty-prev .pbadges.chosen{justify-content:flex-start;margin-top:4px}
+#sty-status{width:100%;box-sizing:border-box}
+.sty-acc{display:flex;flex-wrap:wrap;gap:10px}
+.sty-acc button{width:34px;height:34px;border-radius:50%;background:var(--c);border:2px solid transparent;display:grid;place-items:center;color:var(--hint)}
+.sty-acc button.on{border-color:var(--text);box-shadow:0 0 0 2px var(--bg) inset}
+.sty-acc .ic{width:16px;height:16px}
+.sty-bdg{display:flex;flex-wrap:wrap;gap:6px}
+.sty-bdg button{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:12px;background:var(--card);color:var(--text);font-size:12.5px;font-weight:600;border:1.5px solid transparent}
+.sty-bdg button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--card))}
+.sty-bdg .ic{width:14px;height:14px}
+.sty-cov{display:flex;align-items:center;gap:10px;padding:10px;border-radius:16px;background:var(--card)}
+.sty-cov .grow{min-width:0;display:flex;flex-direction:column}
+.sty-cov .grow b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sty-cov .grow span{font-size:12px;color:var(--hint)}
+.sty-cv{flex:none;width:46px;height:46px;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:var(--bg)}
+.sty-cv .ic{width:22px;height:22px;color:var(--hint)}
+.sty-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sty-grid.nick{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sty-it{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px 10px;border-radius:16px;background:var(--card);border:1.5px solid transparent;min-width:0;text-align:center}
+.sty-it.on{border-color:var(--gold,#ffc93d)}
+.sty-it>b{font-size:12.5px}
+.sty-it small{font-size:11px;color:var(--green,#4fd67a);font-weight:700}
+.sty-pv{height:64px;display:grid;place-items:center;max-width:100%}
+.sty-pv.nick{height:40px;padding:0 4px}
+.sty-pv.nick b{font-size:17px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sty-bt{display:flex;gap:4px;width:100%}
+.sty-bt .btn{flex:1;min-width:0;padding-left:4px;padding-right:4px;font-size:11.5px}
+.sty-it>.btn{width:100%}
+
+/* шапка профиля: выбранные значки — чипы с подписью (старое правило .pbadges span рисовало их квадратами 30×30 → текст вылезал) */
+.pbadges.chosen{gap:6px;margin-top:10px;padding:0 8px}
+.pbadges.chosen .pbadge{width:auto;height:auto;max-width:100%;padding:4px 10px 4px 7px;border-radius:11px;color:var(--text);background:var(--card);box-shadow:none;
+  display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;line-height:1.2}
+.pbadges.chosen .pbadge .ic{width:14px;height:14px;color:var(--gold,#ffc93d)}
+.pwrap.acc .pbadges.chosen .pbadge .ic{color:var(--pac)}
+/* строка имени: длинное имя обрезается, уровень и тег клана не сжимаются и не переносятся */
+.pname{padding:0 12px;box-sizing:border-box;width:100%}
+.pname h2{min-width:0}
+.pname .plv,.pname .ctag{flex:none}
+.pname .ctag{margin-left:0}
+.phead.v3 .pstatus{margin-top:5px;max-width:320px;padding:0 12px;line-height:1.35}
+.phead.v3 .ptitle{margin-top:6px}
+.phead.v3 .un{margin-top:4px}
+.pwrap .pmenu+.pacts .btn{font-size:13.5px}
+.sty-prev .pbadges.chosen{padding:0}
+/* кэшбэк недели во вкладке «Стата» */
+.cbk{display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--green,#4fd67a) 14%,var(--card))}
+.cbk>.ic{width:20px;height:20px;color:var(--green,#4fd67a);flex:none}
+.cbk .grow{min-width:0;display:flex;flex-direction:column}.cbk b{font-size:14px}.cbk span{font-size:11.5px;color:var(--hint)}

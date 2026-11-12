@@ -1,0 +1,334 @@
+{
+ "AK-47 Asiimov": {
+  "Factory New": "ak_47_asiimov__factory_new",
+  "Minimal Wear": "ak_47_asiimov__minimal_wear",
+  "Field-Tested": "ak_47_asiimov__field_tested",
+  "Well-Worn": "ak_47_asiimov__well_worn",
+  "Battle-Scarred": "ak_47_asiimov__battle_scarred"
+ },
+ "P90 Asiimov": {
+  "Factory New": "p90_asiimov__factory_new",
+  "Minimal Wear": "p90_asiimov__minimal_wear",
+  "Field-Tested": "p90_asiimov__field_tested",
+  "Well-Worn": "p90_asiimov__well_worn",
+  "Battle-Scarred": "p90_asiimov__battle_scarred"
+ },
+ "Karambit": {
+  "Fade": "karambit__fade",
+  "Doppler": "karambit__doppler",
+  "Gamma Doppler": "karambit__gamma_doppler",
+  "Marble Fade": "karambit__marble_fade",
+  "Tiger Tooth": "karambit__tiger_tooth",
+  "Lore": "karambit__lore",
+  "Slaughter": "karambit__slaughter",
+  "Crimson Web": "karambit__crimson_web"
+ },
+ "CS Gloves": {
+  "Pandora's Box": "cs_gloves__pandora_s_box",
+  "Vice": "cs_gloves__vice",
+  "King Snake": "cs_gloves__king_snake",
+  "Crimson Kimono": "cs_gloves__crimson_kimono",
+  "Spearmint": "cs_gloves__spearmint",
+  "Cobalt Skulls": "cs_gloves__cobalt_skulls"
+ },
+ "_cover": {
+  "CS Case": "cover__cs_case"
+ },
+ "AWP Asiimov": {
+  "Field-Tested": "awp_asiimov__field_tested",
+  "Well-Worn": "awp_asiimov__well_worn",
+  "Battle-Scarred": "awp_asiimov__battle_scarred"
+ },
+ "AWP Dragon Lore": {
+  "Factory New": "awp_dragon_lore__factory_new",
+  "Minimal Wear": "awp_dragon_lore__minimal_wear",
+  "Field-Tested": "awp_dragon_lore__field_tested",
+  "Well-Worn": "awp_dragon_lore__well_worn",
+  "Battle-Scarred": "awp_dragon_lore__battle_scarred"
+ },
+ "M4A4 Howl": {
+  "Factory New": "m4a4_howl__factory_new",
+  "Minimal Wear": "m4a4_howl__minimal_wear",
+  "Field-Tested": "m4a4_howl__field_tested",
+  "Well-Worn": "m4a4_howl__well_worn"
+ },
+ "Desert Eagle Blaze": {
+  "Factory New": "desert_eagle_blaze__factory_new",
+  "Minimal Wear": "desert_eagle_blaze__minimal_wear"
+ },
+ "Glock-18 Fade": {
+  "Factory New": "glock_18_fade__factory_new",
+  "Minimal Wear": "glock_18_fade__minimal_wear"
+ },
+ "USP-S Kill Confirmed": {
+  "Factory New": "usp_s_kill_confirmed__factory_new",
+  "Minimal Wear": "usp_s_kill_confirmed__minimal_wear",
+  "Field-Tested": "usp_s_kill_confirmed__field_tested",
+  "Well-Worn": "usp_s_kill_confirmed__well_worn",
+  "Battle-Scarred": "usp_s_kill_confirmed__battle_scarred"
+ },
+ "AK-47 Fire Serpent": {
+  "Factory New": "ak_47_fire_serpent__factory_new",
+  "Minimal Wear": "ak_47_fire_serpent__minimal_wear",
+  "Field-Tested": "ak_47_fire_serpent__field_tested",
+  "Well-Worn": "ak_47_fire_serpent__well_worn",
+  "Battle-Scarred": "ak_47_fire_serpent__battle_scarred"
+ },
+ "Butterfly Knife": {
+  "Fade": "butterfly_knife__fade",
+  "Doppler": "butterfly_knife__doppler",
+  "Gamma Doppler": "butterfly_knife__gamma_doppler",
+  "Marble Fade": "butterfly_knife__marble_fade",
+  "Tiger Tooth": "butterfly_knife__tiger_tooth",
+  "Lore": "butterfly_knife__lore",
+  "Slaughter": "butterfly_knife__slaughter",
+  "Crimson Web": "butterfly_knife__crimson_web"
+ },
+ "Sport Gloves": {
+  "Omega": "sport_gloves__omega",
+  "Amphibious": "sport_gloves__amphibious",
+  "Hedge Maze": "sport_gloves__hedge_maze",
+  "Nocts": "sport_gloves__nocts",
+  "Slingshot": "sport_gloves__slingshot",
+  "Scarlet Shamagh": "sport_gloves__scarlet_shamagh",
+  "Bronze Morph": "sport_gloves__bronze_morph",
+  "Superconductor": "sport_gloves__superconductor"
+ },
+ "CS Case 2": {
+  "CS Case 2": "cover__cs_case_2"
+ },
+ "AK-47 Redline": {
+  "Minimal Wear": "ak_47_redline__minimal_wear",
+  "Field-Tested": "ak_47_redline__field_tested",
+  "Well-Worn": "ak_47_redline__well_worn",
+  "Battle-Scarred": "ak_47_redline__battle_scarred"
+ },
+ "AK-47 Vulcan": {
+  "Factory New": "ak_47_vulcan__factory_new",
+  "Minimal Wear": "ak_47_vulcan__minimal_wear",
+  "Field-Tested": "ak_47_vulcan__field_tested",
+  "Well-Worn": "ak_47_vulcan__well_worn",
+  "Battle-Scarred": "ak_47_vulcan__battle_scarred"
+ },
+ "M4A1-S Printstream": {
+  "Factory New": "m4a1_s_printstream__factory_new",
+  "Minimal Wear": "m4a1_s_printstream__minimal_wear",
+  "Field-Tested": "m4a1_s_printstream__field_tested",
+  "Well-Worn": "m4a1_s_printstream__well_worn",
+  "Battle-Scarred": "m4a1_s_printstream__battle_scarred"
+ },
+ "M4A4 Neo-Noir": {
+  "Factory New": "m4a4_neo_noir__factory_new",
+  "Minimal Wear": "m4a4_neo_noir__minimal_wear",
+  "Field-Tested": "m4a4_neo_noir__field_tested",
+  "Well-Worn": "m4a4_neo_noir__well_worn",
+  "Battle-Scarred": "m4a4_neo_noir__battle_scarred"
+ },
+ "AWP Neo-Noir": {
+  "Factory New": "awp_neo_noir__factory_new",
+  "Minimal Wear": "awp_neo_noir__minimal_wear",
+  "Field-Tested": "awp_neo_noir__field_tested",
+  "Well-Worn": "awp_neo_noir__well_worn",
+  "Battle-Scarred": "awp_neo_noir__battle_scarred"
+ },
+ "AWP Hyper Beast": {
+  "Factory New": "awp_hyper_beast__factory_new",
+  "Minimal Wear": "awp_hyper_beast__minimal_wear",
+  "Field-Tested": "awp_hyper_beast__field_tested",
+  "Well-Worn": "awp_hyper_beast__well_worn",
+  "Battle-Scarred": "awp_hyper_beast__battle_scarred"
+ },
+ "Desert Eagle Code Red": {
+  "Factory New": "desert_eagle_code_red__factory_new",
+  "Minimal Wear": "desert_eagle_code_red__minimal_wear",
+  "Field-Tested": "desert_eagle_code_red__field_tested",
+  "Well-Worn": "desert_eagle_code_red__well_worn",
+  "Battle-Scarred": "desert_eagle_code_red__battle_scarred"
+ },
+ "M9 Bayonet": {
+  "Fade": "m9_bayonet__fade",
+  "Doppler": "m9_bayonet__doppler",
+  "Gamma Doppler": "m9_bayonet__gamma_doppler",
+  "Marble Fade": "m9_bayonet__marble_fade",
+  "Tiger Tooth": "m9_bayonet__tiger_tooth",
+  "Lore": "m9_bayonet__lore",
+  "Slaughter": "m9_bayonet__slaughter",
+  "Crimson Web": "m9_bayonet__crimson_web"
+ },
+ "Driver Gloves": {
+  "Crimson Weave": "driver_gloves__crimson_weave",
+  "Imperial Plaid": "driver_gloves__imperial_plaid",
+  "Overtake": "driver_gloves__overtake",
+  "Racing Green": "driver_gloves__racing_green",
+  "Lunar Weave": "driver_gloves__lunar_weave",
+  "Diamondback": "driver_gloves__diamondback",
+  "Black Tie": "driver_gloves__black_tie",
+  "Snow Leopard": "driver_gloves__snow_leopard"
+ },
+ "Бравлеры редкие": {
+  "Shelly": "bs_shelly",
+  "Colt": "bs_colt",
+  "Bull": "bs_bull",
+  "Brock": "bs_brock",
+  "Barley": "bs_barley",
+  "Nita": "bs_nita",
+  "El Primo": "bs_el_primo",
+  "Poco": "bs_poco",
+  "Rosa": "bs_rosa"
+ },
+ "Бравлеры супер редкие": {
+  "Rico": "bs_rico",
+  "Jessie": "bs_jessie",
+  "Dynamike": "bs_dynamike",
+  "Darryl": "bs_darryl",
+  "Penny": "bs_penny",
+  "Tick": "bs_tick",
+  "Carl": "bs_carl",
+  "8-Bit": "bs_8_bit",
+  "Jacky": "bs_jacky",
+  "Gus": "bs_gus"
+ },
+ "Бравлеры эпические": {
+  "Bo": "bs_bo",
+  "Piper": "bs_piper",
+  "Pam": "bs_pam",
+  "Frank": "bs_frank",
+  "Bibi": "bs_bibi",
+  "Bea": "bs_bea",
+  "Emz": "bs_emz",
+  "Gale": "bs_gale",
+  "Nani": "bs_nani",
+  "Colette": "bs_colette",
+  "Edgar": "bs_edgar",
+  "Stu": "bs_stu",
+  "Belle": "bs_belle",
+  "Grom": "bs_grom",
+  "Griff": "bs_griff",
+  "Ash": "bs_ash",
+  "Lola": "bs_lola",
+  "Bonnie": "bs_bonnie",
+  "Sam": "bs_sam",
+  "Mandy": "bs_mandy",
+  "Maisie": "bs_maisie",
+  "Hank": "bs_hank",
+  "Pearl": "bs_pearl",
+  "Larry & Lawrie": "bs_larry_lawrie",
+  "Angelo": "bs_angelo",
+  "Berry": "bs_berry",
+  "Shade": "bs_shade",
+  "Meeple": "bs_meeple",
+  "Trunk": "bs_trunk",
+  "Bolt": "bs_bolt"
+ },
+ "Бравлеры мифические": {
+  "Mortis": "bs_mortis",
+  "Tara": "bs_tara",
+  "Gene": "bs_gene",
+  "Mr. P": "bs_mr_p",
+  "Max": "bs_max",
+  "Sprout": "bs_sprout",
+  "Lou": "bs_lou",
+  "Byron": "bs_byron",
+  "Ruffs": "bs_ruffs",
+  "Squeak": "bs_squeak",
+  "Buzz": "bs_buzz",
+  "Fang": "bs_fang",
+  "Eve": "bs_eve",
+  "Janet": "bs_janet",
+  "Otis": "bs_otis",
+  "Buster": "bs_buster",
+  "Gray": "bs_gray",
+  "R-T": "bs_r_t",
+  "Willow": "bs_willow",
+  "Doug": "bs_doug",
+  "Chuck": "bs_chuck",
+  "Charlie": "bs_charlie",
+  "Mico": "bs_mico",
+  "Melodie": "bs_melodie",
+  "Lily": "bs_lily",
+  "Clancy": "bs_clancy",
+  "Moe": "bs_moe",
+  "Juju": "bs_juju",
+  "Ollie": "bs_ollie",
+  "Lumi": "bs_lumi",
+  "Finx": "bs_finx",
+  "Jae-Yong": "bs_jae_yong",
+  "Alli": "bs_alli",
+  "Mina": "bs_mina",
+  "Ziggy": "bs_ziggy",
+  "Gigi": "bs_gigi",
+  "Glowy": "bs_glowy",
+  "Najia": "bs_najia",
+  "Damian": "bs_damian",
+  "Starr Nova": "bs_starr_nova",
+  "Wendy": "bs_wendy",
+  "Cosmo": "bs_cosmo",
+  "Vince": "bs_vince"
+ },
+ "Бравлеры легендарные": {
+  "Spike": "bs_spike",
+  "Crow": "bs_crow",
+  "Leon": "bs_leon",
+  "Sandy": "bs_sandy",
+  "Surge": "bs_surge",
+  "Amber": "bs_amber",
+  "Meg": "bs_meg",
+  "Chester": "bs_chester",
+  "Cordelius": "bs_cordelius",
+  "Kit": "bs_kit",
+  "Draco": "bs_draco",
+  "Kenji": "bs_kenji",
+  "Kaze": "bs_kaze",
+  "Pierce": "bs_pierce",
+  "Sirius": "bs_sirius",
+  "Nori": "bs_nori"
+ },
+ "Мегаящик": {
+  "Мегаящик": "cover__megabox"
+ },
+ "Деревянные инструменты": {
+  "Мотыга": "mc_wooden_hoe",
+  "Лопата": "mc_wooden_shovel",
+  "Топор": "mc_wooden_axe",
+  "Кирка": "mc_wooden_pickaxe",
+  "Меч": "mc_wooden_sword"
+ },
+ "Каменные инструменты": {
+  "Мотыга": "mc_stone_hoe",
+  "Лопата": "mc_stone_shovel",
+  "Топор": "mc_stone_axe",
+  "Кирка": "mc_stone_pickaxe",
+  "Меч": "mc_stone_sword"
+ },
+ "Золотые инструменты": {
+  "Мотыга": "mc_golden_hoe",
+  "Лопата": "mc_golden_shovel",
+  "Топор": "mc_golden_axe",
+  "Кирка": "mc_golden_pickaxe",
+  "Меч": "mc_golden_sword"
+ },
+ "Железные инструменты": {
+  "Мотыга": "mc_iron_hoe",
+  "Лопата": "mc_iron_shovel",
+  "Топор": "mc_iron_axe",
+  "Кирка": "mc_iron_pickaxe",
+  "Меч": "mc_iron_sword"
+ },
+ "Алмазные инструменты": {
+  "Мотыга": "mc_diamond_hoe",
+  "Лопата": "mc_diamond_shovel",
+  "Топор": "mc_diamond_axe",
+  "Кирка": "mc_diamond_pickaxe",
+  "Меч": "mc_diamond_sword"
+ },
+ "Незеритовые инструменты": {
+  "Мотыга": "mc_netherite_hoe",
+  "Лопата": "mc_netherite_shovel",
+  "Топор": "mc_netherite_axe",
+  "Кирка": "mc_netherite_pickaxe",
+  "Меч": "mc_netherite_sword"
+ },
+ "Сундук": {
+  "Сундук": "cover__chest"
+ }
+}

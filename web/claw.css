@@ -1,0 +1,111 @@
+/* ================= «Кран» ================= */
+.cl-cab{position:relative;margin:2px 0 12px;padding:10px 10px 0;border-radius:30px;
+  background:linear-gradient(160deg,#ff6fb5 0%,#e0338a 38%,#a3165f 75%,#7a0d48 100%);
+  box-shadow:0 26px 50px -24px rgba(255,79,160,.8),inset 0 2px 0 rgba(255,255,255,.45),inset 0 -8px 0 rgba(0,0,0,.22),inset 0 0 0 1px rgba(255,255,255,.12)}
+.cl-sign{position:relative;display:flex;justify-content:center;align-items:center;gap:8px;height:38px;margin:0 6px 8px;border-radius:14px;
+  background:linear-gradient(180deg,#2a0b3e,#160523);box-shadow:inset 0 0 0 2px rgba(255,255,255,.08),inset 0 -2px 6px rgba(0,0,0,.6);
+  font-weight:900;letter-spacing:.16em;font-size:18px;color:#fff;text-shadow:0 0 6px #fff,0 0 14px #ff8dc8,0 0 28px #ff4fa0}
+.cl-sign b{color:#ffe36e;text-shadow:0 0 6px #fff3b0,0 0 14px #ffd04d,0 0 28px #ff9a1a}
+.cl-bulbs{position:absolute;top:50%;width:46px;height:6px;margin-top:-3px;
+  background:radial-gradient(circle,#ffe9a0 0 2px,transparent 2.6px) 0 0/11.5px 6px;filter:drop-shadow(0 0 4px #ffd04d)}
+.cl-bulbs:first-child{left:10px}.cl-bulbs:last-child{right:10px}
+.cl-glass{position:relative;height:310px;border-radius:18px 18px 10px 10px;overflow:hidden;
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,.22),inset 0 0 0 6px rgba(80,10,50,.55),0 4px 0 rgba(0,0,0,.25)}
+.cl-wall{position:absolute;inset:0;background:
+  radial-gradient(70% 55% at 50% 18%,rgba(255,140,210,.35),transparent 70%),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 2px,transparent 2px 26px),
+  linear-gradient(180deg,#3b1663 0%,#26104a 55%,#1a0a34 100%)}
+.cl-shine{position:absolute;inset:0;pointer-events:none;z-index:9;
+  background:linear-gradient(118deg,transparent 0 14%,rgba(255,255,255,.14) 18%,transparent 24%,transparent 64%,rgba(255,255,255,.07) 68%,transparent 73%)}
+.cl-rail{position:absolute;left:12px;right:12px;top:14px;height:10px;border-radius:5px;z-index:6;
+  background:linear-gradient(180deg,#f2f4fa,#a5aabb 55%,#6d7286);box-shadow:0 4px 8px rgba(0,0,0,.5)}
+.cl-rail i{position:absolute;top:-4px;width:12px;height:18px;border-radius:4px;background:linear-gradient(180deg,#ffe36e,#d98a00);box-shadow:0 2px 4px rgba(0,0,0,.5)}
+.cl-rail i:first-child{left:-4px}.cl-rail i:last-child{right:-4px}
+.cl-car{--cable:30px;position:absolute;top:9px;width:0;z-index:7;transition:left .5s cubic-bezier(.4,1.15,.5,1)}
+.cl-car::before{content:"";position:absolute;left:-20px;top:0;width:40px;height:22px;border-radius:8px;
+  background:linear-gradient(180deg,#fff0a6,#ffc21a 50%,#e08a00);box-shadow:0 4px 8px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.7)}
+.cl-cable{position:absolute;left:-2px;top:20px;width:4px;height:var(--cable);border-radius:2px;background:linear-gradient(90deg,#8a90a3,#f4f6fb,#8a90a3)}
+.cl-claw{position:absolute;left:-42px;top:calc(20px + var(--cable) - 4px);width:84px;height:74px}
+.cl-hand{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 8px 6px rgba(0,0,0,.55));z-index:2}
+.cl-arm{transition:transform .25s cubic-bezier(.4,1.6,.5,1)}
+.cl-arm.l{transform-origin:37px 20px;transform:rotate(16deg)}
+.cl-arm.r{transform-origin:43px 20px;transform:rotate(-16deg)}
+.cl-claw.shut .cl-arm.l{transform:rotate(-8deg)}
+.cl-claw.shut .cl-arm.r{transform:rotate(8deg)}
+.cl-claw.wobble .cl-hand{animation:cl-wob .35s ease-in-out 2}
+@keyframes cl-wob{25%{transform:rotate(-7deg)}75%{transform:rotate(7deg)}}
+.cl-held{position:absolute;left:17px;top:38px;width:50px;height:50px;z-index:1;border-radius:14px;overflow:hidden;transform:rotate(-4deg);box-shadow:0 8px 14px rgba(0,0,0,.5)}
+.cl-held .gift{width:100%;height:100%;border-radius:0}
+.cl-held.fall-chute{transition:transform .55s cubic-bezier(.5,0,.9,.5),opacity .55s;transform:translateY(190px) rotate(25deg);opacity:0}
+/* лоток выдачи: шахта с полосатой кромкой */
+.cl-chute{position:absolute;left:3%;bottom:0;width:17%;height:96px;z-index:8;border-radius:12px 12px 0 0;padding:10px 6px 0;
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04));box-shadow:inset 0 0 0 2px rgba(255,255,255,.18)}
+.cl-chute::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;border-radius:12px 12px 0 0;
+  background:repeating-linear-gradient(135deg,#ffc21a 0 7px,#1a0a34 7px 14px)}
+.cl-hole{height:100%;border-radius:10px 10px 0 0;display:grid;place-items:center;background:radial-gradient(80% 70% at 50% 30%,#0b0418,#000);
+  box-shadow:inset 0 6px 12px rgba(0,0,0,.8)}
+.cl-hole .ic{width:22px;height:22px;color:#ffe36e;opacity:.85;filter:drop-shadow(0 0 6px rgba(255,200,60,.6))}
+/* горка призов */
+.cl-floor{position:absolute;left:22%;right:3%;bottom:0;height:150px;z-index:5}
+.cl-floor::before{content:"";position:absolute;left:-30%;right:-6%;bottom:-20px;height:90px;border-radius:50%;
+  background:radial-gradient(60% 70% at 50% 40%,#ff7cc0,#b82a78 60%,#6e1046);filter:blur(1px);opacity:.9}
+.cl-prize{position:absolute;width:calc(100% / var(--f) - 16px);max-width:64px;transform:translateX(-50%) rotate(var(--r));background:none;border:0;padding:0;
+  transition:transform .25s cubic-bezier(.3,1.4,.5,1),filter .2s}
+.cl-prize.r0{bottom:8px;z-index:3}
+.cl-prize.r1{bottom:82px;z-index:2;width:calc((100% / var(--f) - 16px) * .8);filter:brightness(.88)}
+.cl-gift{width:100%;aspect-ratio:1;border-radius:18px;overflow:hidden;box-shadow:0 12px 16px -6px rgba(0,0,0,.65),inset 0 0 0 1.5px rgba(255,255,255,.2)}
+.cl-gift .gift{width:100%;height:100%;border-radius:0}
+.cl-prize em{pointer-events:none;position:absolute;right:-6px;top:-8px;font-style:normal;font-weight:900;font-size:11px;line-height:1;padding:4px 6px;border-radius:8px;
+  background:#1a0a34;color:#fff;box-shadow:0 0 0 1.5px rgba(255,255,255,.35),0 4px 8px rgba(0,0,0,.4);transform:rotate(8deg);white-space:nowrap}
+.cl-prize.big em{background:linear-gradient(180deg,#fff0a6,#ffc21a 50%,#e08a00);color:#3a1d00;box-shadow:0 0 0 1.5px #1a0a34,0 0 14px rgba(255,190,40,.7)}
+.cl-mark{pointer-events:none;position:absolute;left:50%;top:-30px;width:22px;height:22px;margin-left:-11px;opacity:0;color:#ffe36e;transform:rotate(90deg);transition:opacity .2s;
+  filter:drop-shadow(0 0 6px rgba(255,210,60,.8))}
+.cl-mark .ic{width:22px;height:22px;stroke-width:3}
+.cl-prize.on{transform:translateX(-50%) rotate(0) translateY(-4px) scale(1.06);filter:none;z-index:4}
+.cl-prize.on .cl-gift{box-shadow:0 0 0 3px #ffe36e,0 0 22px rgba(255,214,90,.7),0 12px 16px -6px rgba(0,0,0,.65)}
+.cl-prize.on .cl-mark{opacity:1;animation:cl-bob 1s ease-in-out infinite}
+@keyframes cl-bob{50%{transform:rotate(90deg) translateX(5px)}}
+.cl-prize.taken{opacity:0}
+.cl-prize.drop-back{animation:cl-drop .55s cubic-bezier(.3,0,.6,1)}
+@keyframes cl-drop{0%{transform:translateX(-50%) translateY(-110px);opacity:1}70%{transform:translateX(-50%) translateY(5px)}100%{transform:translateX(-50%) rotate(var(--r))}}
+.cl-base{display:flex;justify-content:center;padding:9px 0 11px}
+.cl-base span{font-size:10px;font-weight:900;letter-spacing:.14em;color:rgba(255,255,255,.75)}
+/* карточка выбранного приза */
+.cl-pick{display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:10px;border-radius:18px;background:var(--card)}
+.cl-pg{width:48px;height:48px;border-radius:14px;overflow:hidden;flex:none}
+.cl-pg .gift{width:100%;height:100%;border-radius:0}
+.cl-pt{flex:1;min-width:0}
+.cl-pt b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-pt span{display:block;font-size:12.5px;color:var(--hint);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-pt em{font-style:normal;font-weight:900;color:var(--text)}.cl-pt em.g{color:var(--gold)}
+.cl-pc{flex:none;text-align:center;padding:6px 10px;border-radius:12px;background:var(--card2)}
+.cl-pc b{display:block;font-size:17px;font-weight:900}.cl-pc span{font-size:10.5px;color:var(--hint);font-weight:700}
+.cl-pc.hi b{color:var(--green)}.cl-pc.lo b{color:var(--red)}
+.cl-btns{display:flex;gap:8px;margin-top:10px}
+.cl-btns .btn.cta{flex:1}
+.cl-sh{width:56px;flex:none;display:grid;place-items:center;padding:0}
+.cl-sh .ic{width:20px;height:20px}
+.cl-note{font-size:12px;text-align:center;margin-top:8px}
+@media (prefers-reduced-motion:reduce){.cl-car,.cl-arm,.cl-prize{transition:none}.cl-prize.on .cl-mark{animation:none}}
+
+/* админка: вкладка «Кран» */
+.ca-hero{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:8px}
+.ca-hero>div{background:var(--card);border-radius:14px;padding:10px 8px;min-width:0}
+.ca-hero span{display:block;font-size:11px;color:var(--hint);font-weight:700}
+.ca-hero b{display:block;font-size:18px;font-weight:900;white-space:nowrap}
+.ca-hero small{display:block;font-size:11px;color:var(--hint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ca-bars{display:flex;align-items:flex-end;gap:5px;height:56px;padding:6px 8px;border-radius:14px;background:var(--card)}
+.ca-bars div{flex:1;height:100%;display:flex;align-items:flex-end}
+.ca-bars i{width:100%;border-radius:4px}.ca-bars i.up{background:var(--green)}.ca-bars i.dn{background:var(--red)}
+.ca-form{padding:12px;display:flex;flex-direction:column;gap:10px}
+.ca-form label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;min-width:0}
+.ca-form label small{font-weight:500;color:var(--hint);font-size:11.5px}
+.ca-form input{width:100%;padding:10px 12px;border-radius:12px;border:0;background:var(--card2);color:var(--text);font:inherit;font-weight:700;font-size:15px}
+.ca-form input:disabled{opacity:.6}
+.ca-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ca-btns{display:flex;gap:8px}.ca-btns .btn{flex:1}
+.ca-odds{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
+.ca-odds div{background:var(--card);border-radius:12px;padding:8px 4px;text-align:center}
+.ca-odds b{display:block;font-size:14px}.ca-odds span{font-size:12px;color:var(--hint);font-weight:700}
+.ca-odds .big b{color:var(--gold)}
+.cl-gift.cl-held{width:50px;height:50px;aspect-ratio:auto}

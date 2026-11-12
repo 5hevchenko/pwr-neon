@@ -1,0 +1,77 @@
+/* ============ кланы: тег, рамка, уровни, чат ============ */
+/* тег клана рядом с именем */
+.ntag{display:inline-block;vertical-align:1px;margin-left:5px;padding:1px 5px;border-radius:6px;font-size:10px;font-weight:900;letter-spacing:.04em;line-height:1.35;
+  background:var(--card2);color:var(--hint);white-space:nowrap}
+.ntag.c,.ctag.c{background:linear-gradient(135deg,var(--a),var(--b));color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.ntag.glow,.ctag.glow,.clbadge.glow{position:relative;overflow:hidden;isolation:isolate}
+.ntag.glow::after,.ctag.glow::after,.clbadge.glow::after{content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);background-size:250% 100%;animation:tagShine 2.6s linear infinite}
+.ntag.glow,.ctag.glow{box-shadow:inset 0 0 0 1px rgba(255,255,255,.3),0 0 8px color-mix(in srgb,var(--a) 60%,transparent)}
+@keyframes tagShine{from{background-position:150% 0}to{background-position:-100% 0}}
+.lite .ntag.glow::after,.lite .ctag.glow::after,.lite .clbadge.glow::after{animation:none}
+
+/* клановая рамка аватара (5+ ур.), золотая (10 ур.) */
+.ava.fr-clan,.ava.fr-clang{--frw:calc(1px + max(1px,var(--s)*.025));box-shadow:0 0 0 1.5px var(--bg);isolation:isolate}
+.ava.fr-clan::before,.ava.fr-clang::before{content:"";position:absolute;inset:calc(-1.5px - var(--frw));border-radius:50%;z-index:-1;opacity:.9;
+  background:conic-gradient(from 210deg,var(--ca),var(--cb),var(--ca),var(--cb),var(--ca))}
+.ava.fr-clang::before{background:conic-gradient(from var(--fra,0deg),#ffe58a,#ffab2e,#fff3c4,#ffab2e,#ffe58a);animation:frSpin 4s linear infinite;filter:drop-shadow(0 0 3px #ffc93d77)}
+.lite .ava.fr-clang::before{animation:none}
+
+/* узор герба на обложке клана (4+ ур.) */
+.clpat{position:absolute;inset:-40%;z-index:-1;opacity:.13;background:var(--img) 0 0/44px 44px repeat;transform:rotate(-14deg);pointer-events:none}
+
+/* кнопка чата в клане */
+.clchat-btn{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:12px 14px;border-radius:18px;background:var(--card);color:var(--text);text-align:left}
+.clchat-btn>.ic:first-child{width:22px;height:22px;color:var(--accent);flex:none}
+.clchat-btn .grow{min-width:0;display:flex;flex-direction:column}.clchat-btn b{font-size:15px}.clchat-btn span{font-size:12px;color:var(--hint)}
+.clchat-btn>.ic:last-child{width:16px;height:16px;color:var(--hint);flex:none}
+.clchat-btn em,.clunread{flex:none;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--red,#ff5a6e);color:#fff;font-size:11.5px;font-weight:800;line-height:20px;font-style:normal;text-align:center}
+.clchat-btn:active{transform:scale(.98)}
+
+/* уровни клана */
+.cllv{margin-top:12px;border-radius:18px;background:var(--card);overflow:hidden}
+.cllv summary{display:flex;align-items:center;gap:12px;padding:12px 14px;list-style:none;cursor:pointer}
+.cllv summary::-webkit-details-marker{display:none}
+.cllv summary>.ic:first-child{width:20px;height:20px;color:var(--gold,#ffc93d);flex:none}
+.cllv summary .grow{min-width:0;display:flex;flex-direction:column}.cllv summary b{font-size:14.5px}.cllv summary span{font-size:12px;color:var(--hint)}
+.cllv summary>.ic:last-child{width:16px;height:16px;color:var(--hint);transform:rotate(90deg);transition:transform .2s;flex:none}
+.cllv[open] summary>.ic:last-child{transform:rotate(-90deg)}
+.cllv-l{display:grid;gap:2px;padding:0 8px 8px}
+.cllv-r{display:flex;align-items:center;gap:10px;padding:8px 6px;border-radius:12px}
+.cllv-r.cur{background:color-mix(in srgb,var(--gold,#ffc93d) 12%,transparent)}
+.cllv-r .grow{min-width:0;display:flex;flex-direction:column}.cllv-r b{font-size:12.5px;line-height:1.3}.cllv-r span{font-size:11px;color:var(--hint)}
+.cllv-r:not(.done) b{opacity:.7}
+.cllv-n{flex:none;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:900;background:var(--card2);color:var(--hint)}
+.cllv-r.done .cllv-n{background:var(--gold,#ffc93d);color:#3a2300}.cllv-n .ic{width:14px;height:14px}
+
+/* чат клана */
+.cc-s .gtitle{display:flex;align-items:center;justify-content:center;gap:8px}.cc-s .gtitle .ic{width:22px;height:22px}
+.cc-list{height:58vh;height:58dvh;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:4px;padding:4px 2px 8px}
+.cc-list>.empty{margin:auto}
+.cc-empty{margin:auto;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--hint);text-align:center}
+.cc-empty .ic{width:34px;height:34px;opacity:.6}.cc-empty b{color:var(--text)}.cc-empty span{font-size:12.5px}
+.cc-m{display:flex;align-items:flex-end;gap:7px;max-width:100%;margin-top:6px}
+.cc-m.cont{margin-top:0}
+.cc-m.me{justify-content:flex-end}
+.cc-ava{flex:none;width:30px;min-height:1px}
+.cc-b{position:relative;max-width:78%;min-width:0;padding:7px 11px 6px;border-radius:16px 16px 16px 6px;background:var(--card)}
+.cc-m.cont:not(.me) .cc-b{border-radius:6px 16px 16px 6px}
+.cc-m.me .cc-b{border-radius:16px 16px 6px 16px;background:var(--accent);color:#fff}
+.cc-m.me.cont .cc-b{border-radius:16px 6px 6px 16px}
+.cc-n{font-size:12px;font-weight:700;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc-t{font-size:14.5px;line-height:1.35;white-space:pre-wrap;overflow-wrap:anywhere}
+.cc-ts{display:block;text-align:right;font-size:10px;opacity:.55;margin-top:1px}
+.cc-sys{align-self:center;display:flex;align-items:center;gap:6px;max-width:92%;margin:6px 0 2px;padding:5px 11px;border-radius:12px;
+  background:color-mix(in srgb,var(--card) 70%,transparent);font-size:12px;color:var(--hint);text-align:center}
+.cc-sys .ic{width:14px;height:14px;flex:none}.cc-sys b{color:var(--text)}
+.cc-sys.win{background:color-mix(in srgb,var(--gold,#ffc93d) 14%,var(--card));color:var(--text)}.cc-sys.win>.ic{color:var(--gold,#ffc93d)}
+.cc-in{display:flex;align-items:flex-end;gap:8px;padding-top:8px;border-top:1px solid color-mix(in srgb,var(--hint) 18%,transparent)}
+.cc-in textarea{flex:1;min-width:0;resize:none;max-height:96px;padding:10px 14px;border-radius:20px;border:0;background:var(--card);color:var(--text);font:inherit;font-size:15px;line-height:1.3;outline:none}
+.cc-send{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#fff}
+.cc-send .ic{width:19px;height:19px}.cc-send:active{transform:scale(.92)}
+
+/* скидка клана в оформлении */
+.sty-disc{display:flex;align-items:center;gap:8px;margin:12px 0 -2px;padding:9px 12px;border-radius:14px;font-size:12.5px;font-weight:700;
+  background:color-mix(in srgb,var(--gold,#ffc93d) 14%,var(--card));color:var(--text)}
+.sty-disc .ic{width:16px;height:16px;color:var(--gold,#ffc93d)}
+.sty-full{font-size:11px;color:var(--hint);margin-bottom:-3px}

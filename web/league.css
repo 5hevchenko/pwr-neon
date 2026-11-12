@@ -1,0 +1,70 @@
+/* ================= Лиги недели ================= */
+.lg-svg{display:block;width:100%;height:100%;overflow:visible}
+.lg-shine{animation:lg-shine 4.5s ease-in-out infinite}
+@keyframes lg-shine{0%,55%{transform:skewX(-20deg) translateX(0)}85%,100%{transform:skewX(-20deg) translateX(190px)}}
+/* шапка: щит лиги, название, место, таймер */
+.lg-hero{position:relative;display:flex;align-items:center;gap:14px;padding:16px 16px 16px 10px;margin-bottom:12px;border-radius:24px;overflow:hidden;isolation:isolate;
+  background:radial-gradient(90% 120% at 0% 50%,color-mix(in srgb,var(--a) 38%,transparent),transparent 70%),linear-gradient(135deg,color-mix(in srgb,var(--b) 55%,#0d0f18),#0d0f18 75%);
+  box-shadow:0 20px 40px -24px var(--a),inset 0 0 0 1px color-mix(in srgb,var(--a) 35%,transparent)}
+.lg-hero::before{content:"";position:absolute;inset:-40% -10% auto auto;width:220px;height:220px;z-index:-1;border-radius:50%;
+  background:radial-gradient(circle,color-mix(in srgb,var(--a) 30%,transparent),transparent 65%);animation:lg-glow 5s ease-in-out infinite alternate}
+@keyframes lg-glow{to{transform:translate(-30px,20px) scale(1.2);opacity:.6}}
+.lg-emb{flex:none;width:96px;height:111px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.55)) drop-shadow(0 0 18px color-mix(in srgb,var(--a) 45%,transparent));animation:lg-float 4s ease-in-out infinite}
+@keyframes lg-float{50%{transform:translateY(-4px)}}
+.lg-ht{min-width:0;color:#fff}
+.lg-ht span{display:block;font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+.lg-ht b{display:block;font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:1.1;
+  background:linear-gradient(180deg,#fff 30%,var(--a));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lg-ht em{display:block;margin-top:4px;font-style:normal;font-size:14px;font-weight:700;opacity:.9}
+.lg-ht em i{font-style:normal;font-weight:900;font-size:18px;font-family:"NP Num",-apple-system,Roboto,sans-serif}
+.lg-ht small{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:800;
+  background:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.lg-ht small .ic{width:12px;height:12px}
+/* лестница лиг */
+.lg-ladder{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:12px;padding:10px 6px 8px;border-radius:18px;background:var(--card)}
+.lg-ladder>div{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;opacity:.35;filter:grayscale(.85);transition:all .3s}
+.lg-ladder>div .lg-svg{width:34px;height:39px}
+.lg-ladder>div span{font-size:9.5px;font-weight:800;color:var(--hint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.lg-ladder>div.done{opacity:.75;filter:none}
+.lg-ladder>div.on{opacity:1;filter:none;transform:scale(1.12)}
+.lg-ladder>div.on span{color:var(--text)}
+/* призы топ-3 */
+.lg-prz{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.lg-prz>div{display:flex;flex-direction:column;align-items:center;padding:9px 4px 8px;border-radius:14px;background:var(--card);min-width:0}
+.lg-prz i{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;font-style:normal;font-size:12px;font-weight:900;color:#2a1a00}
+.lg-prz .p1 i{background:linear-gradient(135deg,#fff1a8,#ffb21f)}.lg-prz .p2 i{background:linear-gradient(135deg,#fff,#a9b6c6)}.lg-prz .p3 i{background:linear-gradient(135deg,#ffd2a8,#c4783d)}
+.lg-prz span{font-size:10.5px;color:var(--hint);margin-top:2px}
+.lg-prz b{font-size:14px;font-weight:900;white-space:nowrap}
+/* таблица группы и зоны */
+.lg-list{padding-top:4px}
+.lg-zone{display:flex;align-items:center;gap:6px;padding:8px 14px 4px;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.lg-zone .ic{width:13px;height:13px}
+.lg-zone.up{color:#35d07f}
+.lg-zone.down{color:#ff5d6c;border-top:1px dashed color-mix(in srgb,#ff5d6c 45%,transparent);margin-top:4px}
+.lg-zone.down .ic{transform:rotate(90deg)}
+.lg-cut{height:0;margin:4px 14px;border-top:1px dashed color-mix(in srgb,#35d07f 50%,transparent)}
+.lg-row.up{background:linear-gradient(90deg,color-mix(in srgb,#35d07f 12%,transparent),transparent 60%)}
+.lg-row.down{background:linear-gradient(90deg,color-mix(in srgb,#ff5d6c 12%,transparent),transparent 60%)}
+.lg-row.me{box-shadow:inset 0 0 0 1.5px var(--gold);border-radius:14px}
+.lg-pl{flex:none;display:grid;place-items:center;width:26px;height:26px;margin-right:8px;border-radius:50%;font-size:12.5px;font-weight:900;color:var(--hint);font-family:"NP Num",-apple-system,Roboto,sans-serif}
+.lg-pl.m1{color:#2a1a00;background:linear-gradient(135deg,#fff1a8,#ffb21f)}.lg-pl.m2{color:#1d232c;background:linear-gradient(135deg,#fff,#a9b6c6)}.lg-pl.m3{color:#2a1500;background:linear-gradient(135deg,#ffd2a8,#c4783d)}
+.lg-row .num small{font-size:11px;font-weight:700;color:var(--hint)}
+.lg-join{display:flex;align-items:center;gap:12px;padding:14px;border-radius:18px;background:var(--card)}
+.lg-join>.ic{width:28px;height:28px;flex:none;color:var(--gold)}
+.lg-join div{flex:1;min-width:0}.lg-join b{display:block;font-size:15px}.lg-join span{font-size:12.5px;color:var(--hint)}
+.lg-join .btn{flex:none;margin:0}
+/* окно итогов недели */
+.lg-res{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:6px 4px 4px}
+.lg-rk{font-size:11px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:var(--hint)}
+.lg-rem{display:flex;align-items:center;gap:10px;margin:14px 0 8px}
+.lg-rem .old{width:64px;height:74px;opacity:.5;filter:grayscale(.6)}
+.lg-rem .new{width:120px;height:139px;animation:lg-in .8s cubic-bezier(.2,1.5,.4,1) both .15s;filter:drop-shadow(0 14px 22px rgba(0,0,0,.5))}
+.lg-rem>.ic{width:26px;height:26px;color:#35d07f}
+.lg-res.down .lg-rem>.ic{color:#ff5d6c;transform:rotate(90deg)}
+@keyframes lg-in{0%{opacity:0;transform:scale(.4) rotate(-12deg)}100%{opacity:1;transform:none}}
+.lg-rt{font-size:24px;font-weight:900;letter-spacing:-.01em}
+.lg-res.up .lg-rt{color:#5cf5ab}.lg-res.down .lg-rt{color:#ff6b78}
+.lg-res p{margin:6px 0 0;color:var(--hint);font-size:14px}
+.lg-rw{margin-top:12px;padding:8px 18px;border-radius:999px;font-size:20px;font-weight:900;color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffb52e);box-shadow:0 8px 22px -8px #ffb52e}
+.lg-res .btn{width:100%;margin-top:18px}
+@media (prefers-reduced-motion:reduce){.lg-shine,.lg-emb,.lg-hero::before{animation:none}}

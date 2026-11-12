@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Банк игры</title>
+<meta name="description" content="Открытые цифры банка игры: размер банка, прибыль по дням, фактический возврат по играм, выпуск звёзд и сборы.">
+<style>
+:root{--bg:#0b0a14;--card:#17151f;--line:#2a2733;--text:#f3f0ff;--hint:#9a93b5;--gold:#ffc53d;--green:#35d07f;--red:#ff5c5c;--ac:#8b6bff;color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f4f2fa;--card:#fff;--line:#e4e0ef;--text:#17141f;--hint:#6c6585;--gold:#b77a00;--green:#13995a;--red:#d63a3a;--ac:#6a4dff;color-scheme:light}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 40px}
+h1{margin:4px 0 2px;font-size:24px}
+.sub{color:var(--hint);font-size:13.5px;margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin:0 0 12px}
+.big{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.big b{font-size:32px;font-weight:900;letter-spacing:-.01em}.big span{color:var(--hint);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.kpi span{display:block;color:var(--hint);font-size:12.5px}.kpi b{font-size:19px;font-variant-numeric:tabular-nums}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--hint);margin:20px 4px 8px}
+svg{display:block;width:100%;height:auto}
+.up{fill:var(--green)}.dn{fill:var(--red)}.z{fill:var(--line)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 4px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}th{color:var(--hint);font-weight:600;font-size:12.5px}tr:last-child td{border-bottom:0}
+.ok{color:var(--green)}.warn{color:var(--gold)}.bad{color:var(--red)}
+.note{color:var(--hint);font-size:13px;margin:8px 0 0}
+.tw{overflow-x:auto}
+a.go{display:block;text-align:center;margin:18px 0 0;padding:14px;border-radius:16px;text-decoration:none;font-weight:800;color:#2a1700;background:linear-gradient(180deg,#ffe08a,#ffb020)}
+.err{color:var(--red)}
+</style>
+</head>
+<body>
+<main>
+  <h1 data-t="Банк игры">Банк игры</h1>
+  <p class="sub" data-t="Открытые цифры: их видит любой, вход не нужен. Обновляются раз в 30 секунд.">Открытые цифры: их видит любой, вход не нужен. Обновляются раз в 30 секунд.</p>
+  <div id="out"><div class="card" data-t="Загружаем…">Загружаем…</div></div>
+</main>
+<script>
+"use strict";
+const EN = /^en/i.test(new URLSearchParams(location.search).get("lang") || navigator.language || "");   // из игры язык приходит в ?lang=, иначе по браузеру
+const T = {"Банк игры":"Game bank","Открытые цифры: их видит любой, вход не нужен. Обновляются раз в 30 секунд.":"Open numbers anyone can see, no login needed. Updated every 30 seconds.",
+  "Загружаем…":"Loading…","Сейчас в банке":"In the bank now","на старте сезона":"at season start","Прибыль казино сегодня":"House profit today","Игроков за сутки":"Players in 24 h",
+  "Игроки выиграли за сутки":"Players won in 24 h","Прибыль по дням":"Profit by day","зелёный: банк в плюсе, красный: игроки обыграли банк":"green: the bank is up, red: players beat the bank",
+  "Возврат по играм за 7 дней":"Return by game, last 7 days","Игра":"Game","Заявлено":"Declared","Фактически":"Actual","Раундов":"Rounds",
+  "Фактический возврат на малом числе раундов скачет, это нормально. Каждую ставку можно проверить в игре.":"Actual return swings on few rounds, that is normal. Every bet can be verified in the game.",
+  "Выпуск звёзд администрацией":"Stars issued by the admins","за неделю":"this week","за всё время":"all time","раз":"times",
+  "Сбор за простой":"Idle fee","Если игрока нет в игре":"If a player is away for","дней, а на балансе больше":"days with a balance over","банк раз в неделю берёт":"the bank takes",
+  "с суммы сверх порога. Сначала приходит предупреждение, вход в игру отменяет сбор.":"of the amount above the limit weekly. A warning comes first, logging in cancels the fee.",
+  "Прошлый сбор":"Last fee","игроков":"players","Всего":"Total","Журнал звёзд":"Star ledger","сходится":"matches","расхождение":"mismatch",
+  "Блоков в журнале":"Ledger blocks","Кризис: ставки ограничены, пока банк ниже":"Crisis: bets are capped while the bank is below","Играть в Telegram":"Play in Telegram",
+  "Не удалось загрузить данные. Попробуй обновить страницу.":"Could not load the data. Try reloading the page.","Звёзды в игре игровые.":"Stars in the game are in-game currency."};
+const t = s => EN && T[s] ? T[s] : s;
+if (EN) { document.documentElement.lang = "en"; document.title = t("Банк игры"); document.querySelectorAll("[data-t]").forEach(e => e.textContent = t(e.dataset.t)); }
+const nf = n => Math.round(n).toLocaleString(EN ? "en-US" : "ru-RU").replace(/,/g, " ");
+const pct = x => (x * 100).toFixed(1).replace(".", EN ? "." : ",") + "%";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function chart(days) {
+  const W = 340, H = 120, mid = H / 2, max = Math.max(1, ...days.map(d => Math.abs(d.profit))), bw = W / days.length;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t("Прибыль по дням"))}"><line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="currentColor" opacity=".15"/>` +
+    days.map((d, i) => { const h = Math.max(d.profit ? 3 : 1.5, Math.abs(d.profit) / max * (mid - 6)), y = d.profit >= 0 ? mid - h : mid;
+      return `<rect class="${d.profit > 0 ? "up" : d.profit < 0 ? "dn" : "z"}" x="${i * bw + 2}" y="${y}" width="${bw - 4}" height="${h}" rx="3"><title>${new Date(d.day * 1000).toLocaleDateString(EN ? "en-US" : "ru-RU")}: ${nf(d.profit)}</title></rect>`; }).join("") + "</svg>";
+}
+async function load() {
+  try {
+    const [b, f] = await Promise.all([fetch("api/bank/public").then(r => r.json()), fetch("api/fair/public").then(r => r.json())]);
+    const games = f.games.filter(g => g.n7 > 0 && g.stake7 > 0).sort((a, b) => b.n7 - a.n7);
+    const it = b.idletax, led = f.ledger || {};
+    document.getElementById("out").innerHTML = `
+      <div class="card"><div class="big"><b>⭐ ${nf(b.bank)}</b><span>${t("Сейчас в банке")} · ${t("на старте сезона")} ${nf(b.start)}</span></div>
+        ${b.crisis.on ? `<p class="note warn">${t("Кризис: ставки ограничены, пока банк ниже")} ${nf(b.crisis.at)}</p>` : ""}</div>
+      <div class="grid">
+        <div class="card kpi"><span>${t("Прибыль казино сегодня")}</span><b class="${b.today >= 0 ? "ok" : "bad"}">${b.today >= 0 ? "+" : "−"}${nf(Math.abs(b.today))}</b></div>
+        <div class="card kpi"><span>${t("Игроков за сутки")}</span><b>${nf(b.players24)}</b></div>
+        <div class="card kpi"><span>${t("Игроки выиграли за сутки")}</span><b>${nf(b.won24)}</b></div>
+        <div class="card kpi"><span>${t("Журнал звёзд")}</span><b class="${led.trigger ? "ok" : "bad"}">${t(led.trigger ? "сходится" : "расхождение")}</b></div>
+      </div>
+      <h2>${t("Прибыль по дням")}</h2>
+      <div class="card">${chart(b.days)}<p class="note">${t("зелёный: банк в плюсе, красный: игроки обыграли банк")}</p></div>
+      <h2>${t("Возврат по играм за 7 дней")}</h2>
+      <div class="card tw"><table><tr><th>${t("Игра")}</th><th>${t("Заявлено")}</th><th>${t("Фактически")}</th><th>${t("Раундов")}</th></tr>
+        ${games.map(g => { const a = g.pay7 / g.stake7; return `<tr><td>${esc(t(g.title))}</td><td>${g.rtp ? pct(g.rtp) : "—"}</td><td class="${g.rtp && Math.abs(a - g.rtp) > .1 ? "warn" : ""}">${pct(a)}</td><td>${nf(g.n7)}</td></tr>`; }).join("")}
+      </table><p class="note">${t("Фактический возврат на малом числе раундов скачет, это нормально. Каждую ставку можно проверить в игре.")}</p></div>
+      <h2>${t("Выпуск звёзд администрацией")}</h2>
+      <div class="grid"><div class="card kpi"><span>${t("за неделю")}</span><b>${nf(f.emission.week.s)}</b><span>${f.emission.week.n} ${t("раз")}</span></div>
+        <div class="card kpi"><span>${t("за всё время")}</span><b>${nf(f.emission.total.s)}</b><span>${f.emission.total.n} ${t("раз")}</span></div></div>
+      ${it && it.on ? `<h2>${t("Сбор за простой")}</h2><div class="card"><p class="note" style="margin:0">${t("Если игрока нет в игре")} ${it.idleDays} ${t("дней, а на балансе больше")} ⭐ ${nf(it.floor)}, ${t("банк раз в неделю берёт")} ${pct(it.rate)} ${t("с суммы сверх порога. Сначала приходит предупреждение, вход в игру отменяет сбор.")}</p>
+        <div class="grid" style="margin-top:10px"><div class="kpi"><span>${t("Прошлый сбор")}</span><b>${nf(it.lastWeek)}</b><span>${it.lastWeekN} ${t("игроков")}</span></div><div class="kpi"><span>${t("Всего")}</span><b>${nf(it.total)}</b></div></div></div>` : ""}
+      <div class="card kpi"><span>${t("Блоков в журнале")}</span><b>${nf(led.blocks || 0)}</b></div>
+      ${b.bot ? `<a class="go" href="https://t.me/${encodeURIComponent(b.bot)}">${t("Играть в Telegram")}</a>` : ""}
+      <p class="note" style="text-align:center">${t("Звёзды в игре игровые.")}</p>`;
+  } catch (e) {
+    document.getElementById("out").innerHTML = `<div class="card err">${t("Не удалось загрузить данные. Попробуй обновить страницу.")}</div>`;
+  }
+}
+if (EN) {   // словарь игры: названия игр по-английски
+  window.LANG = "en"; window.i18nAdd = o => { for (const k in o) if (!(k in T)) T[k] = o[k]; }; window.i18nNode = () => {};
+  const sc = document.createElement("script"); sc.src = "i18n_en.js"; sc.onload = sc.onerror = load; document.head.appendChild(sc);
+} else load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>

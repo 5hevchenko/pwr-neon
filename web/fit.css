@@ -1,0 +1,279 @@
+/* ============================================================
+   fit.css — ничего не вылезает и не накладывается на узких экранах (320–360px). Подключается последним.
+   ============================================================ */
+/* страница и шторки не прокручиваются вбок, даже если что-то шире экрана */
+main{overflow-x:clip}
+.sheet{overflow-x:hidden}
+img,video,canvas{max-width:100%}
+/* ячейки сеток могут сжиматься (иначе длинное число распирает колонку и наезжает на соседнюю) */
+.achs>*,
+.adm-cg>*,
+.adm-sales>*,
+.al-grid>*,
+.bh-nav>*,
+.bizg>*,
+.bkh-stats>*,
+.bks-foot>*,
+.bks-top>*,
+.bnr-pick>*,
+.bt-pick>*,
+.ca-sell>*,
+.cases>*,
+.clb-acts>*,
+.clb-top>*,
+.clembs>*,
+.cr-odds>*,
+.cr-pot>*,
+.cxmvs>*,
+.dash2>*,
+.dgbuy>*,
+.dginfo>*,
+.dgpt>*,
+.dgreels>*,
+.dgwrap.n4>*,
+.die>*,
+.dstats>*,
+.epins>*,
+.fp-g>*,
+.fp-risk>*,
+.fx-btns>*,
+.fx-info>*,
+.fx-levs>*,
+.fx-stats>*,
+.ggrid.two>*,
+.ggrid>*,
+.ghub>*,
+.gq>*,
+.hl-btns>*,
+.hl-row>*,
+.inv-stats>*,
+.jpbuy>*,
+.jpme>*,
+.jpprize>*,
+.mgrid>*,
+.mk2-grid>*,
+.mk2-tabs>*,
+.mkstats>*,
+.mstat>*,
+.ob-bar>*,
+.ph-k>*,
+.pins>*,
+.pmenu+.pacts>*,
+.pmenu>*,
+.pr-c-cols>*,
+.promo>*,
+.pst>*,
+.pstats div>*,
+.pstats>*,
+.pw-mini>div>*,
+.pworth>*,
+.qb-list>*,
+.rnums>*,
+.sc-grid>*,
+.sc-pay>*,
+.sc-tiers>*,
+.shift-stats>*,
+.showcase>*,
+.sp-tiers>*,
+.sreels>*,
+.st-row>*,
+.stats>*,
+.suits>*,
+.swtop>*,
+.tme-g>*,
+.tt-grid>*,
+.upair>*,
+.vplans>*{min-width:0}
+
+/* строки списков: имя сжимается и переносится, а не выталкивает кнопки за край */
+.row>.grow,.row .grow{min-width:0}
+.row .grow .t,.row .grow .s{overflow-wrap:anywhere}
+.box .row{min-width:0}
+/* числа в узких ячейках — обрезаются многоточием */
+.dstats b,.mkstats b,.pst b,.st-row b,.fx-stats b,.bkh-stats b,.tme-g b,.ih-two b,.mstat b,.dginfo b,.ph-k b,.pw-main>b,.cx-px b,.fp-g b,.fp-pnl b,.fx-px b,.bkme2>b,.bkh-top>div>b,.qsum,.inv-stats b,.pr-c-cols b,.pr-c-cols span{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+/* имена на подиумах/в лентах */
+.podium .nm,.lv-it b,.pr-o-body b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv-it b{max-width:110px}
+/* окно пополнения: «Telegram Stars» переносится внутри узкой карточки */
+.qb-p .tgp{white-space:normal;text-align:center;justify-content:center;flex-wrap:wrap;line-height:1.2}
+.shop-row{min-width:0}.shop-row .tgp{white-space:normal}
+/* шапка: на узких экранах прячем заголовок (вкладка и так подсвечена снизу), кнопки поменьше */
+header>*{flex-shrink:0}header h1{flex-shrink:1}
+.bal{min-width:0}
+@media (max-width:380px){
+  header{gap:7px}
+  header h1{font-size:0;flex:1}
+  .fr-btn,.bell-btn{width:34px;height:34px}
+  .bal{padding:6px 10px 6px 7px}
+}
+@media (max-width:340px){
+  .bal .num{font-size:14px}
+  .bal .plus{width:18px;height:18px}
+  .bh-nav button{font-size:10.5px}
+  .pmenu button{font-size:10.5px}
+  .qb-p>b{font-size:15px}
+}
+/* строка друга с огоньками: кнопки дуэли/обмена убираются (они есть в профиле) — иначе не влезает */
+.row.sp-row .ibtn{display:none}
+.sp-right{flex:none}
+@media (max-width:360px){.sp-btn{padding:0 8px 0 6px;font-size:11px}.sp-cell{padding:4px 6px 4px 4px}}
+/* листалка на главной и плашки — текст не выталкивает стрелку */
+.stc-t,.inc-t,.jp-t{min-width:0}
+.prib,.evrib{min-width:0}.prib b,.evrib b{overflow:hidden;text-overflow:ellipsis}
+/* таблицы в банке/крипте */
+.cxrow .grow,.cx-nm{min-width:0}
+.cx-nm .t,.cx-nm .s{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ===== карточки игр: ничего не выезжает и не перекрывается =====
+   узкая карточка: сверху зона под картинку фиксированной высоты, текст строго под ней;
+   широкая: текст слева (до 54%), картинка справа по центру. Заголовок — одна строка, описание — до 3 строк. */
+.ghub .gcard{justify-content:flex-start;min-width:0}
+.ghub .gcard:not(.wide){padding:104px 12px 12px;min-height:0}
+.ghub .gcard:not(.wide) .gc-img{left:50%;right:auto;top:10px;width:auto;height:86px;max-width:70%;translate:-50% 0}
+.ghub .gcard.wide{padding:16px 46% 14px 16px;min-height:168px;justify-content:center}
+.ghub .gcard.wide .gc-img{right:5%;width:38%;max-height:84%;top:50%;translate:0 -50%}
+.ghub .gc-t{font-size:clamp(17px,5vw,21px);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ghub .gc-s{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;font-size:12px;overflow-wrap:anywhere}
+.ghub .gcard:not(.wide) .gc-s{-webkit-line-clamp:3;min-height:calc(1.3em * 3)}
+.ghub .gc-chips{flex-wrap:wrap;gap:4px;margin-top:auto;padding-top:8px}
+.ghub .gcard.wide .gc-chips{margin-top:8px}
+.ghub .gc-chips span{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:10px;padding:3px 7px}
+/* плашки «Закрыто» / «Видишь только ты» — в верхний левый угол, не на чипы */
+.ghub .g-lock,.ghub .g-admb{inset:10px auto auto 10px;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:4}
+.ghub .gcard:has(.gc-live) .g-admb,.ghub .gcard:has(.gc-live) .g-lock{top:44px}
+
+/* ===== профиль: объём вместо плоскости, ничего не вылезает ===== */
+.pf-cover>.banner:not(.photo){background:
+  radial-gradient(70% 90% at 85% 0%,color-mix(in srgb,var(--c1) 70%,#fff) 0%,transparent 55%),
+  radial-gradient(60% 80% at 10% 100%,color-mix(in srgb,var(--c3) 80%,transparent),transparent 70%),
+  radial-gradient(circle at 50% 62%,var(--c1),var(--c2) 90%)}
+.pf-cover>.banner:not(.photo)::before{content:"";position:absolute;inset:0;opacity:.07;mix-blend-mode:overlay;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+.pf-ava .ava{box-shadow:0 0 0 4px var(--bg),0 12px 30px rgba(0,0,0,.55)}
+.pf .pname h2{font-size:24px}
+/* цифры профиля — плитками в ряд */
+.pf-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:14px;font-size:11px;font-weight:600}
+.pf-stats>span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;padding:10px 3px 9px;border-radius:16px;text-align:center;line-height:1.2;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--text) 7%,var(--card)),var(--card));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.04),0 8px 18px -12px rgba(0,0,0,.6)}
+.pf-stats>span b{font-size:16px;font-weight:900;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.pwrap.acc .pf-stats>span{box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px color-mix(in srgb,var(--pac) 35%,transparent)}
+/* меню профиля: 3 × 3, у каждого пункта свой цвет */
+.pwrap .pmenu{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 10px}
+.pwrap .pmenu button{gap:7px;padding:12px 4px 11px;font-size:12.5px;font-weight:700;min-width:0;white-space:nowrap;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--text) 6%,var(--card)),var(--card));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 0 0 1px rgba(255,255,255,.04),0 8px 18px -12px rgba(0,0,0,.6)}
+.pwrap .pmenu button>span{width:40px;height:40px;border-radius:14px;color:#fff;background:linear-gradient(135deg,var(--m1,#6a8bff),var(--m2,#8a5cff));
+  box-shadow:0 6px 14px -6px var(--m2,#8a5cff),inset 0 1px 0 rgba(255,255,255,.35)}
+.pwrap .pmenu button:nth-child(9n+1){--m1:#4aa8ff;--m2:#2f6bff}
+.pwrap .pmenu button:nth-child(9n+2){--m1:#ffd76a;--m2:#ff9f1a}
+.pwrap .pmenu button:nth-child(9n+3){--m1:#c58bff;--m2:#7b4dff}
+.pwrap .pmenu button:nth-child(9n+4){--m1:#4fe3c1;--m2:#14a88a}
+.pwrap .pmenu button:nth-child(9n+5){--m1:#ff8ac4;--m2:#e0338a}
+.pwrap .pmenu button:nth-child(9n+6){--m1:#ffb36b;--m2:#f0631a}
+.pwrap .pmenu button:nth-child(9n+7){--m1:#5cf0a0;--m2:#16b874}
+.pwrap .pmenu button:nth-child(9n+8){--m1:#ff7a7a;--m2:#e0334a}
+.pwrap .pmenu button:nth-child(9n+9){--m1:#a9b1c6;--m2:#5d667d}
+.pwrap .pmenu button:nth-child(9n+2)>span{color:#3a2300}
+/* кнопки «Изменить / Оформление / Позвать»: иконка над подписью — влезает на любом экране */
+.pwrap .pmenu+.pacts{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pwrap .pmenu+.pacts .btn{flex-direction:column;gap:4px;padding:10px 4px;font-size:13px;line-height:1.1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:16px}
+.pwrap .pmenu+.pacts .btn .ic{width:20px;height:20px;margin:0}
+.pwrap .ptabs{margin-top:14px}
+.pwrap .ptabs button{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ===== плашка дохода: изумруд с золотом, глубина и блик ===== */
+.incbar{position:relative;overflow:hidden;isolation:isolate;
+  background:
+    radial-gradient(120% 140% at 0% 0%,rgba(140,255,200,.32),transparent 48%),
+    radial-gradient(90% 120% at 100% 100%,rgba(0,0,0,.38),transparent 60%),
+    linear-gradient(135deg,#0a4f33 0%,#0e7a4c 40%,#12a061 68%,#0b6a43 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 0 0 1px rgba(150,255,200,.16),0 16px 32px -18px #0e9a5c}
+/* узор из монет справа */
+.incbar::before{content:"";position:absolute;right:-14px;top:-18px;width:150px;height:150px;z-index:-1;pointer-events:none;opacity:.22;
+  background:radial-gradient(circle,transparent 9px,rgba(255,230,140,.9) 10px 12px,transparent 13px) 0 0/38px 38px;
+  -webkit-mask:radial-gradient(closest-side,#000,transparent);mask:radial-gradient(closest-side,#000,transparent);transform:rotate(-12deg)}
+/* медленный блик */
+.incbar::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.16) 48%,transparent 60%);background-size:250% 100%;animation:inc-shine 5s ease-in-out infinite}
+@keyframes inc-shine{0%,55%{background-position:130% 0}100%{background-position:-30% 0}}
+.incbar .inc-i{background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);color:#3a2300;box-shadow:0 8px 18px -8px #ffb52e,inset 0 1px 0 rgba(255,255,255,.6)}
+.incbar .inc-t b{text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.incbar .inc-t b [data-live]{color:#ffe08a}
+.incbar .inc-t small{opacity:.8}
+html.lite .incbar::after{display:none}
+
+/* ===== главная: слайды листалки не растягиваются под текст ===== */
+.st-sl,.st-sl>*{min-width:0}
+/* «Щедрые выходные» и ивент в листалке — полноценная карточка: иконка, заголовок, подпись в две строки */
+.st-sl>.prib,.st-sl>.evrib{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:12px;row-gap:2px;align-content:center;
+  padding:12px 14px;border-radius:16px;font-size:14px}
+.st-sl>.prib{background:radial-gradient(120% 140% at 0% 0%,rgba(255,215,106,.28),transparent 55%),linear-gradient(135deg,#3a2a08,#1f1606 60%,#2a1d07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1px rgba(255,197,61,.28)}
+.st-sl>.prib .prib-i,.st-sl>.evrib img{grid-row:1/3;align-self:center}
+.st-sl>.prib .prib-i{width:42px;height:42px;border-radius:13px;place-items:center;color:#3a2300;animation:none;
+  background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);box-shadow:0 8px 18px -8px #ffb52e,inset 0 1px 0 rgba(255,255,255,.6)}
+.st-sl>.prib .prib-i .ic{width:22px;height:22px;animation:pribspin 6s linear infinite}
+.st-sl>.prib b,.st-sl>.evrib b{grid-column:2;font-size:15px;align-self:end}
+.st-sl>.prib .prib-s,.st-sl>.evrib span{grid-column:2;grid-row:2;align-self:start;font-size:12.5px;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.st-sl>.prib>.ic,.st-sl>.evrib>.ic{grid-column:3;grid-row:1/3;align-self:center}
+.st-sl>.evrib img{width:42px;height:42px}
+/* онбординг: кнопка «Забрать»/«Перейти» не сжимается */
+.ob-step .btn.sm{flex:none;white-space:nowrap;padding-left:12px;padding-right:12px}
+.ob-step>.grow,.ob-step>div:not(.pic){min-width:0}
+
+/* ===== шапка на узких экранах: всё влезает в 360 ===== */
+@media (max-width:380px){
+  header{gap:6px;padding-left:12px;padding-right:14px}
+  .fr-btn,.bell-btn{width:32px;height:32px}
+  .fr-btn .ic{width:18px;height:18px}
+  header .me-btn .ava{width:34px!important;height:34px!important;--s:34px}
+  .bal{padding:5px 9px 5px 6px;gap:4px}
+}
+/* приветствие: подсказка уходит на вторую строку, а не обрезает имя */
+.hello{flex-wrap:wrap;row-gap:6px}
+.hello b{flex:1 1 auto;min-width:0}
+.hello button,.hello .hello-t{max-width:100%}
+/* топ кланов: строка «Битва кланов» не рвётся по цифрам */
+.timer{display:block;text-wrap:balance;line-height:1.45}
+.timer>.ic{display:inline-block;vertical-align:-3px;margin-right:5px;width:15px;height:15px}
+
+/* ===== окна игр: заголовок под плашкой баланса, а не под ней внахлёст ===== */
+.sheet .ghead,.no-tg .sheet .ghead{margin:46px 0 14px;min-width:0}
+.sheet .ghead>div{min-width:0}
+.sheet .ghead h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet .ghead span{display:block;line-height:1.3}
+
+/* блэкджек: подписи «Дилер»/«Ты» — свой .fl, а не огонёк серии из hub.css */
+.felt .fl{display:flex;position:static;gap:0;flex:initial;line-height:1.35}
+
+/* theme.css задаёт «верхний свет» через background-image — он затирал собственные градиенты плашек. Возвращаем: свет + родной фон */
+.bankbar:not(.crisis){background-image:linear-gradient(180deg,rgba(255,255,255,.07),transparent 55%),radial-gradient(120% 160% at 0% 0%,rgba(255,200,80,.26),transparent 55%),linear-gradient(120deg,#3a2a05,#1a1408 60%)}
+.richbar{background-image:linear-gradient(180deg,color-mix(in srgb,var(--text) 4%,transparent),transparent 60%),linear-gradient(90deg,color-mix(in srgb,var(--gold) 20%,var(--card)),var(--card) 75%)}
+.prib{background-image:linear-gradient(180deg,color-mix(in srgb,var(--text) 4%,transparent),transparent 60%),linear-gradient(90deg,color-mix(in srgb,var(--gold) 22%,var(--card)),var(--card) 70%)}
+.tme{background-image:linear-gradient(180deg,color-mix(in srgb,var(--text) 4%,transparent),transparent 60%),radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--accent) 28%,var(--card)),var(--card) 70%)}
+
+/* тёмные игровые панели: цифры всегда светлые, в светлой теме тоже */
+.dicebig b:not(.win):not(.lose),.limbo:not(.win):not(.lose) b{color:#fff}
+.dicebig span,.limbo span{color:rgba(255,255,255,.62)}
+
+/* плашка банка в «Играх»: на узком экране «сегодня» прячется, сумма банка помещается целиком */
+.bankbar em i{font-style:normal}
+@media (max-width:400px){.bankbar em i{display:none}.bankbar{gap:10px;padding:12px}}
+
+/* шапка: заголовок вкладки убран (вкладка подсвечена в меню снизу) — h1 остаётся пустой распоркой между кнопками */
+header h1{font-size:0!important;flex:1 1 0;min-width:0;padding:0;margin:0}
+header{gap:6px}
+header .fr-btn:not(.pay-pill),header .bell-btn{width:34px;height:34px}
+header .fr-btn .ic{width:19px;height:19px}
+header .me-btn .ava{width:36px!important;height:36px!important;--s:36px}
+@media (max-width:350px){header{gap:4px;padding-left:10px;padding-right:12px}header .fr-btn:not(.pay-pill),header .bell-btn{width:31px;height:31px}}
+
+/* главная: «Бесплатный / Бонус дня / Задания» — три ровные колонки, иконка над текстом, ничего не уезжает за край */
+.promo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.promo>button{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:8px;min-width:0;padding:11px 10px 10px;border-radius:16px}
+.promo>button>div{min-width:0;width:100%}
+.promo>button b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.promo>button span:not(.pic){display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.promo .pic{width:34px;height:34px;border-radius:11px}
+.promo .ready .pic{box-shadow:0 0 0 2px color-mix(in srgb,var(--gold) 60%,transparent),0 6px 14px -6px var(--gold)}

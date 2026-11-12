@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Gift Cases</title>
+<script>(function(){try{var d=document.documentElement,a=localStorage.getItem("ac"),g=localStorage.getItem("glass");if(a){d.style.setProperty("--ac",a);var n=parseInt(a.slice(1),16);d.style.setProperty("--ac-on",.299*(n>>16)+.587*(n>>8&255)+.114*(n&255)>165?"#2a1c00":"#ffffff");}if(g!==null)d.style.setProperty("--gp",g);}catch(e){}})();</script>
+<style>
+/* экран загрузки: без картинок и внешних файлов, виден сразу */
+html{background:#07070c}
+.np-boot{--a:var(--ac,#ffc53d);position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(60% 40% at 50% 46%,color-mix(in srgb,var(--a) 26%,transparent),transparent 75%),#07070c;transition:opacity .4s ease}
+.npb-logo{position:relative;width:112px;height:112px;display:grid;place-items:center;transition:transform .45s cubic-bezier(.3,0,.2,1)}
+.npb-ring{position:absolute;inset:0;transform:rotate(-90deg);animation:npb-spin 1.5s linear infinite}
+.npb-ring circle{fill:none;stroke-width:3;stroke-linecap:round}
+.npb-ring .tr{stroke:#ffffff17}
+.npb-ring .pr{stroke:var(--a);stroke-dasharray:60 240;filter:drop-shadow(0 0 6px var(--a))}
+.npb-star{width:50px;height:50px;fill:#ffc53d;filter:drop-shadow(0 4px 16px #ffb02e80);animation:npb-in .6s cubic-bezier(.2,1.5,.4,1) both}
+.np-boot.out{opacity:0;pointer-events:none}
+.np-boot.out .npb-logo{transform:scale(1.5)}
+@keyframes npb-spin{to{transform:rotate(270deg)}}
+@keyframes npb-in{from{transform:scale(.4);opacity:0}}
+@media (prefers-reduced-motion:reduce){.npb-ring,.npb-star{animation:none}}
+</style>
+<link rel="preload" href="fonts/manrope.woff2" as="font" type="font/woff2" crossorigin>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>/* профиль игрока запрашиваем сразу, параллельно со скачиванием бандла; loadMe() возьмёт готовый ответ (или спросит заново) */
+window.ME_P = (function () { try { var t = window.Telegram && Telegram.WebApp; if (!t || !t.initData) return null;
+  return fetch("api/me", { headers: { "X-Init-Data": t.initData } }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); } catch (e) { return null; } })();</script>
+<link rel="stylesheet" href="app.css?v=74">
+<link rel="stylesheet" href="games.css?v=74">
+<link rel="stylesheet" href="social.css?v=74">
+<link rel="stylesheet" href="games2.css?v=74">
+<link rel="stylesheet" href="cards.css?v=74">
+<link rel="stylesheet" href="dogs.css?v=74">
+<link rel="stylesheet" href="games3.css?v=74">
+<link rel="stylesheet" href="bank.css?v=74">
+<link rel="stylesheet" href="crypto.css?v=74">
+<link rel="stylesheet" href="games4.css?v=74">
+<link rel="stylesheet" href="bigwin.css?v=74">
+<link rel="stylesheet" href="chicken.css?v=74">
+<link rel="stylesheet" href="claw.css?v=74">
+<link rel="stylesheet" href="arcade.css?v=74">
+<link rel="stylesheet" href="pump.css?v=74">
+<link rel="stylesheet" href="drill.css?v=74">
+<link rel="stylesheet" href="darts.css?v=74">
+<link rel="stylesheet" href="fish.css?v=74">
+<link rel="stylesheet" href="keno.css?v=75">
+<link rel="stylesheet" href="penalty.css?v=75">
+<link rel="stylesheet" href="league.css?v=1">
+<link rel="stylesheet" href="plinko.css?v=1">
+<link rel="stylesheet" href="stack.css?v=1">
+<link rel="stylesheet" href="starfall.css?v=74">
+<link rel="stylesheet" href="avia.css?v=74">
+<link rel="stylesheet" href="battles.css?v=74">
+<link rel="stylesheet" href="scratch.css?v=74">
+<link rel="stylesheet" href="market2.css?v=1">
+<link rel="stylesheet" href="live.css?v=1">
+<link rel="stylesheet" href="hub.css?v=1">
+<link rel="stylesheet" href="tickets.css?v=1">
+<link rel="stylesheet" href="wipe.css?v=1">
+<link rel="stylesheet" href="polls.css?v=1">
+<link rel="stylesheet" href="style.css?v=1">
+<link rel="stylesheet" href="clan2.css?v=1">
+<link rel="stylesheet" href="pay.css?v=1">
+<link rel="stylesheet" href="eggs.css?v=1">
+<link rel="stylesheet" href="theme.css?v=74">
+<link rel="stylesheet" href="fit.css?v=1">
+<link rel="stylesheet" href="motion.css?v=1">
+<link rel="stylesheet" href="fair.css?v=1">
+<link rel="stylesheet" href="store.css?v=1">
+<link rel="stylesheet" href="adminops.css?v=1">
+<link rel="stylesheet" href="games5.css?v=1">
+<link rel="stylesheet" href="stable.css?v=1">
+<link rel="stylesheet" href="polish.css?v=1">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="xtr-g" x1=".2" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#ffdc5c"/><stop offset=".55" stop-color="#ffc233"/><stop offset="1" stop-color="#ffa91f"/></linearGradient>
+  </defs>
+  <!-- звезда Telegram Stars: пухлая золотая звезда со скруглёнными лучами и клиновидным вырезом слева -->
+  <symbol id="xtr" viewBox="0 0 24 24">
+    <path d="M10.83,3.80 Q12.00,1.70 13.17,3.80 L14.93,6.97 Q15.47,7.93 16.55,8.14 L20.11,8.84 Q22.46,9.30 20.83,11.06 L18.36,13.72 Q17.61,14.52 17.74,15.62 L18.18,19.22 Q18.47,21.60 16.29,20.59 L13.00,19.06 Q12.00,18.60 11.00,19.06 L7.71,20.59 Q5.53,21.60 6.03,19.25 L6.68,16.20 Q6.79,15.71 7.26,15.53 L13.20,13.30 L6.54,13.52 Q6.04,13.54 5.68,13.19 L3.29,10.95 Q1.54,9.30 3.89,8.84 L7.45,8.14 Q8.53,7.93 9.07,6.97 L10.83,3.80Z" fill="url(#xtr-g)"/>
+  </symbol>
+</svg>
+<div id="boot" class="np-boot" role="status" aria-label="Загрузка">
+  <div class="npb-logo">
+    <svg class="npb-ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="tr" cx="50" cy="50" r="47"/><circle class="pr" cx="50" cy="50" r="47"/></svg>
+    <svg class="npb-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4l2.95 5.98 6.6.96-4.78 4.65 1.13 6.57L12 17.46l-5.9 3.1 1.13-6.57L2.45 9.34l6.6-.96z"/></svg>
+  </div>
+</div>
+<canvas id="fx"></canvas>
+<header>
+  <button class="bal" id="bal" data-act="daily"><span class="st">⭐</span><span class="num" id="bal-n">—</span><span class="plus">+</span></button>
+  <button class="fr-btn pay-btn" id="pay-btn" data-act="pay" aria-label="Кошелёк: переводы"></button>
+  <h1 id="title">Кейсы</h1>
+  <button class="fr-btn" id="fr-btn" data-act="friends"></button>
+  <button class="me-btn" id="me-btn" data-act="me"></button>
+</header>
+
+<main>
+  <section class="view on" id="v-cases"></section>
+  <section class="view" id="v-games"></section>
+  <section class="view" id="v-market"></section>
+  <section class="view" id="v-crypto"></section>
+  <section class="view" id="v-top"></section>
+  <section class="view" id="v-inv"></section>
+</main>
+
+<nav class="tabs" id="tabs">
+  <span class="tab-ind" id="tab-ind"></span>
+  <button class="on" data-tab="cases"><i data-ic="gift"></i>Кейсы</button>
+  <button data-tab="games"><i data-ic="games"></i>Игры</button>
+  <button class="tab-fair" data-act="fair"><i data-ic="shield"></i>Честно</button>
+  <button data-tab="inv"><i data-ic="bag"></i>Сумка</button>
+  <button data-tab="market"><i data-ic="store"></i>Маркет</button>
+  <button data-tab="crypto"><i data-ic="coin"></i>Крипта</button>
+  <button data-tab="top"><i data-ic="trophy"></i>Топ</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div id="modal-body"></div></div>
+
+<script src="i18n.js?v=1"></script>
+<script src="errlog.js?v=1"></script>
+<script src="icons.js?v=74"></script>
+<script src="app.js?v=75"></script>
+<script src="settings.js?v=1"></script>
+<script src="shop.js?v=1"></script>
+<script src="bigwin.js?v=74"></script>
+<script src="games.js?v=74"></script>
+<script src="social.js?v=74"></script>
+<script src="duels.js?v=74"></script>
+<script src="games2.js?v=74"></script>
+<script src="cards.js?v=74"></script>
+<script src="dogs.js?v=74"></script>
+<script src="jackpot.js?v=74"></script>
+<script src="games3.js?v=74"></script>
+<script src="fair.js?v=1"></script>
+<script src="games5.js?v=1"></script>
+<script src="carousel.js?v=1"></script>
+<script src="forecast.js?v=1"></script>
+<script src="share.js?v=1"></script>
+<script src="legacy.js?v=1"></script>
+<script src="gameday.js?v=1"></script>
+<script src="income.js?v=74"></script>
+<script src="polish.js?v=74"></script>
+<script src="bank.js?v=74"></script>
+<script src="home.js?v=74"></script>
+<script src="crypto.js?v=74"></script>
+<script src="defi.js?v=74"></script>
+<script src="games4.js?v=74"></script>
+<script src="chicken.js?v=74"></script>
+<script src="claw.js?v=74"></script>
+<script src="arcade.js?v=74"></script>
+<script src="pump.js?v=74"></script>
+<script src="drill.js?v=74"></script>
+<script src="darts.js?v=74"></script>
+<script src="fish.js?v=74"></script>
+<script src="keno.js?v=75"></script>
+<script src="penalty.js?v=75"></script>
+<script src="league.js?v=1"></script>
+<script src="plinko.js?v=1"></script>
+<script src="stack.js?v=1"></script>
+<script src="starfall.js?v=74"></script>
+<script src="avia.js?v=74"></script>
+<script src="battles.js?v=74"></script>
+<script src="scratch.js?v=74"></script>
+<script src="autoplay.js?v=74"></script>
+<script src="loans.js?v=74"></script>
+<script src="clans.js?v=74"></script>
+<script src="promo.js?v=74"></script>
+<script src="market2.js?v=1"></script>
+<script src="presents.js?v=1"></script>
+<script src="album.js?v=1"></script>
+<script src="events.js?v=1"></script>
+<script src="tourn.js?v=1"></script>
+<script src="details.js?v=1"></script>
+<script src="sound.js?v=1"></script>
+<script src="fly.js?v=1"></script>
+<script src="live.js?v=1"></script>
+<script src="hub.js?v=1"></script>
+<script src="qrcode.js?v=1"></script>
+<script src="invite.js?v=1"></script>
+<script src="growth.js?v=1"></script>
+<script src="records.js?v=1"></script>
+<script src="care.js?v=1"></script>
+<script src="pay.js?v=1"></script>
+<script src="eggs.js?v=1"></script>
+<script src="sparks.js?v=1"></script>
+<script src="premium.js?v=1"></script>
+<script src="style.js?v=1"></script>
+<script src="clan2.js?v=1"></script>
+<script src="tickets.js?v=1"></script>
+<script src="wipe.js?v=1"></script>
+<script src="polls.js?v=1"></script>
+<script src="admin.js?v=75"></script>
+<script src="gates.js?v=1"></script>
+<script src="clawadm.js?v=74"></script>
+<script src="adminops.js?v=1"></script>
+<script src="motion.js?v=1"></script>
+<script src="rules.js?v=1"></script>
+</body>
+</html>

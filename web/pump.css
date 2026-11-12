@@ -1,0 +1,65 @@
+/* ================= «Насос» ================= */
+.pm-stage{height:380px;--mc:#ff5fa8;
+  background:
+    radial-gradient(60% 46% at 50% 40%,color-mix(in srgb,var(--mc) 30%,transparent),transparent 70%),
+    radial-gradient(120% 70% at 50% 0%,#3a1a5e 0%,#1d0d36 48%,#0d0719 100%);
+  transition:background .6s}
+/* боке на фоне */
+.pm-sky{position:absolute;inset:0;z-index:0;pointer-events:none}
+.pm-sky i{position:absolute;border-radius:50%;filter:blur(1.5px);opacity:.5;animation:pm-bok 9s ease-in-out infinite alternate;
+  background:radial-gradient(circle,color-mix(in srgb,var(--mc) 70%,#fff) 0,transparent 68%)}
+.pm-sky i:nth-child(1){left:8%;top:18%;width:38px;height:38px}
+.pm-sky i:nth-child(2){left:78%;top:12%;width:24px;height:24px;animation-delay:-3s;background:radial-gradient(circle,#ffd76a 0,transparent 68%)}
+.pm-sky i:nth-child(3){left:84%;top:46%;width:46px;height:46px;animation-delay:-5s;opacity:.3}
+.pm-sky i:nth-child(4){left:14%;top:56%;width:18px;height:18px;animation-delay:-1s;background:radial-gradient(circle,#9fd3ff 0,transparent 68%)}
+.pm-sky i:nth-child(5){left:30%;top:8%;width:12px;height:12px;animation-delay:-7s}
+.pm-sky i:nth-child(6){left:62%;top:30%;width:14px;height:14px;animation-delay:-2s;background:radial-gradient(circle,#fff 0,transparent 68%);opacity:.35}
+@keyframes pm-bok{to{transform:translate(10px,-14px) scale(1.2)}}
+/* глянцевый пол с отражением */
+.pm-floor{position:absolute;left:0;right:0;bottom:0;height:96px;z-index:1;
+  background:
+    radial-gradient(40% 40% at 50% 10%,color-mix(in srgb,var(--mc) 35%,transparent),transparent 75%),
+    linear-gradient(180deg,#2a1546 0%,#160a28 40%,#0b0616 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.pm-floor::before{content:"";position:absolute;left:50%;top:6px;width:140px;height:16px;margin-left:-70px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.6),transparent)}
+/* шланг */
+.pm-hose{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
+.pm-hose path{fill:none;stroke-linecap:round}
+.pm-hb{stroke:#14141c;stroke-width:9}
+#pm-hp{stroke:#2e2f3d;stroke-width:6;stroke-dasharray:0;transition:opacity .3s}
+#pm-hp.flow{stroke:color-mix(in srgb,var(--mc) 70%,#fff);stroke-dasharray:14 400;animation:pm-flow .42s linear}
+@keyframes pm-flow{from{stroke-dashoffset:0}to{stroke-dashoffset:-414}}
+#pm-hp.off,.pm-hose:has(#pm-hp.off) .pm-hb{opacity:0}
+/* шар: растёт от узелка, качается, при натяжении светлеет и дрожит */
+.pm-ball{position:absolute;left:50%;bottom:84px;z-index:4;width:160px;height:195px;margin-left:-80px;transform-origin:50% 100%;
+  transform:scale(var(--sc,.5));transition:transform .42s cubic-bezier(.25,1.6,.45,1)}
+.pm-svg{display:block;width:100%;height:100%;overflow:visible;transform-origin:50% 100%;
+  filter:drop-shadow(0 18px 24px rgba(0,0,0,.45)) saturate(calc(1 - var(--t,0) * .25)) brightness(calc(1 + var(--t,0) * .18));
+  animation:pm-sway calc(3.2s - var(--t,0) * 2.4s) ease-in-out infinite}
+@keyframes pm-sway{0%,100%{transform:rotate(calc(-2deg - var(--t,0) * 2deg))}50%{transform:rotate(calc(2deg + var(--t,0) * 2deg)) scaleY(1.01)}}
+.pm-ball.puff .pm-svg{animation:pm-puff .38s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pm-puff{0%{transform:scale(.93,1.06)}45%{transform:scale(1.06,.95)}100%{transform:none}}
+.pm-ball.strain .pm-svg{animation:pm-strain .07s linear infinite}
+@keyframes pm-strain{0%{transform:translate(-1.5px,0) scale(1.01)}50%{transform:translate(1.5px,-1px) scale(1.03,.99)}100%{transform:translate(-1px,1px)}}
+.pm-ball.gone{opacity:0;transition:none}
+.pm-ball.fly{transition:transform 1.6s cubic-bezier(.5,0,.75,.4),opacity 1.6s ease-in;transform:translate(30px,-520px) scale(var(--sc)) rotate(8deg);opacity:.2}
+/* насос */
+.pm-pump{position:absolute;right:7%;bottom:14px;z-index:5;width:86px;height:136px}
+.pm-psvg{width:100%;height:100%;display:block;filter:drop-shadow(0 10px 12px rgba(0,0,0,.55));overflow:visible}
+.pm-rod{transition:transform .14s ease-in}
+.pm-pump.push .pm-rod{animation:pm-push .38s cubic-bezier(.4,0,.3,1)}
+@keyframes pm-push{0%{transform:none}40%{transform:translateY(46px)}100%{transform:none}}
+.pm-needle{transition:transform .5s cubic-bezier(.3,1.7,.5,1)}
+/* разрыв */
+.pm-flash{position:absolute;z-index:24;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,#fff 0,rgba(255,255,255,.7) 30%,transparent 70%);animation:pm-flash .6s ease-out forwards}
+@keyframes pm-flash{0%{transform:scale(1);opacity:1}100%{transform:scale(22);opacity:0}}
+.pm-burst{position:absolute;z-index:23;width:0;height:0;pointer-events:none}
+.pm-burst i{position:absolute;left:0;top:0;width:var(--l);height:4px;border-radius:2px;background:linear-gradient(90deg,transparent,#fff);transform-origin:0 50%;
+  transform:rotate(var(--a)) translateX(20px) scaleX(.2);animation:pm-line .45s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes pm-line{60%{opacity:1}100%{transform:rotate(var(--a)) translateX(70px) scaleX(1);opacity:0}}
+.pm-shard{position:absolute;z-index:22;width:var(--w);height:calc(var(--w) * .55);border-radius:40% 60% 50% 30%;pointer-events:none;
+  background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:inset 1px 1px 0 rgba(255,255,255,.4);
+  animation:pm-shard 1.2s cubic-bezier(.15,.6,.4,1) forwards}
+@keyframes pm-shard{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+.pm-s .ghead img{background:radial-gradient(circle at 50% 40%,#5a2366,#1d0d36);padding:6px;object-fit:contain}

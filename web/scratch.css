@@ -1,0 +1,35 @@
+/* ================= Скретч-карты ================= */
+.sc-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.sc-tiers button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;border-radius:16px;color:#fff;transition:transform .15s,opacity .2s;
+  background:linear-gradient(145deg,var(--t1),var(--t2));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 18px -12px var(--t1);opacity:.6}
+.sc-tiers button b{font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.35)}.sc-tiers button span{font-size:12px;font-weight:800;opacity:.95}
+.sc-tiers button.on{opacity:1;transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 0 0 2px #fff,0 12px 24px -10px var(--t1)}
+.sc-tiers button[disabled]{pointer-events:none}
+.sc-tiers .xtr svg{width:1em;height:1em;vertical-align:-.12em}
+/* билет */
+.sc-ticket{--t1:#d69a5a;--t2:#5a3410;position:relative;padding:12px;border-radius:22px;
+  background:radial-gradient(130% 80% at 50% 0%,color-mix(in srgb,var(--t1) 55%,#1a1a24),#14141c 75%);
+  box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--t1) 60%,transparent),0 18px 36px -16px var(--t1)}
+.sc-ticket::before,.sc-ticket::after{content:"";position:absolute;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;background:var(--bg)}
+.sc-ticket::before{left:-9px}.sc-ticket::after{right:-9px}
+.sc-top{display:flex;justify-content:space-between;align-items:baseline;margin:2px 4px 10px;color:#fff}
+.sc-top b{font-size:15px;letter-spacing:.14em;background:linear-gradient(90deg,#fff,var(--t1));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sc-top span{font-size:11.5px;opacity:.7}
+.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sc-cell{aspect-ratio:1;border-radius:14px;display:grid;place-items:center;background:radial-gradient(circle,rgba(255,255,255,.14),rgba(255,255,255,.04));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transition:opacity .3s,filter .3s}
+.sc-cell img{width:74%;height:74%;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45))}
+.sc-cell.q{font-size:28px;font-weight:900;color:rgba(255,255,255,.25)}
+.sc-cell.win{animation:scwin .7s cubic-bezier(.2,1.6,.4,1) both;background:radial-gradient(circle,rgba(255,215,106,.45),rgba(255,160,40,.12));box-shadow:inset 0 0 0 2px #ffd76a,0 0 20px -4px #ffd76a}
+@keyframes scwin{0%{transform:scale(1)}40%{transform:scale(1.18) rotate(-4deg)}100%{transform:scale(1.06)}}
+.sc-cell.dim{opacity:.35;filter:grayscale(.6)}
+.sc-foil{position:absolute;z-index:2;border-radius:14px;touch-action:none;cursor:crosshair;transition:opacity .45s,transform .45s}
+.sc-foil.gone{opacity:0;transform:scale(1.04);pointer-events:none}
+.sc-spark{position:fixed;z-index:120;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,#fff,#ffd76a 60%,transparent);animation:scsp .6s ease-out forwards}
+@keyframes scsp{to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+.sc-pay{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.sc-pay>div{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:12px;background:var(--card)}
+.sc-pi{display:flex}.sc-pi img{width:24px;height:24px;object-fit:contain;margin-right:-6px}
+.sc-pay b{color:var(--gold);font-size:14px}
+.sc-grid.covered .sc-cell img{visibility:hidden}

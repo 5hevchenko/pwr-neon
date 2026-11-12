@@ -1,0 +1,4 @@
+.egg-roll{animation:eggRoll .9s cubic-bezier(.3,1.2,.4,1)}
+@keyframes eggRoll{from{transform:rotate(0)}to{transform:rotate(720deg)}}
+body.egg-god main{animation:eggGod 1.5s ease-out}
+@keyframes eggGod{0%{filter:none}15%{filter:brightness(1.6) sepia(.6) saturate(2)}100%{filter:none}}

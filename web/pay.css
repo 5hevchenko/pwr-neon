@@ -1,0 +1,189 @@
+/* ============ «Кошелёк»: переводы звёзд по QR (pay.js) ============ */
+.pay-btn{color:var(--gold)}
+.pay-btn .ic{width:22px;height:22px}
+.pay-s,.pay-x,.pay-r{--pg1:#ffe9a6;--pg2:#ffc53d;--pg3:#ff9f1c}
+
+/* ---- главный экран кошелька: стопка стеклянных карт с глубиной ---- */
+.pay-hero{position:relative;margin:42px 0 22px;perspective:900px}
+.pay-orbs{position:absolute;inset:-34px -12px -30px;pointer-events:none;overflow:hidden}
+.pay-orbs i{position:absolute;border-radius:50%}
+.pay-orbs i:first-child{left:-22%;top:-18%;width:92%;aspect-ratio:1;background:radial-gradient(closest-side,color-mix(in srgb,var(--ac) 70%,transparent),transparent)}
+.pay-orbs i:last-child{right:-24%;bottom:-24%;width:84%;aspect-ratio:1;background:radial-gradient(closest-side,color-mix(in srgb,var(--ac) 40%,#ff5f9e80),transparent)}
+.pay-stack{position:relative;padding-top:18px;transform-style:preserve-3d}
+.pay-stack>i{position:absolute;left:0;right:0;top:18px;height:100%;max-height:186px;border-radius:26px;border:1px solid #ffffff2b;background:linear-gradient(150deg,#ffffff24,#ffffff0a)}
+.pay-stack>i:nth-child(1){transform:translateY(-18px) scale(.86);opacity:.5}
+.pay-stack>i:nth-child(2){transform:translateY(-9px) scale(.93);opacity:.8}
+.pay-card{position:relative;display:flex;flex-direction:column;min-height:186px;padding:18px 20px;border-radius:26px;overflow:hidden;color:#fff;--gx:30%;--gy:0%;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--ac) 58%,#ffffff24),color-mix(in srgb,var(--ac) 28%,#0a0a1499) 70%);
+  backdrop-filter:blur(22px) saturate(1.7);-webkit-backdrop-filter:blur(22px) saturate(1.7);
+  border:1px solid #ffffff47;box-shadow:inset 0 1.5px 0 #ffffff66,inset 0 -18px 30px -18px #0000005c,0 26px 44px -18px #000000b8,0 14px 34px -14px var(--ac);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1);animation:pay-in .55s cubic-bezier(.2,.9,.25,1.1) both}
+@keyframes pay-in{from{transform:translateY(22px) rotateX(16deg) scale(.95);opacity:0}}
+.pay-gloss{position:absolute;inset:0;pointer-events:none;background:radial-gradient(70% 90% at var(--gx) var(--gy),#ffffff47,transparent 62%)}
+.pay-hl{position:relative;display:flex;align-items:center;justify-content:space-between;font-size:14px}
+.pay-hl b{font-weight:700;color:#ffffffe6}
+.pay-chip{width:36px;height:26px;border-radius:7px;background:linear-gradient(135deg,#ffffffc7,#ffffff4d 55%,#ffffff94);box-shadow:inset 0 0 0 1px #ffffff66,0 2px 5px #0000004d}
+.pay-bal{position:relative;display:flex;align-items:center;gap:9px;margin:auto 0 8px;padding-top:16px;min-width:0}
+.pay-st{display:inline-flex;line-height:1;flex:none;filter:drop-shadow(0 4px 8px #00000059)}
+.pay-bal .pay-st .xtr{width:32px;height:32px}
+.pay-num{min-width:0;font-size:clamp(36px,11.5vw,48px);font-weight:800;letter-spacing:-.03em;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 3px 14px #0000005c}
+.pay-addr{position:relative;align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:14px;color:#ffffffe0;background:#00000033;border:1px solid #ffffff2e;font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+.pay-addr .ic{width:13px;height:13px;flex:none}
+.pay-addr:active,.pay-raddr:active{opacity:.6}
+html.lite .pay-orbs{display:none}
+html.lite .pay-card{animation:none;backdrop-filter:none;-webkit-backdrop-filter:none;background:linear-gradient(145deg,var(--ac),var(--ac-d))}
+.pay-acts{display:flex;justify-content:center;gap:26px;margin:0 0 24px}
+.pay-acts button{display:flex;flex-direction:column;align-items:center;gap:7px;width:68px;color:var(--text)}
+.pay-acts button:active{transform:scale(.94)}
+.pay-ic{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;color:var(--text);background:linear-gradient(160deg,color-mix(in srgb,var(--text) 22%,transparent),color-mix(in srgb,var(--text) 6%,transparent));border:1px solid color-mix(in srgb,var(--text) 22%,transparent);box-shadow:inset 0 1.5px 0 color-mix(in srgb,var(--text) 30%,transparent),0 12px 20px -10px #000000b0}
+.pay-acts button:first-child .pay-ic{color:#fff;background:linear-gradient(160deg,var(--ac-l),var(--ac) 55%,var(--ac-d));border-color:#ffffff4d;box-shadow:inset 0 1.5px 0 #ffffff80,0 12px 22px -8px var(--ac)}
+.pay-ic .ic{width:23px;height:23px}
+.pay-acts b{font-size:12.5px;font-weight:600;white-space:nowrap}
+  background:linear-gradient(135deg,var(--pg1),var(--pg2) 55%,var(--pg3));box-shadow:0 10px 20px -10px var(--pg3),inset 0 1px 0 #ffffff80}
+.pay-s .adm-warn{margin:0 0 12px}
+
+.pay-find{display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:15px;background:var(--card);color:var(--hint)}
+.pay-find:focus-within{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--gold) 55%,transparent)}
+.pay-find .ic{width:18px;height:18px;flex:none}
+.pay-find input{flex:1;min-width:0;padding:13px 0;background:none;border:0;outline:0;color:var(--text);font-size:15px}
+.pay-find input:focus{box-shadow:none}   /* рамку рисует обёртка (.pay-find:focus-within) — иначе две обводки */
+.pay-peers{display:flex;gap:10px;overflow-x:auto;padding:12px 2px 6px;margin:0 -16px;padding-inline:16px;scrollbar-width:none;scroll-snap-type:x proximity}
+.pay-peers::-webkit-scrollbar{display:none}
+.pay-peer{position:relative;flex:none;width:66px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--text);scroll-snap-align:start;transition:transform .12s}
+.pay-peer:active{transform:scale(.92)}
+.pay-peer span{max-width:66px;font-size:11.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pay-peer i{position:absolute;top:38px;left:50%;transform:translateX(-50%);font-style:normal;font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px;
+  background:var(--gold);color:#3a2300;white-space:nowrap}
+.pay-empty{padding:8px 0;font-size:13px}
+.pay-day{font-size:12px;font-weight:700;color:var(--hint);margin:14px 4px 6px;text-transform:none}
+.sec-t+.pay-day{margin-top:2px}
+.pay-row .s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pay-row .grow{min-width:0}
+.pay-d{white-space:nowrap;font-size:14.5px;font-variant-numeric:tabular-nums}
+.pay-d.in{color:var(--green)}
+.pay-d .xtr{width:14px;height:14px;vertical-align:-2px}
+.pay-none{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 12px;color:var(--hint);font-size:13px}
+.pay-none .ic{width:30px;height:30px;opacity:.5}
+.pay-note{font-size:12px;text-align:center;margin:14px 8px 0;line-height:1.4}
+
+/* ---- «Получить»: золотая шапка + белая карточка с QR (как платёжный код) ---- */
+.pay-rc{margin:42px 0 14px;border-radius:24px;overflow:hidden;box-shadow:0 22px 44px -24px #000}
+.pay-rtop{display:flex;align-items:center;gap:8px;padding:13px 16px;font-weight:800;font-size:15px;color:#3a2300;
+  background:linear-gradient(135deg,var(--pg1),var(--pg2) 55%,var(--pg3))}
+.pay-rtop .ic{width:19px;height:19px}
+.pay-rbody{display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px 16px 14px;background:#fff;color:#14112a}
+.pay-rh{align-self:stretch;display:flex;align-items:center;gap:10px;min-width:0;padding-bottom:12px;border-bottom:1px dashed #14112a1f}
+.pay-rh .grow{min-width:0;display:flex;flex-direction:column}
+.pay-rh b{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pay-rh span{font-size:12px;color:#14112a80}
+.pay-rt{font-size:13px;color:#14112a99;font-weight:600;text-align:center}
+.pay-ramt{display:flex;align-items:center;gap:6px;margin-top:-4px;font-size:34px;font-weight:900;color:#14112a;font-variant-numeric:tabular-nums}
+.pay-ramt .xtr{width:30px;height:30px}
+.pay-code{width:min(66vw,250px);box-shadow:none}
+.pay-code .inv-logo .ava{--s:48px}
+.pay-rbtns{display:flex;gap:18px;justify-content:center;padding-top:10px;border-top:1px dashed #14112a1f;align-self:stretch}
+.pay-link{padding:4px 2px;font-size:14px;font-weight:700;color:#c47a00}
+.pay-link:active{opacity:.6}
+
+/* ---- перевод игроку ---- */
+.pay-to{display:flex;flex-direction:column;align-items:center;gap:2px;margin:38px 0 16px;text-align:center}
+.pay-to .ava{margin-bottom:8px;box-shadow:0 0 0 3px var(--bg),0 0 0 5px color-mix(in srgb,var(--gold) 60%,transparent)}
+.pay-tl{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
+.pay-to b{font-size:20px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pay-to>span:last-child{font-size:13px;color:var(--hint)}
+.pay-amt{padding:12px 16px 10px;border-radius:20px;background:var(--card);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--gold) 35%,transparent);transition:box-shadow .2s}
+.pay-amt:focus-within{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--gold) 75%,transparent)}
+.pay-amt.bad{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--red) 70%,transparent)}
+.pay-amt label{display:block;font-size:12px;font-weight:600;color:var(--hint)}
+.pay-ai{display:flex;align-items:center;gap:8px}
+.pay-ai .xtr{width:32px;height:32px}
+.pay-a{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);font-size:clamp(32px,10.5vw,44px);font-weight:900;letter-spacing:-.02em;font-variant-numeric:tabular-nums;padding:2px 0}
+.pay-a::placeholder{color:color-mix(in srgb,var(--hint) 50%,transparent)}
+.pay-ab{font-size:12px;color:var(--hint);border-top:1px solid color-mix(in srgb,var(--text) 7%,transparent);padding-top:7px;margin-top:4px}
+.pay-ab .xtr{width:12px;height:12px;vertical-align:-1px}
+.pay-chips{display:flex;gap:6px;margin:10px 0}
+.pay-chips button{flex:1;min-width:0;padding:10px 2px;border-radius:12px;background:var(--card2);color:var(--text);font-weight:800;font-size:13px;transition:transform .1s}
+.pay-chips button:last-child{color:var(--gold)}
+.pay-chips button:active{transform:scale(.93)}
+.pay-sum{padding:10px 14px;border-radius:16px;background:var(--card);margin-bottom:10px;font-size:13.5px}
+.pay-sum>div{display:flex;justify-content:space-between;gap:10px;padding:3px 0;color:var(--hint)}
+.pay-sum>div b{color:var(--text);font-variant-numeric:tabular-nums}
+.pay-sum .tot{border-top:1px dashed color-mix(in srgb,var(--text) 14%,transparent);margin-top:4px;padding-top:7px;color:var(--text);font-weight:700}
+.pay-sum .tot b{font-size:15px}
+.pay-sum p{margin:6px 0 0;font-size:12px;color:var(--hint);text-align:center}
+.pay-sum p.tl{color:var(--red);font-weight:700}
+.pay-sum .xtr{width:13px;height:13px;vertical-align:-2px}
+.pay-memo{width:100%;box-sizing:border-box;padding:13px 14px;border-radius:15px;background:var(--card);border:0;outline:0;color:var(--text);font-size:15px;margin-bottom:12px}
+.pay-memo:focus{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--gold) 55%,transparent)}
+
+/* ---- перевод отправлен: квитанция ---- */
+.pay-done{display:flex;flex-direction:column;align-items:center;gap:6px;margin:50px 0 20px;text-align:center}
+.pay-ok{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#04210f;margin-bottom:10px;
+  box-shadow:0 0 0 10px color-mix(in srgb,var(--green) 16%,transparent),0 0 0 22px color-mix(in srgb,var(--green) 7%,transparent);
+  animation:pay-pop .55s cubic-bezier(.2,1.6,.4,1)}
+.pay-ok .ic{width:44px;height:44px;stroke-width:3}
+.pay-ok .ic path{stroke-dasharray:26;stroke-dashoffset:26;animation:pay-draw .45s .3s ease-out forwards}
+html.lite .pay-ok .ic path{stroke-dashoffset:0;animation:none}
+.pay-done>b{font-size:18px}
+.pay-dsum{display:flex;align-items:center;gap:8px;font-size:clamp(36px,11vw,50px);font-weight:900;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.pay-dsum .xtr{width:38px;height:38px}
+.pay-rcpt{align-self:stretch;margin-top:12px;padding:8px 16px;border-radius:18px;background:var(--card);font-size:14px;text-align:left}
+.pay-rcpt>div{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:7px 0;color:var(--hint)}
+.pay-rcpt>div+div{border-top:1px solid color-mix(in srgb,var(--text) 6%,transparent)}
+.pay-rcpt b{color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pay-rcpt .tot b{color:var(--gold)}
+.pay-rcpt .xtr{width:14px;height:14px;vertical-align:-2px}
+.pay-who{display:flex;align-items:center;gap:6px}
+@keyframes pay-pop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+@keyframes pay-draw{to{stroke-dashoffset:0}}
+
+/* пароль кошелька */
+.sheet.pin-s{display:flex;flex-direction:column;padding:calc(var(--top) + 8px) 16px calc(18px + var(--bot));overflow:hidden}
+.sheet.pin-s .sbal{display:none}
+/* на весь экран, как в WeChat: сверху замок, заголовок и точки, клавиатура прижата к низу */
+.pin{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;text-align:center;padding:6vh 0 0}
+.pin-ic{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold)}
+.pin-ic .ic{width:24px;height:24px}
+.pin-t{margin-top:10px;font-size:19px}.pin-sub{margin-top:4px;font-size:13px;color:var(--hint);max-width:300px}
+.pin-dots{display:flex;gap:16px;margin:28px 0 20px}
+.pin-dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--hint);transition:background .1s,border-color .1s}
+.pin-dots i.on{background:var(--text);border-color:var(--text)}
+.pin-kb{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:360px;margin-top:auto}
+.pin-kb button{height:62px;border-radius:16px;background:var(--card2);font-size:24px;font-weight:700;color:var(--text);display:grid;place-items:center}
+.pin-kb button:active{transform:scale(.94);background:var(--card)}
+.pin-kb button .ic{width:24px;height:24px}
+.pin-kb .pin-f{font-size:13px;font-weight:600;color:var(--hint);background:none}
+.pay-raddr{align-self:stretch;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 8px;margin-top:10px;padding:8px 10px;border-radius:12px;background:#14112a0a;text-align:left;color:#14112a}
+.pay-raddr small{grid-column:1/-1;font-size:11px;color:#14112a80}
+.pay-raddr span{font:700 13px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.02em;overflow-wrap:anywhere}
+.pay-raddr .ic{width:16px;height:16px;color:#c47a00}
+.ava.pay-anon{--ac:#3a3550}
+.ava.pay-anon span{color:#ffffffb3;font-weight:900}
+.pay-anon-s{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:8px 4px 4px}
+.pay-anon-s h3{margin:4px 0 0}
+.pay-anon-s .hint{margin:0;font-size:13px}
+.pay-anon-s .pay-raddr{background:var(--card);color:var(--text)}
+.pay-anon-s .pay-raddr small{color:var(--hint)}
+/* кнопка кошелька в шапке — таблетка с иконкой и подписью */
+.fr-btn.pay-pill{width:auto;height:34px;display:inline-flex;align-items:center;gap:5px;padding:0 12px 0 9px;border-radius:17px;color:#3a2300;
+  background:linear-gradient(135deg,#ffe58a,#ffc53d 50%,#ff9f1c);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(150,80,0,.2),0 6px 16px -8px #ffab2e}
+.fr-btn.pay-pill .ic{width:17px;height:17px;stroke-width:2.2}
+.fr-btn.pay-pill span{font-size:12.5px;font-weight:800;letter-spacing:.01em;white-space:nowrap}
+.fr-btn.pay-pill:active{transform:scale(.95)}
+.fr-btn.pay-pill.tight{padding:0 11px}
+.fr-btn.pay-pill.tight span{display:none}
+
+/* ---- «Получить»: QR на стеклянной карте ---- */
+.pay-rc{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;margin:46px 0 16px;padding:22px 20px 18px;border-radius:28px;overflow:visible;color:var(--text);
+  background:linear-gradient(160deg,color-mix(in srgb,var(--ac) 34%,transparent),color-mix(in srgb,var(--text) 6%,transparent) 70%);border:1px solid color-mix(in srgb,var(--text) 18%,transparent);
+  box-shadow:inset 0 1.5px 0 color-mix(in srgb,var(--text) 26%,transparent),0 26px 46px -22px #000,0 18px 44px -22px var(--ac)}
+.pay-qrwrap{padding:14px;border-radius:24px;background:#fff;box-shadow:0 16px 30px -14px #000000b0}
+.pay-qrwrap .pay-code{position:relative;display:block;width:min(58vw,224px);aspect-ratio:1;margin:0;padding:0;background:none;box-shadow:none;border:0}
+.pay-qrwrap .pay-code svg{display:block;width:100%;height:100%}
+.pay-qrwrap .inv-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:3px;border-radius:50%;background:#fff}
+.pay-rname{margin-top:4px;font-size:18px;font-weight:800;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pay-ramt{display:flex;align-items:center;gap:6px;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.pay-rc .pay-addr{align-self:center;color:var(--text);background:color-mix(in srgb,var(--text) 10%,transparent);border-color:var(--line)}
+.pay-racts{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.pay-racts .pay-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px}
+.pay-racts .pay-link .ic{width:15px;height:15px}

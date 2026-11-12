@@ -1,0 +1,16 @@
+# секреты и данные — никогда не коммитить
+.env
+data/
+*.db
+*.db-*
+web/u/
+# генерируется
+web/bundle.js
+web/bundle.css
+web/index.html
+bin/
+venv/
+.venv/
+__pycache__/
+server/.asset_cache/
+*.part

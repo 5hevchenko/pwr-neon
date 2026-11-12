@@ -1,0 +1,237 @@
+/* ============================================================
+   stable.css — общий шрифт и защита от дёрганья. Подключается последним.
+   ============================================================ */
+/* optional: на первом заходе без шрифта экран не перестраивается, со второго — Manrope из кэша */
+@font-face{font-family:"Manrope";src:url("fonts/manrope.woff2") format("woff2");font-weight:200 800;font-display:optional}
+html,body,button,input,textarea,select{font-family:"Manrope",-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,"Segoe UI",sans-serif}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+code,kbd,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+/* цифры одной ширины: балансы и таймеры не двигают соседей при каждом обновлении */
+.num,.bal,.bal .num,.mstat b,.jpbar b,.bankbar b,.chips b,.s,.t{font-variant-numeric:tabular-nums}
+
+/* кнопка краша: текст меняется по фазам раунда, а высота — нет */
+.cbtns .btn,.cbtns .allin{height:64px;min-height:64px;box-sizing:border-box;line-height:1.2;overflow:hidden}
+.cbtns{align-items:stretch}
+/* колонки и строки с динамическим текстом не распирают сетку */
+.bal{white-space:nowrap}
+.row .grow{min-width:0}
+.row .grow .t,.row .grow .s{overflow:hidden;text-overflow:ellipsis}
+/* картинки занимают место сразу, до загрузки */
+.ghead img{width:48px;height:48px;flex:none}
+
+/* ============================================================
+   Стекло: весь интерфейс полупрозрачный поверх цветного фона. Размытие — только у шапки, меню и окон:
+   размытие на каждой карточке заметно тормозит на телефонах. В режиме оптимизации всё непрозрачное.
+   ============================================================ */
+:root{
+  --card:color-mix(in srgb,var(--text) 8%,transparent);
+  --card2:color-mix(in srgb,var(--text) 12%,transparent);
+  --line:color-mix(in srgb,var(--text) 12%,transparent);
+  --glass:color-mix(in srgb,var(--bg) 58%,transparent);
+  --glass-solid:color-mix(in srgb,var(--bg) 82%,transparent);
+}
+html::before{background:
+  radial-gradient(75% 45% at 0% 0%,color-mix(in srgb,var(--purple) 42%,transparent),transparent 72%),
+  radial-gradient(70% 42% at 100% 32%,color-mix(in srgb,var(--accent) 36%,transparent),transparent 72%),
+  radial-gradient(80% 45% at 40% 100%,color-mix(in srgb,#16c88d 24%,transparent),transparent 72%)}
+.box,.betp,.rules,.bankbar,.richbar,.prib,.clme,.tme,.dginfo>div,.fstats>div{border:1px solid color-mix(in srgb,var(--text) 9%,transparent);background-color:var(--card)}
+.sheet{background:var(--glass)!important;backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5)}
+nav.tabs{background:color-mix(in srgb,var(--bg) 46%,transparent);backdrop-filter:blur(24px) saturate(1.7);-webkit-backdrop-filter:blur(24px) saturate(1.7);border:1px solid color-mix(in srgb,var(--text) 12%,transparent)}
+header{background:color-mix(in srgb,var(--bg) 52%,transparent)}
+.modal>*{background:var(--glass-solid)!important;backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);border:1px solid color-mix(in srgb,var(--text) 12%,transparent)}
+.toast{background:var(--glass-solid)}
+input,textarea,select{background:color-mix(in srgb,var(--text) 9%,transparent)}
+html.lite{--card:var(--tg-theme-section-bg-color,#1c1c21);--card2:color-mix(in srgb,#1c1c21 70%,var(--text) 6%);--glass:var(--bg);--glass-solid:#1c1c21}
+html.lite nav.tabs{background:#1c1c21}
+html.lite header{background:var(--bg)}
+
+/* --- кнопка «Честность» в меню — главное преимущество игры --- */
+nav.tabs button.tab-fair{color:#4ee0ad;font-weight:800}
+nav.tabs button.tab-fair i{filter:none;color:#4ee0ad}
+nav.tabs button.tab-fair i .ic{filter:drop-shadow(0 0 7px #16c88d99)}
+/* --- плашка преимущества на главных экранах --- */
+.fbanner{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 12px;padding:12px 14px;border-radius:18px;text-align:left;color:var(--text);
+  background:linear-gradient(120deg,color-mix(in srgb,#16c88d 30%,transparent),color-mix(in srgb,#16c88d 8%,transparent));border:1px solid color-mix(in srgb,#16c88d 45%,transparent)}
+.fbanner>span{flex:none;display:grid;place-items:center;width:42px;height:42px;border-radius:13px;color:#06281d;background:#4ee0ad}
+.fbanner>span .ic{width:23px;height:23px}
+.fbanner div{flex:1;min-width:0}
+.fbanner b{display:block;font-size:14.5px}
+.fbanner small{display:block;margin-top:2px;font-size:12px;line-height:1.3;color:color-mix(in srgb,var(--text) 72%,transparent)}
+.fbanner>.ic{flex:none;width:18px;height:18px;opacity:.6}
+.fbanner:active{transform:scale(.98)}
+
+/* --- визуальные баги, найденные на скриншотах --- */
+.gfav{top:auto!important;bottom:10px!important;right:10px!important}
+.gq{display:flex;align-items:center;gap:10px}
+.gq input{flex:1;min-width:0;width:100%;text-align:left;text-indent:0;padding-left:0;background:none}
+.bankbar .bk-lvl{flex:none;display:inline-flex;width:auto;margin-left:6px;vertical-align:middle}
+.bankbar>div{min-width:0}
+.gc-live{width:152px;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.gc-live i{flex:none}
+#bal-n{display:inline-block;min-width:54px}
+.fair-s .box{padding:4px 14px}
+.fair-s .box.fok{padding:12px 14px}
+
+/* --- меньше текста: заголовок и суть, подробности — в «Как играть» и «Честности» --- */
+.ghead>div>span{display:none}
+.ghead h2{margin:0}
+.ghead{align-items:center}
+.pay-s .pay-rbtns{margin-top:4px}
+.pay-note{text-align:center}
+.gc-s,.gcard .gc-tags{display:none}
+.pay-link{color:var(--hint);font-weight:600;font-size:13px}
+.pay-rbtns{border-top:0}
+
+/* ============================================================
+   Игры и кейсы: компактный список горизонтальных строк
+   ============================================================ */
+.ghub,.cases{display:flex!important;flex-direction:column;gap:8px}
+.ghub .gcard.gl,.case{position:relative;display:flex!important;flex-direction:row;align-items:center;gap:12px;width:100%;height:76px;min-height:76px!important;padding:8px 10px!important;border-radius:18px;text-align:left;overflow:hidden;
+  background:linear-gradient(100deg,color-mix(in srgb,var(--k1) 26%,transparent),color-mix(in srgb,var(--text) 6%,transparent) 62%)!important;border:1px solid color-mix(in srgb,var(--text) 11%,transparent);box-shadow:none!important;contain-intrinsic-size:auto 76px}
+.ghub .gcard.gl:active,.case:active{transform:scale(.98)}
+.gl-art{flex:none;display:grid;place-items:center;width:60px;height:60px;border-radius:14px;background:linear-gradient(145deg,var(--k1),var(--k2));overflow:hidden}
+.ghub .gcard.gl .gc-img,.case .cv{position:static!important;width:50px!important;height:50px!important;max-width:none!important;max-height:none!important;margin:0!important;translate:none!important;object-fit:contain;filter:drop-shadow(0 3px 6px #0006);animation:none!important}
+.gl-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-right:34px}
+.ghub .gcard.gl .gc-t{font-size:16px;font-weight:800;line-height:1.15;margin:0;text-shadow:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;color:var(--text)}
+.gc-rtp{font-size:12px;font-weight:600;color:#4ee0ad;white-space:nowrap}
+.ghub .gcard.gl .gc-live{position:static;width:auto;max-width:100%;padding:0;background:none;font-size:12px;font-weight:600;color:#4ee0ad;display:flex;align-items:center;gap:5px}
+.ghub .gcard.gl .gfav{position:absolute;inset:50% 10px auto auto!important;translate:0 -50%;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--text) 8%,transparent);border:0}
+.ghub .gcard.gl .g-lock,.ghub .gcard.gl .g-admb{inset:6px 50px auto auto;max-width:90px;font-size:10px;padding:2px 6px}
+.ghub .gcard.gl>:not(.gl-art,.gl-txt,.gfav,.g-lock,.g-admb){display:none!important}
+.case>.cpat,.case>.rays,.case>.halo,.case::after,.case::before{display:none!important}
+.case .cfoot{flex:1;min-width:0;margin:0!important;padding:0!important;background:none!important;border:0;display:flex;flex-direction:column;gap:5px}
+.case .nm{font-size:16px;font-weight:800;color:var(--text);text-shadow:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.case .minis{display:flex;align-items:center}
+.case .minis img{width:20px;height:20px;margin:0 -3px 0 0;border-radius:50%;object-fit:contain;background:#0005}
+.case .pr{flex:none;margin:0;padding:7px 11px;border-radius:12px;background:color-mix(in srgb,var(--text) 10%,transparent);color:var(--text);font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.case .pr .xtr{width:14px;height:14px}
+.case .lock{position:static;inset:auto;flex:none;display:inline-flex;flex-direction:row;align-items:center;gap:4px;background:none;color:var(--hint);font-size:12.5px;font-weight:700;white-space:nowrap}
+.case .lock .ic{width:14px;height:14px}
+.case:has(.lock) .gl-art,.case:has(.lock) .cfoot{opacity:.55}
+.case .lvtag,.case .hot{display:none}
+.case.mega{box-shadow:none!important}
+/* быстрые действия: одна компактная строка */
+.promo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 2px}
+.promo>button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:74px;padding:8px 4px;border-radius:16px;text-align:center;background:var(--card);border:1px solid var(--line);box-shadow:none}
+.promo>button .pic{width:30px;height:30px;margin:0;border-radius:10px;box-shadow:none}
+.promo>button .pic .ic{width:17px;height:17px}
+.promo>button div b{display:block;font-size:12.5px;font-weight:700;line-height:1.15}
+.promo>button div span{display:none}
+.promo>button.ready{border-color:color-mix(in srgb,var(--gold) 70%,transparent);background:color-mix(in srgb,var(--gold) 14%,transparent)}
+.stc{min-height:0;padding:9px 12px}
+.stc-t small{-webkit-line-clamp:1}
+
+/* ============================================================
+   Цвет акцента и прозрачность: выбирает игрок
+   ============================================================ */
+:root{--ac:rgb(255,197,61);--ac-on:#2a1c00;--gp:60;
+  --ac-l:color-mix(in srgb,var(--ac) 62%,#fff);--ac-d:color-mix(in srgb,var(--ac) 76%,#000);
+  --gold:var(--ac);--accent:var(--ac);--accent-text:var(--ac-on);
+  --solid:color-mix(in srgb,var(--bg) calc(100% - var(--gp) * .85%),transparent);
+  --card:color-mix(in srgb,var(--text) 8%,var(--solid));
+  --card2:color-mix(in srgb,var(--text) 13%,var(--solid));
+  --glass:color-mix(in srgb,var(--bg) calc(100% - var(--gp) * .55%),transparent);
+  --glass-solid:color-mix(in srgb,var(--bg) calc(100% - var(--gp) * .25%),transparent)}
+.btn.gold,.btn.cta.gold{color:var(--ac-on)!important;background:linear-gradient(135deg,var(--ac-l),var(--ac) 50%,var(--ac-d))!important}
+.btn.gold::after{display:none}
+nav.tabs button.on{background:color-mix(in srgb,var(--ac) 85%,transparent);color:var(--ac-on)}
+nav.tabs button.on i{color:var(--ac-on)!important;filter:none}
+.tab-ind{background:color-mix(in srgb,var(--ac) 80%,transparent)!important}
+.drange{accent-color:var(--ac)}
+.lookb{padding:12px 14px}
+.lookb .t{font-weight:600}
+.swatches{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 14px}
+.swatches button{width:34px;height:34px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px #fff3}
+.swatches button.on{outline:2px solid var(--text);outline-offset:2px}
+.lookr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.lookr b{font-variant-numeric:tabular-nums}
+.lookb input[type=range]{width:100%;padding:0;background:none}
+/* --- меньше лишнего над списками --- */
+#v-games .jpbar,#v-games .tr-bar,#v-games .stc{display:none!important}
+#v-games .bankbar{min-height:0;padding:9px 12px;margin-bottom:8px}
+#v-games .bankbar .bk-i{width:34px;height:34px;border-radius:11px}
+#v-games .bankbar .bk-lvl{display:none}
+.fbanner{padding:9px 12px}
+.fbanner>span{width:34px;height:34px;border-radius:11px}
+.fbanner>span .ic{width:19px;height:19px}
+.fbanner b{font-size:13.5px}
+.promo>button{min-height:64px}
+.promo>button.ready div span,.promo>button[data-act=quests] div span{display:none!important}
+.promo>button div span{font-size:11px;color:var(--hint)}
+.promo>button.ready{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 16%,transparent)}
+.stories .stc{height:66px}
+
+.case .hunttag{position:absolute;left:84px;bottom:9px;top:auto;right:auto;margin:0;padding:2px 7px;border-radius:8px;font-size:11px;font-weight:700;color:var(--text);background:color-mix(in srgb,var(--ac) 28%,transparent);box-shadow:none}
+.case .hunttag .ic{width:11px;height:11px}
+.case:has(.hunttag) .minis{display:none}
+.case:has(.hunttag) .cfoot{justify-content:flex-start;align-self:flex-start;padding-top:6px!important}
+
+/* --- фон темнее, стекло читается за счёт контраста --- */
+:root{--bg:#07070c}
+html{background:#07070c}
+html::before{background:
+  radial-gradient(70% 40% at 0 0,color-mix(in srgb,var(--ac) 20%,transparent),transparent 72%),
+  radial-gradient(65% 38% at 100% 32%,color-mix(in srgb,var(--purple) 14%,transparent),transparent 72%),
+  radial-gradient(75% 40% at 40% 100%,color-mix(in srgb,#16c88d 10%,transparent),transparent 72%)}
+.pay-orbs{overflow:visible}
+.ghist{margin-top:12px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:13px}
+.ghist summary{display:flex;align-items:center;gap:8px;min-height:42px;padding:0 12px;cursor:pointer;font-weight:600}
+.ghist summary .ic{width:16px;height:16px;flex:none}
+.ghist-b{padding:0 12px 10px}
+.ghist-r{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;border-top:1px solid var(--line)}
+.ghist-r span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.ghist-r small{display:block;font-size:11px;font-weight:500;color:var(--hint)}
+.ghist-r em{flex:none;font-style:normal;font-size:11.5px;color:var(--hint)}
+
+/* --- прокрутка окна не уходит на страницу под ним --- */
+.sheet{overscroll-behavior:contain;touch-action:pan-y}
+.ghead>div span{display:none}
+
+/* ============================================================
+   Производительность: размытие под стеклом было главной причиной лагов — отключено везде.
+   Под открытым окном страница не рисуется: сквозь стекло виден только фон.
+   ============================================================ */
+*,*::before,*::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html.has-sheet body{overflow:hidden}
+html.has-sheet main,html.has-sheet header,html.has-sheet nav.tabs{visibility:hidden}
+
+nav.tabs{background:color-mix(in srgb,var(--bg) 82%,transparent)}
+header{background:color-mix(in srgb,var(--bg) 84%,transparent)}
+.modal>*{background:color-mix(in srgb,var(--bg) 94%,transparent)!important}
+.toast{background:color-mix(in srgb,var(--bg) 92%,transparent)}
+.case,.gcard{transition:none}
+.ghub .gcard.gl,.case{content-visibility:auto}
+
+
+.sheet.under{visibility:hidden}
+/* главная кнопка всегда в цвете акцента и всегда читается */
+.btn.cta:not(.green):not(.red):not(.ghost):not(.wait){background:linear-gradient(135deg,var(--ac-l),var(--ac) 55%,var(--ac-d))!important;color:var(--ac-on)!important}
+.btn.cta:not(.green):not(.red):not(.ghost):not(.wait) .ic{color:inherit}
+.btn:disabled{color:var(--hint)!important;background:var(--card2)!important}
+
+/* --- недавние игры: ровная прокручиваемая строка --- */
+.grecent{display:flex!important;flex-wrap:nowrap;gap:8px;margin:0 -16px 4px;padding:2px 16px 8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.grecent::-webkit-scrollbar{display:none}
+.grecent button{flex:none;display:flex;flex-direction:row;align-items:center;gap:7px;width:auto;height:40px;padding:0 12px 0 5px;border-radius:14px;font-size:13px;font-weight:700;white-space:nowrap;color:var(--text);background:var(--card);border:1px solid var(--line)}
+.grecent button img{flex:none;width:30px;height:30px;margin:0;border-radius:10px;object-fit:contain;background:linear-gradient(145deg,var(--k1),var(--k2))}
+/* --- «Бур»: шкала прогресса не закрывает пласты --- */
+.dr-race{left:0;right:0;bottom:0;border-radius:0;background:#0b0b12}
+.ghead>div>span{display:none!important}
+.fpop{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 8px;padding:8px 0;font-size:13px;border-top:1px solid var(--line)}
+.fpop:first-child{border-top:0}
+.fpop span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fpop em{font-style:normal;font-size:12px;color:var(--hint);font-variant-numeric:tabular-nums}
+.fpop i{grid-column:1/-1;height:6px;border-radius:3px;background:var(--card2);overflow:hidden}
+.fpop i b{display:block;height:100%;border-radius:3px;background:var(--ac)}
+
+/* --- лента на главной: все плашки строго одной высоты --- */
+.st-sl{height:120px;min-height:120px;max-height:120px}
+.st-sl>*{height:100%!important;min-height:0!important;max-height:100%;overflow:hidden;box-sizing:border-box}
+.stories .stc{height:100%}
+.st-sl .stc-t small,.st-sl .inc-t small,.st-sl .jp-t small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}
+.st-sl>.ob{justify-content:space-between;padding:9px 12px}
+.st-sl>.ob .ob-bar{margin:3px 0 4px}
+.st-sl>.ob .ob-step{min-height:0}
+/* нижнее меню плотнее: текст карточек за ним не читается и не мешает */
+nav.tabs{background:color-mix(in srgb,var(--bg) 93%,transparent)}

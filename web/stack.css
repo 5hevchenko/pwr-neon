@@ -1,0 +1,51 @@
+/* «Стопка» — игра на ловкость */
+.stk-head{display:flex;align-items:center;gap:12px;margin:2px 44px 12px 0}
+.stk-head img{width:52px;height:52px;flex:none;filter:drop-shadow(0 6px 12px rgba(46,196,255,.35))}
+.stk-head h2{margin:0;font-size:22px}
+.stk-head span{display:block;font-size:12.5px;color:var(--hint);line-height:1.35;margin-top:2px}
+.stk-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stk-stats>div{background:var(--card);border-radius:14px;padding:9px 10px;text-align:center;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hint) 10%,transparent)}
+.stk-stats span{display:block;font-size:11px;color:var(--hint)}
+.stk-stats b{font-size:18px;font-weight:900}
+.stk-play{position:relative;height:min(460px,58vh);border-radius:22px;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;background:linear-gradient(180deg,#0b1026,#1d2552);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07),0 14px 30px -14px rgba(0,0,0,.6);contain:strict}
+.stk-play canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stk-score{position:absolute;top:14px;left:0;right:0;text-align:center;font-size:56px;font-weight:900;color:#fff;letter-spacing:-.03em;
+  text-shadow:0 2px 0 rgba(0,0,0,.25),0 6px 22px rgba(80,140,255,.45);opacity:0;transition:opacity .25s;pointer-events:none;font-variant-numeric:tabular-nums}
+.stk-score.on{opacity:1}
+.stk-score.bump{animation:stkBump .22s ease-out}
+@keyframes stkBump{50%{transform:scale(1.14)}}
+.stk-pop{position:absolute;top:82px;left:0;right:0;text-align:center;font-size:15px;font-weight:900;color:#ffe27a;opacity:0;pointer-events:none;
+  text-shadow:0 2px 10px rgba(0,0,0,.5)}
+.stk-pop.on{animation:stkPop .9s ease-out}
+@keyframes stkPop{0%{opacity:0;transform:translateY(8px) scale(.9)}15%{opacity:1;transform:none}70%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+.stk-ov{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:radial-gradient(120% 80% at 50% 40%,rgba(8,12,30,.1),rgba(8,12,30,.65))}
+.stk-ov.on{display:flex;animation:stkFade .25s ease-out}
+@keyframes stkFade{from{opacity:0}}
+.stk-card{width:100%;max-width:300px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:18px 16px 16px;border-radius:20px;
+  background:rgba(16,22,52,.72);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.18),0 18px 40px -12px rgba(0,0,0,.7);color:#fff}
+.stk-card span{font-size:12.5px;color:rgba(255,255,255,.72);line-height:1.4}
+.stk-card .stk-big{font-size:20px;font-weight:900;line-height:1.15}
+.stk-card b.stk-big:only-of-type{font-size:44px}
+.stk-card .btn{margin-top:8px;align-self:stretch}
+.stk-end{margin-left:auto;font-style:normal;font-size:11.5px;font-weight:600;color:var(--hint)}
+.stk-prz{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.stk-prz>div{background:var(--card);border-radius:12px;padding:6px 2px;text-align:center}
+.stk-prz span{display:block;font-size:10.5px;color:var(--hint);font-weight:700}
+.stk-prz b{font-size:12.5px;font-weight:800;white-space:nowrap}
+.stk-prz .t1{background:linear-gradient(160deg,#ffd76a33,var(--card) 70%);box-shadow:inset 0 0 0 1px #ffd76a55}
+.stk-prz .t2{background:linear-gradient(160deg,#d6e0f033,var(--card) 70%)}
+.stk-prz .t3{background:linear-gradient(160deg,#e3a06a33,var(--card) 70%)}
+.stk-rule{display:block;font-size:12px;color:var(--hint);line-height:1.45;margin:8px 2px 0}
+.stk-rule .ic{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:6px}
+.stk-top{padding:4px 0}
+.stk-row{display:flex;align-items:center;gap:10px;padding:7px 12px}
+.stk-row+.stk-row{border-top:1px solid color-mix(in srgb,var(--hint) 14%,transparent)}
+.stk-row.me{background:color-mix(in srgb,var(--gold) 10%,transparent)}
+.stk-row .grow{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:14px}
+.stk-row b{font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+.stk-row em{font-style:normal;font-size:11.5px;font-weight:700;color:#2fd47a}
+.stk-pl{width:22px;flex:none;text-align:center;font-style:normal;font-weight:900;font-size:13px;color:var(--hint)}
+.stk-pl.p1{color:#ffd76a}.stk-pl.p2{color:#d6e0f0}.stk-pl.p3{color:#e3a06a}
+.stk-none{padding:14px;text-align:center;font-size:13px}
