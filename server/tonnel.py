@@ -88,8 +88,12 @@ async def _post(url, payload, timeout=15, retry=True):
     if r.status_code in (403, 429):
         if not _STATE["logged"]:   # один раз — что именно ответила защита (страница проверки, запрет адреса…)
             _STATE["logged"] = True
-            print("tonnel 403:", {k: v for k, v in r.headers.items() if k.lower() in ("server", "cf-mitigated", "cf-ray")},
-                  " ".join(r.text[:300].split()), flush=True)
+            import re
+            t = r.text
+            print("tonnel 403:", {k: v for k, v in r.headers.items() if k.lower() in ("server", "cf-mitigated")},
+                  "| title:", (re.findall(r"<title>(.*?)</title>", t, re.S) or [""])[0].strip()[:80],
+                  "| code:", re.findall(r"(?:Error code|error code:?)\s*<?[^0-9]{0,40}(\d{4})", t)[:2] or re.findall(r"\b(10\d\d)\b", t)[:3],
+                  "| h:", [" ".join(re.sub(r"<[^>]+>", " ", x).split())[:90] for x in re.findall(r"<h[12][^>]*>(.*?)</h[12]>", t, re.S)[:3]], flush=True)
         raise TonnelError(f"площадка отклонила запрос ({r.status_code}, защита Cloudflare)")
     if r.status_code != 200:
         raise TonnelError(f"ответ {r.status_code}")
