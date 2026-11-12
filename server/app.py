@@ -2910,8 +2910,8 @@ async def asset(path: str, request: Request):
         url, headers={"User-Agent": f"NePridymal/1.0 (+t.me/{BOT_NAME})"}, timeout=30,
         follow_redirects=True,   # Steam CDN отвечает 301 на соседний хост
     )
-    if r.status_code != 200:
-        return Response(status_code=r.status_code)
+    if r.status_code != 200:   # чужой 3xx/4xx наружу не отдаём как есть: браузер запоминает 301 навсегда
+        return Response(status_code=404 if r.status_code == 404 else 502, headers={"Cache-Control": "no-store"})
     if DEV or SERVE_WEB:
         _cache_write(f, r.content)
     if want_webp:

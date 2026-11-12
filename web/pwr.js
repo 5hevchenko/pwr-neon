@@ -8,6 +8,8 @@ let CTAB = (() => { try { return localStorage.getItem("np_ctab") || "all"; } cat
 const CTABS = [["all", "Все"], ["tg", "Подарки"], ["cs", "CS"], ["ru", "RubUp"]];
 const pwrLoad = async () => { try { PWR = await api("pwr"); } catch (e) {} return PWR; };
 const pwrImg = (name, s = 256) => A.orig(name, s);
+// адреса картинок с меткой версии: первая выкладка отдавала по скинам CS ответ 301, и браузеры его запомнили
+for (const k of ["model", "orig"]) { const f = A[k]; A[k] = (...a) => f(...a) + "&r=2"; }
 
 // ---------------- главная: баннер пропуска и вкладки витрины ----------------
 function pwrBannerHTML() {
