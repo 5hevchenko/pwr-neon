@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>PWR Neon</title>
+<title>Neon</title>
 <script>(function(){try{var d=document.documentElement,a=localStorage.getItem("ac"),g=localStorage.getItem("glass");if(a){d.style.setProperty("--ac",a);var n=parseInt(a.slice(1),16);d.style.setProperty("--ac-on",.299*(n>>16)+.587*(n>>8&255)+.114*(n&255)>165?"#2a1c00":"#ffffff");}if(g!==null)d.style.setProperty("--gp",g);}catch(e){}})();</script>
 <style>
 /* экран загрузки: без картинок и внешних файлов, виден сразу */
@@ -74,6 +74,7 @@ window.ME_P = (function () { try { var t = window.Telegram && Telegram.WebApp; i
 <link rel="stylesheet" href="polish.css?v=1">
 <link rel="stylesheet" href="neon.css?v=1">
 <link rel="stylesheet" href="pwr.css?v=1">
+<link rel="stylesheet" href="modern.css?v=1">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -107,13 +108,14 @@ window.ME_P = (function () { try { var t = window.Telegram && Telegram.WebApp; i
   <section class="view" id="v-crypto"></section>
   <section class="view" id="v-top"></section>
   <section class="view" id="v-inv"></section>
+  <section class="view" id="v-quests"></section>
 </main>
 
 <nav class="tabs" id="tabs">
   <span class="tab-ind" id="tab-ind"></span>
   <button class="on" data-tab="cases"><i data-ic="gift"></i>Кейсы</button>
   <button data-tab="games"><i data-ic="games"></i>Игры</button>
-  <button class="tab-quests" data-act="quests"><i data-ic="checks"></i>Задания<em class="tq-n" id="tq-n"></em></button>
+  <button class="tab-quests" data-tab="quests"><i data-ic="checks"></i>Задания<em class="tq-n" id="tq-n"></em></button>
   <button data-tab="inv"><i data-ic="bag"></i>Сумка</button>
   <button data-tab="market"><i data-ic="store"></i>Маркет</button>
   <button data-tab="crypto"><i data-ic="coin"></i>Крипта</button>

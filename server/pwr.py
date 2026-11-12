@@ -30,7 +30,7 @@ CHANNEL = os.environ.get("PWR_CHANNEL", "").strip()          # @канал ил�
 ADS_BLOCK = os.environ.get("ADSGRAM_BLOCK", "").strip()      # блок Adsgram (Rewarded)
 ADS_SECRET = os.environ.get("ADS_SECRET", "").strip()        # секрет в Reward URL блока
 TIERS = ("FREE", "PWR", "VIP")
-TITLE = {"FREE": "Free", "PWR": "PWR Pass", "VIP": "VIP Pass"}
+TITLE = {"FREE": "Бесплатный", "PWR": "Плюс", "VIP": "Премиум"}   # названия дорожек пропуска для игрока (внутренние ключи прежние)
 BENEFITS = {   # тексты SKINBOX (locales/ru/pass.json); «Бейдж в профиле» и «Личный саппорт» не перенесены — их здесь нет
     "FREE": [],
     "PWR": ["Бонус к шансу дропа +5%", "1.5x монет за задания", "Редкие ежедневные кейсы", "Уникальный кейс на 7 день"],

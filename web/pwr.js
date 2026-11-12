@@ -23,7 +23,7 @@ function pwrBannerHTML() {
   const best = mine[mine.length - 1] || p.tiers[0], f = p.tiers[0];
   return `<button class="pp-banner${ready ? " ready" : ""}${GEN.pass_banner ? " art" : ""}" data-act="pwr-pass" style="--pc:${best.color}${GEN.pass_banner ? `;--art:url('${GEN.pass_banner}')` : ""}">
     <span class="pp-b-art"><img src="${pwrImg(best.cover)}" alt=""></span>
-    <span class="pp-b-t"><i>Battle Pass</i><b>Боевой пропуск</b>
+    <span class="pp-b-t"><i>Кейс каждый день</i><b>Боевой пропуск</b>
       <small>${ready ? `${ready} ${plural(ready, ["кейс ждёт", "кейса ждут", "кейсов ждут"])} — забери` : `Новые кейсы через ${clock(p.resetIn)}`}</small>
       <span class="pp-days">${Array.from({ length: f.days }, (_, i) => `<i class="${i < (f.done ? f.day : f.day - 1) ? "on" : ""}${i === f.days - 1 ? " last" : ""}"></i>`).join("")}</span></span>
     <span class="pp-b-go">${ready ? "Открыть" : ic("chev")}</span></button>`;
@@ -93,7 +93,7 @@ openCase = function (id) {
   el.classList.add("cs-" + (c.group || "tg"));
   if (GEN.case_burst && !pwrLite() && !window._burstWarm) { window._burstWarm = 1; fetch(GEN.case_burst).catch(() => {}); }   // ролик вспышки — в кэш заранее
   const d = el.querySelector(".disc");
-  if (c.src === "cs" && d) d.textContent = d.textContent.replace(/Из платного кейса не выпадает[^.]*\.\s*/, "Чем дороже скин, тем он реже. PWR Pass и VIP Pass повышают шансы на дорогие скины. Скин продаётся за полную ценность. ");
+  if (c.src === "cs" && d) d.textContent = d.textContent.replace(/Из платного кейса не выпадает[^.]*\.\s*/, "Чем дороже скин, тем он реже. Пропуск «Плюс» и «Премиум» повышают шансы на дорогие скины. Скин продаётся за полную ценность. ");
   if (c.src === "ru") {   // RubUp: шесть категорий с шансом, внутри категории подарки равновероятны; у каждого подарка твёрдая цена
     if (d) d.textContent = d.textContent.replace(/Из платного кейса не выпадает[^.]*\.\s*/, "Шанс указан для категории; внутри категории подарки выпадают равновероятно. Подарок продаётся за полную ценность. ");
     const grid = el.querySelector(".ggrid"), tiers = [];
@@ -214,7 +214,7 @@ function pwrTasksHTML() {
         : `<button class="btn sm gold" data-act="pwr-ad">Смотреть</button>`;
   const sub = x => x.id === "invite" ? `${ME.refBonus ? `награда ⭐ ${fmt(ME.refBonus)} за друга · ` : ""}приглашено: ${x.have}`
     : !x.on ? esc(x.why) : x.id === "ad" ? `${x.have}/${x.need} сегодня · награда ⭐ ${fmt(x.reward)}` : `награда ⭐ ${fmt(x.reward)}`;
-  return `<div class="sec-t">Задания PWR${t.k > 1 ? `<span class="pt-k">×${String(t.k).replace(".", ",")} с пропуском</span>` : ""}</div>
+  return `<div class="sec-t">Реклама и подписка${t.k > 1 ? `<span class="pt-k">×${String(t.k).replace(".", ",")} с пропуском</span>` : ""}</div>
     <div class="box">${t.items.map(x => `<div class="row qrow${x.done ? " done" : ""}${x.on ? "" : " pt-dim"}"><span class="pic ${x.done ? "g" : "b"}">${ic(x.done ? "check" : x.icon === "play" ? "eye" : x.icon)}</span>
       <div class="grow"><div class="t">${esc(x.t)}</div><div class="s">${sub(x)}</div></div>${btn(x)}</div>`).join("")}</div>`;
 }
@@ -317,3 +317,10 @@ Object.assign(ACT, {
   },
   "gs-again": () => gsPaint(),
 });
+
+/* ---------------- «Задания» — обычная вкладка, а не окно ---------------- */
+TITLES.quests = "Задания";
+TAB_RENDER.quests = () => { const v = $("#v-quests"); if (!v.querySelector("#q-body")) v.innerHTML = `<div id="q-body">${emptyHTML("hourglass", "Загружаем…")}</div>`; v._q = true; fillQuests(v); };
+ACT.quests = () => setTab("quests");
+const _qcPwr = ACT["q-claim"];
+ACT["q-claim"] = async el => { await _qcPwr(el); if (TAB === "quests") fillQuests($("#v-quests")); };
