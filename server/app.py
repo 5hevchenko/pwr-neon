@@ -2851,7 +2851,7 @@ def _custom_asset(raw, request):
             return Response(status_code=404)
         size = request.query_params.get("size", "256")
         size = size if size in ("64", "128", "256", "512") else "256"
-        return f"https://community.cloudflare.steamstatic.com/economy/image/{E.REMOTE[col]}/{size}fx{size}f"
+        return f"https://community.fastly.steamstatic.com/economy/image/{E.REMOTE[col]}/{size}fx{size}f"
     if col not in E.CUSTOM and col not in E.CUSTOM_COVERS and col not in E.PWR_COVERS and not col.startswith("~"):
         return None
     if kind == "pattern":
@@ -2907,7 +2907,8 @@ async def asset(path: str, request: Request):
         if not want_webp and os.path.exists(f):
             return FileResponse(f, media_type=ct, headers=hdrs)
     r = await http.get(
-        url, headers={"User-Agent": f"NePridymal/1.0 (+t.me/{BOT_NAME})"}, timeout=30
+        url, headers={"User-Agent": f"NePridymal/1.0 (+t.me/{BOT_NAME})"}, timeout=30,
+        follow_redirects=True,   # Steam CDN отвечает 301 на соседний хост
     )
     if r.status_code != 200:
         return Response(status_code=r.status_code)
