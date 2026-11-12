@@ -77,13 +77,21 @@ def skins_real():
     return bool(w and w.enabled())
 
 
+def gifts_real():
+    """Работают кейсы с настоящими подарками Telegram (realgifts.py)."""
+    import sys
+    r = sys.modules.get("realgifts")
+    return bool(r and r.enabled())
+
+
 def disclaimer():
     """Что в игре настоящее, а что нет. Про покупку за Telegram Stars — только пока включена продажа (админка → «Продажи»),
-    про скины — только пока работает вывод в Steam."""
+    про скины — только пока работает вывод в Steam, про настоящие подарки — пока включены их кейсы."""
     import shop
-    t = "Подарки Telegram и звёзды здесь игровые: "
-    t += ("звёзды можно купить за Telegram Stars, но вывести их или обменять на настоящие подарки Telegram нельзя."
-          if shop.shop_on() else "вывести их или обменять на настоящие подарки Telegram нельзя.")
+    t = "Звёзды ⭐ и подарки из обычных кейсов — игровые"
+    t += ": звёзды можно купить за Telegram Stars, но вывести нельзя." if shop.shop_on() else ": вывести их нельзя."
+    if gifts_real():
+        t += " Настоящие подарки Telegram лежат в кейсах «Настоящие подарки»: выигранный подарок можно вывести на свой аккаунт или продать игре."
     if skins_real():
         t += " Скины CS настоящие: их можно вывести в Steam."
     return t + " Картинки подарков — @GiftChanges (api.changes.tg)."
@@ -2868,6 +2876,8 @@ import share  # noqa: E402,F401 — карточка большого выигр
 import pwr  # noqa: E402,F401 — слияние с PWR SKINBOX: боевой пропуск и задания
 import withdraw  # noqa: E402,F401 — вывод скинов CS в Steam через market.csgo.com
 import guess  # noqa: E402,F401 — «Угадай дроп» на тир-кейсах
+import realgifts  # noqa: E402,F401 — кейсы с настоящими подарками Telegram: продать игре или вывести на аккаунт
+import cryptopay  # noqa: E402,F401 — пополнение криптой через Crypto Pay (@CryptoBot)
 
 
 # ---------------- картинки подарков (api.changes.tg); на проде перед этим стоит кэш nginx ----------------

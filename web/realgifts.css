@@ -1,0 +1,82 @@
+/* ============================================================
+   Кейсы с настоящими подарками Telegram и блок пополнения криптой. Поверх modern.css, те же переменные.
+   Главный образ — «веер» из трёх самых дорогих призов кейса; всё остальное спокойное, жёлтым — только цена.
+   ============================================================ */
+.rg-art{flex:none;width:52px;height:52px;display:flex;align-items:center;justify-content:center}
+.rg-art img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.rg-art i{font-style:normal;font-size:34px;line-height:1}
+.rg-art.big{width:132px;height:132px}.rg-art.big i{font-size:84px}
+
+.rg-lead{margin:6px 2px 14px;font-size:14px;line-height:1.45;color:var(--mu)}
+.rg-cases{display:flex;flex-direction:column;gap:10px}
+.rg-case{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:92px;padding:12px 14px 12px 10px;border:0;border-radius:var(--r);
+  background:radial-gradient(120% 140% at 0% 50%,rgba(124,107,255,.34),transparent 62%),var(--sf);color:var(--tx);text-align:left;font-family:var(--body);overflow:hidden}
+.rg-case:active{transform:scale(.985)}
+.rg-case:focus-visible,.rg-more:focus-visible,.cp-pk:focus-visible{outline:2px solid #3ce7ff;outline-offset:2px}
+.rg-fan{display:block;position:relative;flex:none;width:104px;height:68px}
+.rg-fan .rg-art{position:absolute;width:56px;height:56px}
+.rg-fan .rg-art:nth-child(1){left:24px;top:2px;width:64px;height:64px;z-index:3}
+.rg-fan .rg-art:nth-child(2){left:0;top:14px;transform:rotate(-14deg);z-index:2;opacity:.92}
+.rg-fan .rg-art:nth-child(3){left:54px;top:14px;transform:rotate(14deg);z-index:1;opacity:.92}
+.rg-fan.big{width:230px;height:150px;margin:0 auto}
+.rg-fan.big .rg-art{width:112px;height:112px}
+.rg-fan.big .rg-art:nth-child(1){left:52px;top:0;width:136px;height:136px}
+.rg-fan.big .rg-art:nth-child(2){left:0;top:32px}.rg-fan.big .rg-art:nth-child(3){left:122px;top:32px}
+.rg-ct{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.rg-ct b{font-family:var(--disp);font-size:14px;font-weight:600}
+.rg-ct small{font-size:12px;color:var(--mu);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rg-pr{flex:none;font-family:var(--disp);font-size:13px;font-weight:600;color:var(--yl);white-space:nowrap}
+.rg-strip{margin-bottom:6px}
+.rg-strip .sec-t{justify-content:space-between}
+.rg-more{border:0;border-radius:999px;padding:7px 12px;background:var(--sf2);color:var(--tx);font:500 12px var(--body)}
+
+.rg-hero{padding:6px 0 2px;border-radius:var(--r);background:radial-gradient(60% 80% at 50% 55%,rgba(124,107,255,.30),transparent 72%)}
+.rg-lim{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:var(--r);background:var(--sf);margin-bottom:10px}
+.rg-lim b{font-family:var(--disp);font-size:14px;font-weight:600}
+.rg-lim span{font-size:12.5px;line-height:1.4;color:var(--mu)}
+.rg-empty{padding:18px 16px;border-radius:var(--r);background:var(--sf);font-size:13.5px;line-height:1.45;color:var(--mu)}
+.rg-bag{display:flex;flex-direction:column;gap:10px}
+.rg-it{padding:12px;border-radius:var(--r);background:var(--sf);display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:center}
+.rg-it.busy{opacity:.7}
+.rg-in{min-width:0;display:flex;flex-direction:column;gap:3px}
+.rg-in b{font-size:14px;font-weight:600}
+.rg-in small{font-size:12.5px;color:var(--mu);line-height:1.35}
+.rg-acts{grid-column:1/-1;display:flex;gap:8px}
+.rg-acts .btn{padding:11px 10px!important}
+.rg-adm .rg-it{grid-template-columns:1fr;margin-top:10px}
+.rg-kv{display:flex;flex-direction:column;gap:2px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.rg-kv:last-child{border-bottom:0}
+.rg-kv span{font-size:12px;color:var(--mu)}
+.rg-kv b{font-size:13.5px;font-weight:600}
+
+.rg-list,.rg-hist{border-radius:var(--r);background:var(--sf);padding:4px 12px}
+.rg-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.rg-row:last-child{border-bottom:0}
+.rg-row .rg-art{width:44px;height:44px}.rg-row .rg-art i{font-size:28px}
+.rg-row .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rg-row b{font-size:13.5px;font-weight:600}
+.rg-row small{font-size:12px;color:var(--mu)}
+.rg-row em{flex:none;font-style:normal;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+
+.rg-tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 8px;border-radius:16px;background:var(--sf)}
+.rg-tile .rg-art{width:72px;height:72px}.rg-tile .rg-art i{font-size:48px}
+.rg-tile small{font-size:11.5px;font-weight:600;color:var(--yl)}
+.rg-tile.hitw{background:linear-gradient(160deg,rgba(60,231,255,.30),rgba(124,107,255,.22)),var(--sf)}
+.rg-won{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 4px;text-align:center}
+.rg-won b{font-family:var(--disp);font-size:18px;font-weight:600;margin-top:4px}
+.rg-won small{font-size:13px;color:var(--yl);font-weight:600}
+.rg-won p{margin:6px 0 0;font-size:13px;color:var(--mu)}
+#rg-btns{flex-wrap:wrap}
+#rg-btns .btn{flex:1 1 40%;white-space:nowrap}
+.sheet.rg-s .gtitle{font-size:19px!important}
+#rg-btns .rg-again{flex-basis:100%}
+
+/* пополнение криптой */
+.cp-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cp-pk{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 6px;border:0;border-radius:18px;background:var(--sf2);color:var(--tx);font-family:var(--body)}
+.cp-pk b{font-family:var(--disp);font-size:12.5px;font-weight:600;color:var(--yl);white-space:nowrap}
+.cp-pk small{font-size:10.5px;color:var(--mu);text-align:center;line-height:1.2}
+.cp-pk em{font-style:normal;margin-top:4px;padding:4px 10px;border-radius:999px;background:rgba(60,231,255,.16);font-size:12px;font-weight:600}
+.cp-pk:disabled{opacity:.5}
+.cp .hint{font-size:12px;line-height:1.4;margin:10px 2px 0}
+@media (prefers-reduced-motion:reduce){.rg-case:active{transform:none}}

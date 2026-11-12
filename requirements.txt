@@ -5,3 +5,4 @@ httpx==0.28.1
 pydantic==2.13.5
 pillow>=11.3          # с 11.3 есть готовые сборки под Python 3.14 (11.0 собирался из исходников и падал без libjpeg)
 cryptography>=43   # франшиза: проверка подписи Telegram (Ed25519) для входа из ботов игроков
+curl_cffi>=0.11      # площадка Tonnel стоит за Cloudflare: нужен HTTP-клиент с отпечатком браузера (server/tonnel.py)

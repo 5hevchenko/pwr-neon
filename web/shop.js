@@ -32,7 +32,7 @@ async function shopFill() {
         <div class="shop-cv" id="shop-cv">Введи количество — покажем, сколько игровых ⭐ получишь</div>
         <button class="btn shop-buy" data-act="buy-custom" id="shop-cb" disabled>${ic("tgplane")}Оплатить</button>
       </div>
-      <div class="shop-note">${ic("lock")}<span>Оплата проходит в Telegram, цены — в Telegram Stars. Игровые ⭐ нельзя вывести или обменять на настоящие подарки.</span></div></div>`;
+      <div class="shop-note">${ic("lock")}<span>Оплата проходит в Telegram, цены — в Telegram Stars. Сами ⭐ не выводятся: на них открывают кейсы и играют.</span></div></div>`;
   starify(box);
   const inp = box.querySelector("#shop-x"), cv = box.querySelector("#shop-cv"), cb = box.querySelector("#shop-cb");
   inp.oninput = () => {

@@ -28,8 +28,10 @@ from settings import conf
 MARKET = os.environ.get("MARKET_URL", "https://market.csgo.com/api/v2/")   # MARKET_URL — только для тестов
 KEY = os.environ.get("MARKET_KEY", "").strip()
 ON = conf("withdraw.on", True)
-XTR_USD = conf("withdraw.xtr_usd", 0.013)        # сколько долларов приносит 1 Telegram Star
+XTR_USD = conf("withdraw.xtr_usd", 0.011)        # сколько долларов приносит 1 Telegram Star (осторожная оценка; по факту ≈ 0,013)
 LIMIT_K = conf("withdraw.limit_k", 0.7)          # лимит выводов = оплачено × этот множитель
+HOLD_H = conf("withdraw.hold_hours", 24)         # свежая оплата идёт в лимит только через столько часов (защита от возвратов платежей)
+EXTRA_USED = []                                  # другие виды вывода в том же лимите: функции uid → $ (настоящие подарки — realgifts.py)
 PRICE_CAP = conf("withdraw.price_cap", 3.0)      # цена на площадке не выше нашей × это число (как в оригинале)
 CHECK_EVERY = int(os.environ.get("MARKET_CHECK", "60"))
 LINK_RE = re.compile(r"^https://steamcommunity\.com/tradeoffer/new/?\?partner=(\d+)&token=([A-Za-z0-9_-]+)$")
@@ -59,11 +61,19 @@ def gift_usd(g):
 
 
 def budget(uid):
-    """(лимит в $, уже выведено или в работе в $) — лимит считается от оплаченных Telegram Stars."""
-    paid = q1("SELECT COALESCE(SUM(xtr),0) s FROM payments WHERE user=?", uid)["s"]
+    """(лимит в $, уже выведено или в работе в $) — лимит считается от оплаченного (Telegram Stars и крипта в пересчёте на Stars).
+    Оплаты моложе HOLD_H часов в лимит пока не идут. В «выведено» входят и скины, и настоящие подарки."""
+    paid = q1("SELECT COALESCE(SUM(xtr),0) s FROM payments WHERE user=? AND ts<=?", uid, now() - int(HOLD_H * 3600))["s"]
     # в лимит идёт то, что реально уплачено площадке (если она дороже нашей цены скина)
     used = q1("SELECT COALESCE(SUM(MAX(usd, market_usd)),0) s FROM withdraws WHERE user=? AND stage IN ('0','1','2')", uid)["s"]
+    used += sum(f(uid) for f in EXTRA_USED)
     return round(paid * XTR_USD * LIMIT_K, 2), round(used, 2)
+
+
+def held(uid):
+    """Сколько $ лимита ещё «на выдержке» после свежих оплат."""
+    fresh = q1("SELECT COALESCE(SUM(xtr),0) s FROM payments WHERE user=? AND ts>?", uid, now() - int(HOLD_H * 3600))["s"]
+    return round(fresh * XTR_USD * LIMIT_K, 2)
 
 
 async def _market(method, **params):
@@ -89,6 +99,7 @@ def state(uid):
     limit, used = budget(uid)
     u = q1("SELECT trade_link FROM users WHERE id=?", uid)
     return {"on": enabled(), "rate": E.USD_COINS, "link": (u["trade_link"] or "") if u else "", "limit": limit, "used": used, "left": round(max(0, limit - used), 2),
+            "held": held(uid), "holdHours": HOLD_H,
             "items": [_row(w) for w in q("SELECT * FROM withdraws WHERE user=? ORDER BY ts DESC LIMIT 30", uid)]}
 
 
@@ -123,7 +134,7 @@ async def withdraw(gid: int, uid=Depends(auth)):
         usd = gift_usd(g)
         limit, used = budget(uid)
         if not limit:
-            err("Вывод открывается после первой покупки за Telegram Stars")
+            err(f"Свежее пополнение станет доступно для вывода через {HOLD_H} ч после оплаты" if held(uid) else "Вывод открывается после первой покупки звёзд")
         if used + usd > limit + 1e-9:
             err(f"Лимит вывода: осталось ${max(0, limit - used):.2f}, а скин стоит ${usd:.2f}. Лимит растёт с покупками")
         wid = secrets.token_hex(16)

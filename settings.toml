@@ -175,6 +175,51 @@ ad_rewards = [50, 50, 75, 100, 75]   # награда за 1-й…5-й рекл�
 [withdraw]
 # Вывод скинов CS в Steam через market.csgo.com. Ключ площадки — переменная окружения MARKET_KEY; без неё вывод выключен.
 on = true
-xtr_usd = 0.013             # сколько долларов приносит одна Telegram Star (см. usd_rate в статистике бота)
+xtr_usd = 0.011             # сколько $ приносит 1 Telegram Star после всех комиссий. По расчёту ≈ 0,013; пока нет своей статистики — осторожные 0,011
 limit_k = 0.7               # игрок выводит скинов не больше 70% от оплаченного (XTR × xtr_usd × это число): маржа с каждого не ниже 30%
+hold_hours = 24             # свежая оплата идёт в лимит вывода только через столько часов (защита от возвратов платежей)
 price_cap = 3.0             # не покупать скин, если на площадке он дороже нашей цены в столько раз (как в оригинале)
+
+[realgifts]
+# Кейсы с настоящими подарками Telegram (server/realgifts.py). Приз лежит в сумке: его можно продать игре за полную цену
+# или вывести на свой аккаунт. Обычные подарки дарит бот со своего баланса Telegram Stars, коллекционные покупаются
+# на площадке Tonnel сразу на аккаунт игрока (нужна переменная окружения TONNEL_AUTH).
+on = true
+rtp = 0.60                  # цена кейса = средняя цена приза / rtp: призами возвращается 60% цены, 40% остаётся игре
+refresh_min = 10            # как часто обновлять цены подарков
+max_age_min = 40            # цена старше — приз убирается из кейса; призов меньше трёх — кейс на паузе
+slip = 1.15                 # на выводе подарок может стоить не больше цены выигрыша × 1,15, иначе отказ (приз остаётся в сумке)
+nft_mode = "auto"           # коллекционные подарки: auto — покупает сервер, manual — заявки разбирает админ, off — выключены
+max_xtr = 2500              # обычные подарки дороже этого в кейсы не попадают
+
+# Вес приза = (1000 / цена в $)^k. Чем больше k, тем реже дорогие призы. stars — какие обычные подарки брать (цена в Telegram Stars, от и до).
+[[realgifts.cases]]
+id = "start"
+title = "Стартовый"
+k = 1.5
+stars = [15, 100]
+gifts = ["Lol Pop", "B-Day Candle", "Desk Calendar", "Love Candle", "Electric Skull"]
+
+[[realgifts.cases]]
+id = "collect"
+title = "Коллекционный"
+k = 2.0
+stars = [0, 0]
+gifts = ["Lol Pop", "Easter Egg", "B-Day Candle", "Desk Calendar", "Light Sword", "Joyful Bundle", "Love Candle", "Crystal Ball", "Cupid Charm", "Electric Skull", "Diamond Ring", "Kissed Frog", "Artisan Brick", "Astral Shard"]
+
+[[realgifts.cases]]
+id = "legend"
+title = "Легенда"
+k = 1.6
+stars = [0, 0]
+gifts = ["Love Candle", "Crystal Ball", "Cupid Charm", "Electric Skull", "Diamond Ring", "Kissed Frog", "Artisan Brick", "Astral Shard", "Loot Bag", "Durov's Cap"]
+
+[crypto]
+# Пополнение криптой через Crypto Pay (@CryptoBot), нужна переменная окружения CRYPTOPAY_TOKEN.
+# С Telegram Stars до нас доходит ≈ 68% денег игрока, с крипты ≈ 97% — поэтому за доллар криптой звёзд больше.
+on = true
+stars_per_usd = 74000       # базовых ⭐ за $1 (за Stars игрок получает ≈ 52 600 ⭐ на доллар, здесь +40%)
+packs = [1.0, 5.0, 10.0, 25.0, 50.0, 100.0]
+min_usd = 1.0
+max_usd = 500.0
+assets = "USDT,TON"

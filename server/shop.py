@@ -39,7 +39,7 @@ def pack_bonus(xtr):
 
 
 def is_first(uid):
-    return not q1("SELECT 1 FROM payments WHERE user=? AND COALESCE(kind,'pack')='pack'", uid)
+    return not q1("SELECT 1 FROM payments WHERE user=? AND COALESCE(kind,'pack') IN ('pack','crypto')", uid)   # крипта — такая же покупка звёзд
 
 
 async def make_invoice(title, desc, payload, xtr):
@@ -80,12 +80,12 @@ async def invoice(req: Request, uid=Depends(auth)):
             err("дарить звёзды можно только друзьям")
         f = q1("SELECT name FROM users WHERE id=?", to)
         link = await make_invoice(f"Подарок: {pack_stars(xtr):,} ⭐".replace(",", " "),
-                                  f"Игровые звёзды GiftBot в подарок для {f['name'][:40]}. Вывести или обменять на настоящие подарки Telegram нельзя.",
+                                  f"Игровые звёзды в подарок для {f['name'][:40]}. Сами звёзды не выводятся.",
                                   {"u": uid, "x": xtr, "to": to}, xtr)
         return {"link": link}
     first = is_first(uid)
     r = await tg_call("createInvoiceLink", _token=__import__("franchise").pay_token(), title=(f"{pack_stars(xtr, first):,} игровых звёзд".replace(",", " ") + (" (×2 первая покупка)" if first else "")),
-                      description="Игровая валюта GiftBot. Вывести или обменять на настоящие подарки Telegram нельзя.",
+                      description="Игровая валюта: на неё открывают кейсы и играют. Сами звёзды не выводятся.",
                       payload=json.dumps({"u": uid, "x": xtr}), currency="XTR", prices=[{"label": "Игровые звёзды", "amount": xtr}])
     if not r.get("ok"):
         err("не удалось создать счёт, попробуй позже")
