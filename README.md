@@ -1,3 +1,32 @@
+# ⚡ PWR Neon
+
+**Объединённая версия:** игра NePridymal (основа) + кейсы, скины CS, боевой пропуск и задания из PWR SKINBOX (cs-bot) + кейсы RubUp Web,
+в новом оформлении «неон / киберпанк».
+
+| Что добавлено | Где |
+|---|---|
+| 12 кейсов SKINBOX и 842 скина CS (картинки — Steam CDN, цены — из долларовых цен SKINBOX) | `server/pwr/data.json`, `server/economy.py` |
+| 39 кейсов RubUp Web на подарках Telegram, с их обложками | там же |
+| Боевой пропуск: ежедневные кейсы Free / PWR / VIP, серия, улучшенный кейс на 7-й день | `server/pwr.py`, `web/pwr.js` |
+| Задания SKINBOX: подписка на канал, друг, реклама Adsgram | там же |
+| Вкладки витрины: Все / Подарки / CS / RubUp | `web/pwr.js` |
+| Тема «неон» | `web/neon.css`, `web/pwr.css` |
+
+Данные из старого проекта собирает `python tools/pwr_build.py <cs-bot-backend> <cs-bot-frontend>`.
+
+**Чего здесь нет намеренно:** вывода скинов в Steam (market.csgo.com) и оплаты пропуска за Telegram Stars — это отдельный этап,
+до него нужно закрыть находки аудита SKINBOX от 11.11.2026. Все скины и звёзды — игровые.
+
+**Переменные окружения для заданий:** `PWR_CHANNEL` (@канал, бот — его админ), `ADSGRAM_BLOCK` и `ADS_SECRET`
+(Reward URL блока: `https://<домен>/np/api/pwr/ads/reward?userid=[userId]&secret=<ADS_SECRET>`). Цены пропуска и награды — `settings.toml`, раздел `[pass]`.
+
+**Запуск на Railway / в контейнере без бота (демо):** `DEV=1 SERVE_WEB=1 BOT_TOKEN=0:demo`, старт
+`python build.py && cd server && python -m uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1`, вход — `/np/?dev=<любой id>`.
+
+Ниже — исходная инструкция NePridymal.
+
+---
+
 # 🎁 NePridymal
 
 **Telegram Mini App казино на подарках Telegram.** Кейсы, 20+ мини-игр, маркет, кланы, турниры, сезоны,

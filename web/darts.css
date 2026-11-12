@@ -26,7 +26,7 @@
 .dt-aim::after{top:50%;left:-7px;right:-7px;height:1.5px;margin-top:-.75px;-webkit-mask:linear-gradient(90deg,#000 0 9px,transparent 9px calc(100% - 9px),#000 0);mask:linear-gradient(90deg,#000 0 9px,transparent 9px calc(100% - 9px),#000 0)}
 .dt-aim i{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:#ff3b4e;box-shadow:0 0 8px #ff3b4e}
 @keyframes dt-drift{0%{transform:translate(0,0)}20%{transform:translate(34px,-22px)}40%{transform:translate(-18px,-40px)}60%{transform:translate(-40px,14px)}80%{transform:translate(16px,34px)}100%{transform:translate(0,0)}}
-.dt-aim.lock{animation:none;transform:scale(.7);box-shadow:0 0 0 2px #ffd76a,0 0 18px rgba(255,215,106,.6)}
+.dt-aim.lock{animation:none;transform:scale(.7);box-shadow:0 0 0 2px #22e9ff,0 0 18px rgba(34,233,255,.6)}
 .dt-stage:has(.dt-dart.fly) .dt-aim{opacity:.9}
 /* дротики */
 .dt-darts{position:absolute;inset:0;z-index:5;pointer-events:none}

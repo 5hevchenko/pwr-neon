@@ -1,0 +1,92 @@
+/* ================= PWR: вкладки витрины, боевой пропуск, задания SKINBOX ================= */
+.pwr-hide{display:none!important}
+
+/* вкладки витрины */
+.ctabs{display:flex;gap:6px;margin:0 0 12px;padding:4px;border-radius:12px;background:#0b081c;box-shadow:inset 0 0 0 1px rgba(139,120,255,.26)}
+.ctabs button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 4px;border-radius:9px;
+  font-family:var(--disp);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8d86b6;transition:color .15s,background-color .15s,box-shadow .2s}
+.ctabs button em{font-style:normal;font-size:10px;font-weight:600;padding:1px 5px;border-radius:5px;background:rgba(139,120,255,.16);color:#a59fd0}
+.ctabs button.on{color:#fff;background:linear-gradient(180deg,rgba(34,233,255,.22),rgba(139,92,255,.14));box-shadow:inset 0 0 0 1px rgba(34,233,255,.6),0 0 18px -6px var(--cy)}
+.ctabs button.on em{background:var(--cy);color:#031018}
+.ctabs button[data-v=cs].on{background:linear-gradient(180deg,rgba(255,122,69,.26),rgba(255,47,208,.12));box-shadow:inset 0 0 0 1px rgba(255,122,69,.7),0 0 18px -6px #ff7a45}
+.ctabs button[data-v=cs].on em{background:#ff7a45}
+.ctabs button[data-v=ru].on{background:linear-gradient(180deg,rgba(255,47,208,.24),rgba(139,92,255,.14));box-shadow:inset 0 0 0 1px rgba(255,47,208,.65),0 0 18px -6px var(--mg)}
+.ctabs button[data-v=ru].on em{background:var(--mg);color:#fff}
+
+/* кейсы CS: обложка крупнее, без подложки-плитки */
+.case[data-g=cs] .gl-art img.cv,.case[data-g=ru] .gl-art img.cv{width:100%;height:100%;object-fit:contain;transform:scale(1.12)}
+
+/* баннер пропуска на главной */
+.pp-banner{position:relative;display:flex;align-items:center;gap:12px;width:100%;margin:14px 0 2px;padding:10px 12px 10px 10px;text-align:left;overflow:hidden;isolation:isolate;
+  border-radius:14px;border:1px solid transparent;
+  background:linear-gradient(105deg,color-mix(in srgb,var(--pc) 34%,#0e0a22),#0e0a22 58%,#0a0718) padding-box,linear-gradient(120deg,var(--pc),rgba(139,120,255,.25) 50%,var(--cy)) border-box;
+  box-shadow:0 16px 34px -22px var(--pc)}
+.pp-banner::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 4px)}
+.pp-banner.ready{box-shadow:0 0 30px -10px var(--pc),0 16px 34px -22px var(--pc)}
+.pp-b-art{flex:none;width:68px;height:68px;display:grid;place-items:center}
+.pp-b-art img{width:118%;height:118%;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.6))}
+.pp-b-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.pp-b-t>i{font-style:normal;font-family:var(--disp);font-size:9.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--cy)}
+.pp-b-t>b{font-family:var(--disp);font-size:16px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-b-t>small{font-size:12px;color:#b3acd9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-days{display:flex;gap:4px;margin-top:6px}
+.pp-days i{flex:1;max-width:22px;height:4px;border-radius:2px;background:rgba(139,120,255,.25)}
+.pp-days i.on{background:var(--cy);box-shadow:0 0 8px var(--cy)}
+.pp-days i.last{background:rgba(255,225,74,.3)}
+.pp-days i.last.on{background:var(--yl);box-shadow:0 0 8px var(--yl)}
+.pp-b-go{flex:none;display:grid;place-items:center;min-width:34px;height:34px;padding:0 12px;font-family:var(--disp);font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border-radius:9px;background:rgba(139,120,255,.14);box-shadow:inset 0 0 0 1px rgba(139,120,255,.35);color:#dcd6ff}
+.pp-banner.ready .pp-b-go{color:#031018;background:linear-gradient(135deg,#6ff3ff,var(--cy) 50%,#7a6bff);box-shadow:0 0 18px -4px var(--cy)}
+html:not(.lite) .pp-banner.ready .pp-b-go{animation:pp-pulse 1.8s ease-in-out infinite}
+@keyframes pp-pulse{50%{box-shadow:0 0 26px 0 var(--cy)}}
+
+/* шторка пропуска */
+.pp-lead{margin:2px 4px 12px;font-size:13.5px;color:#b3acd9}
+.pp-tier{position:relative;margin:0 0 12px;padding:12px;border-radius:16px;border:1px solid transparent;overflow:hidden;isolation:isolate;
+  background:radial-gradient(120% 80% at 0 0,color-mix(in srgb,var(--pc) 26%,transparent),transparent 62%) padding-box,linear-gradient(180deg,#151030,#0a0718) padding-box,
+    linear-gradient(135deg,var(--pc),rgba(139,120,255,.2) 55%,rgba(34,233,255,.45)) border-box}
+.pp-tier:not(.owned){background:radial-gradient(120% 80% at 0 0,color-mix(in srgb,var(--pc) 14%,transparent),transparent 62%) padding-box,linear-gradient(180deg,#110d26,#090616) padding-box,
+    linear-gradient(135deg,color-mix(in srgb,var(--pc) 55%,transparent),rgba(139,120,255,.16)) border-box}
+.pp-tier.imp{box-shadow:0 0 34px -12px var(--yl)}
+.pp-head{display:flex;gap:12px;align-items:center}
+.pp-head>.grow{flex:1;min-width:0}
+.pp-art{flex:none;width:86px;height:86px;display:grid;place-items:center}
+.pp-art img{width:112%;height:112%;object-fit:contain;filter:drop-shadow(0 8px 16px rgba(0,0,0,.6))}
+.pp-tier:not(.owned) .pp-art img{filter:grayscale(.55) brightness(.75) drop-shadow(0 8px 16px rgba(0,0,0,.6))}
+.pp-name{display:flex;align-items:center;gap:7px}
+.pp-name img{width:22px;height:22px;object-fit:contain}
+.pp-name b{font-family:var(--disp);font-size:17px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.pp-name em{margin-left:auto;font-style:normal;font-size:11px;color:#a59fd0;display:flex;align-items:center}
+.pp-name em.lock svg{width:15px;height:15px}
+.pp-sub{margin-top:2px;font-size:12.5px;color:#b3acd9}
+.pp-track{display:flex;gap:5px;margin-top:9px}
+.pp-track i{flex:1;height:26px;display:grid;place-items:center;border-radius:6px;font-style:normal;font-family:var(--disp);font-size:11.5px;font-weight:700;
+  color:#7f78a8;background:#0c0920;box-shadow:inset 0 0 0 1px rgba(139,120,255,.24)}
+.pp-track i svg{width:14px;height:14px}
+.pp-track i.on{color:#031018;background:linear-gradient(180deg,#6ff3ff,var(--cy));box-shadow:0 0 12px -3px var(--cy)}
+.pp-track i.cur{color:#fff;box-shadow:inset 0 0 0 1.5px var(--cy),0 0 14px -4px var(--cy)}
+.pp-track i.last{color:var(--yl);box-shadow:inset 0 0 0 1px rgba(255,225,74,.45)}
+.pp-track i.last.on{color:#1a1500;background:linear-gradient(180deg,#fff3a0,var(--yl));box-shadow:0 0 14px -3px var(--yl)}
+.pp-track i.last.cur{box-shadow:inset 0 0 0 1.5px var(--yl),0 0 16px -4px var(--yl)}
+.pp-ins{display:flex;gap:6px;margin:12px 0 2px}
+.pp-in{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px 5px;border-radius:9px;background:#0b081c;box-shadow:inset 0 0 0 1px rgba(139,120,255,.2)}
+.pp-in img{width:100%;max-width:54px;aspect-ratio:1;object-fit:contain}
+.pp-in b{height:54px;display:grid;place-items:center;font-size:26px}
+.pp-in small{font-size:10px;font-weight:700;color:var(--yl);white-space:nowrap;font-family:var(--disp)}
+.pp-ben{margin:10px 0 12px;padding:0;list-style:none;display:grid;gap:5px}
+.pp-ben li{position:relative;padding-left:16px;font-size:12.5px;color:#cfc8f5}
+.pp-ben li::before{content:"";position:absolute;left:2px;top:6px;width:6px;height:6px;transform:rotate(45deg);background:var(--pc);box-shadow:0 0 8px var(--pc)}
+.pp-tier .btn.cta{width:100%}
+.pp-wonbox{margin:0 0 14px;padding:14px 12px 16px;text-align:center;border-radius:16px;border:1px solid transparent;
+  background:linear-gradient(180deg,#17122f,#0a0718) padding-box,linear-gradient(135deg,var(--cy),var(--mg)) border-box;box-shadow:0 0 34px -12px var(--cy)}
+.pp-wonbox .won-g{width:150px;margin:0 auto}
+.pp-wonbox h2{margin:10px 0 2px;font-size:19px}
+.pp-wonbox small{display:block;margin-top:6px;font-size:12px;color:#8d86b6}
+.pp-stars{font-size:54px;line-height:1;filter:drop-shadow(0 0 18px rgba(255,225,74,.7))}
+
+/* задания SKINBOX */
+.pt-k{margin-left:auto;order:2!important;font-family:var(--disp);font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:5px;color:#031018;background:var(--cy);text-transform:none}
+.pt-off{font-family:var(--disp);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:6px;color:#8d86b6;box-shadow:inset 0 0 0 1px rgba(139,120,255,.3)}
+.pt-dim .t{color:#a59fd0}
+details.locked.pwr-hide{display:none!important}

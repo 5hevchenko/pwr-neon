@@ -9,7 +9,7 @@
   backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);opacity:0;transition:opacity .45s}
 .wp-ov.on{opacity:1}
 .wp-frame{position:relative;width:100%;max-width:380px;padding:1.5px;border-radius:28px;
-  background:linear-gradient(135deg,#fff3c4,#c9962e 22%,#5e4310 45%,#e9c46a 62%,#7a5714 82%,#ffe7a0);
+  background:linear-gradient(135deg,#a8fbff,#c9962e 22%,#5e4310 45%,#e9c46a 62%,#7a5714 82%,#ffe7a0);
   box-shadow:0 40px 100px #000c,0 0 80px #d9a83a2e;transform:translateY(30px) scale(.94);opacity:0;
   transition:transform .7s cubic-bezier(.16,1.2,.3,1),opacity .5s}
 .wp-ov.on .wp-frame{transform:none;opacity:1}
@@ -35,7 +35,7 @@
 .wp-top span{font-size:10.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#e9c46a}
 .wp-dates{margin-top:4px;font-size:11px;letter-spacing:.12em;color:#a8946a}
 .wp-seal{width:78px;height:78px;margin:18px auto 14px;padding:3px;border-radius:50%;
-  background:conic-gradient(from 210deg,#fff3c4,#b7841f,#ffe7a0,#8a6216,#fff3c4);box-shadow:0 12px 34px #c9962e55,0 0 0 7px #e9c46a0d;
+  background:conic-gradient(from 210deg,#a8fbff,#b7841f,#ffe7a0,#8a6216,#a8fbff);box-shadow:0 12px 34px #c9962e55,0 0 0 7px #e9c46a0d;
   animation:wpFloat 4s ease-in-out infinite}
 .wp-seal>div{width:100%;height:100%;border-radius:50%;display:grid;place-items:center;color:#3b2805;
   background:radial-gradient(circle at 35% 30%,#fff6d6,#f0c75e 45%,#b88420 100%);box-shadow:inset 0 2px 6px #fff8,inset 0 -4px 10px #6b4a0c88}
@@ -58,7 +58,7 @@
 .wp-t i .ic{width:15px;height:15px}
 .wp-t b{font-size:19px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:#fff3d4}
 .wp-t span{font-size:11px;color:#a8946a;line-height:1.25}
-.wp-t.g b{color:#7fe7ac}.wp-t.r b{color:#ff9d8f}.wp-t.y b{color:#ffd76a}
+.wp-t.g b{color:#7fe7ac}.wp-t.r b{color:#ff9d8f}.wp-t.y b{color:#22e9ff}
 .wp-h{font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#e9c46a;margin-bottom:10px}
 .wp-fav{margin:0 0 12px;padding:14px;border-radius:16px;text-align:left;background:linear-gradient(160deg,#ffffff0a,#ffffff03);border:1px solid #e9c46a17}
 .wp-g{display:grid;grid-template-columns:104px 1fr auto;align-items:center;gap:10px;font-size:12.5px;margin-top:8px}
@@ -76,10 +76,10 @@
 .wp-sum{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 8px}
 .wp-sum .st{font-size:30px;filter:drop-shadow(0 0 10px #ffc53d88)}
 .wp-sum b{font:900 44px/1.05 -apple-system,BlinkMacSystemFont,"SF Pro Display",Roboto,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums;
-  background:linear-gradient(180deg,#fffaf0,#ffd76a 55%,#c98d1c);-webkit-background-clip:text;background-clip:text;color:transparent;
+  background:linear-gradient(180deg,#fffaf0,#22e9ff 55%,#c98d1c);-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 0 18px #ffc53d55)}
 .wp-gift small{display:block;font-size:12.5px;color:#e5d4ad;line-height:1.45}
-.wp-gift small b{color:#ffd76a}
+.wp-gift small b{color:#22e9ff}
 .wp-next{display:flex;flex-direction:column;gap:3px;margin:0 0 14px;padding:12px 14px;border-radius:14px;text-align:left;font-size:12px;line-height:1.45;
   color:#cdbb93;background:#ffffff07;border-left:2px solid #e9c46a}
 .wp-next b{color:#fff1cc;font-size:13px}

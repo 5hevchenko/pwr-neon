@@ -1,7 +1,7 @@
 /* ============ «Кошелёк»: переводы звёзд по QR (pay.js) ============ */
 .pay-btn{color:var(--gold)}
 .pay-btn .ic{width:22px;height:22px}
-.pay-s,.pay-x,.pay-r{--pg1:#ffe9a6;--pg2:#ffc53d;--pg3:#ff9f1c}
+.pay-s,.pay-x,.pay-r{--pg1:#ffe9a6;--pg2:#22e9ff;--pg3:#7a6bff}
 
 /* ---- главный экран кошелька: стопка стеклянных карт с глубиной ---- */
 .pay-hero{position:relative;margin:42px 0 22px;perspective:900px}
@@ -53,7 +53,7 @@ html.lite .pay-card{animation:none;backdrop-filter:none;-webkit-backdrop-filter:
 .pay-peer:active{transform:scale(.92)}
 .pay-peer span{max-width:66px;font-size:11.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pay-peer i{position:absolute;top:38px;left:50%;transform:translateX(-50%);font-style:normal;font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px;
-  background:var(--gold);color:#3a2300;white-space:nowrap}
+  background:var(--gold);color:#031018;white-space:nowrap}
 .pay-empty{padding:8px 0;font-size:13px}
 .pay-day{font-size:12px;font-weight:700;color:var(--hint);margin:14px 4px 6px;text-transform:none}
 .sec-t+.pay-day{margin-top:2px}
@@ -68,7 +68,7 @@ html.lite .pay-card{animation:none;backdrop-filter:none;-webkit-backdrop-filter:
 
 /* ---- «Получить»: золотая шапка + белая карточка с QR (как платёжный код) ---- */
 .pay-rc{margin:42px 0 14px;border-radius:24px;overflow:hidden;box-shadow:0 22px 44px -24px #000}
-.pay-rtop{display:flex;align-items:center;gap:8px;padding:13px 16px;font-weight:800;font-size:15px;color:#3a2300;
+.pay-rtop{display:flex;align-items:center;gap:8px;padding:13px 16px;font-weight:800;font-size:15px;color:#031018;
   background:linear-gradient(135deg,var(--pg1),var(--pg2) 55%,var(--pg3))}
 .pay-rtop .ic{width:19px;height:19px}
 .pay-rbody{display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px 16px 14px;background:#fff;color:#14112a}
@@ -165,8 +165,8 @@ html.lite .pay-ok .ic path{stroke-dashoffset:0;animation:none}
 .pay-anon-s .pay-raddr{background:var(--card);color:var(--text)}
 .pay-anon-s .pay-raddr small{color:var(--hint)}
 /* кнопка кошелька в шапке — таблетка с иконкой и подписью */
-.fr-btn.pay-pill{width:auto;height:34px;display:inline-flex;align-items:center;gap:5px;padding:0 12px 0 9px;border-radius:17px;color:#3a2300;
-  background:linear-gradient(135deg,#ffe58a,#ffc53d 50%,#ff9f1c);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(150,80,0,.2),0 6px 16px -8px #ffab2e}
+.fr-btn.pay-pill{width:auto;height:34px;display:inline-flex;align-items:center;gap:5px;padding:0 12px 0 9px;border-radius:17px;color:#031018;
+  background:linear-gradient(135deg,#a8fbff,#22e9ff 50%,#7a6bff);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(150,80,0,.2),0 6px 16px -8px #7a6bff}
 .fr-btn.pay-pill .ic{width:17px;height:17px;stroke-width:2.2}
 .fr-btn.pay-pill span{font-size:12.5px;font-weight:800;letter-spacing:.01em;white-space:nowrap}
 .fr-btn.pay-pill:active{transform:scale(.95)}

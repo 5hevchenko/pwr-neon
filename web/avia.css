@@ -63,13 +63,13 @@
 .avplane.boom .avpl{animation:avshake .55s}
 @keyframes avshake{20%{transform:translate(-6px,4px) rotate(-8deg)}45%{transform:translate(6px,-3px) rotate(6deg)}70%{transform:translate(-3px,2px)}}
 .avplane.boom::after{content:"";position:absolute;left:18px;top:-14px;width:60px;height:60px;z-index:2;pointer-events:none;
-  background:radial-gradient(circle,#fff6c8 0,#ffd23f 30%,#ff6a2a 60%,rgba(255,60,40,0) 72%);
+  background:radial-gradient(circle,#a8fbff 0,#22e9ff 30%,#ff6a2a 60%,rgba(255,60,40,0) 72%);
   clip-path:polygon(50% 0,61% 33%,96% 20%,70% 50%,100% 72%,63% 68%,55% 100%,42% 70%,6% 88%,30% 55%,0 30%,38% 34%);animation:avpow .55s ease-out forwards}
 @keyframes avpow{from{transform:scale(.2) rotate(0)}60%{opacity:1}to{transform:scale(1.5) rotate(25deg);opacity:0}}
 .avplane.sunk{opacity:0;transition:opacity .45s .15s}
 .avfloat{position:absolute;left:50%;top:-10px;transform:translateX(-50%);font-size:21px;font-weight:900;white-space:nowrap;pointer-events:none;
   text-shadow:0 2px 8px rgba(0,0,0,.55);animation:avfloat .9s ease-out forwards}
-.avfloat.add{color:#8dffbf}.avfloat.mul{color:#ffd23f;font-size:26px}.avfloat.bad{color:#ff7b7b}
+.avfloat.add{color:#8dffbf}.avfloat.mul{color:#22e9ff;font-size:26px}.avfloat.bad{color:#ff7b7b}
 @keyframes avfloat{to{transform:translate(-50%,-46px);opacity:0}}
 
 /* авианосец */

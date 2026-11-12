@@ -166,7 +166,7 @@ header>*{flex-shrink:0}header h1{flex-shrink:1}
 .pwrap .pmenu button>span{width:40px;height:40px;border-radius:14px;color:#fff;background:linear-gradient(135deg,var(--m1,#6a8bff),var(--m2,#8a5cff));
   box-shadow:0 6px 14px -6px var(--m2,#8a5cff),inset 0 1px 0 rgba(255,255,255,.35)}
 .pwrap .pmenu button:nth-child(9n+1){--m1:#4aa8ff;--m2:#2f6bff}
-.pwrap .pmenu button:nth-child(9n+2){--m1:#ffd76a;--m2:#ff9f1a}
+.pwrap .pmenu button:nth-child(9n+2){--m1:#22e9ff;--m2:#ff9f1a}
 .pwrap .pmenu button:nth-child(9n+3){--m1:#c58bff;--m2:#7b4dff}
 .pwrap .pmenu button:nth-child(9n+4){--m1:#4fe3c1;--m2:#14a88a}
 .pwrap .pmenu button:nth-child(9n+5){--m1:#ff8ac4;--m2:#e0338a}
@@ -174,7 +174,7 @@ header>*{flex-shrink:0}header h1{flex-shrink:1}
 .pwrap .pmenu button:nth-child(9n+7){--m1:#5cf0a0;--m2:#16b874}
 .pwrap .pmenu button:nth-child(9n+8){--m1:#ff7a7a;--m2:#e0334a}
 .pwrap .pmenu button:nth-child(9n+9){--m1:#a9b1c6;--m2:#5d667d}
-.pwrap .pmenu button:nth-child(9n+2)>span{color:#3a2300}
+.pwrap .pmenu button:nth-child(9n+2)>span{color:#031018}
 /* кнопки «Изменить / Оформление / Позвать»: иконка над подписью — влезает на любом экране */
 .pwrap .pmenu+.pacts{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .pwrap .pmenu+.pacts .btn{flex-direction:column;gap:4px;padding:10px 4px;font-size:13px;line-height:1.1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:16px}
@@ -197,9 +197,9 @@ header>*{flex-shrink:0}header h1{flex-shrink:1}
 .incbar::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
   background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.16) 48%,transparent 60%);background-size:250% 100%;animation:inc-shine 5s ease-in-out infinite}
 @keyframes inc-shine{0%,55%{background-position:130% 0}100%{background-position:-30% 0}}
-.incbar .inc-i{background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);color:#3a2300;box-shadow:0 8px 18px -8px #ffb52e,inset 0 1px 0 rgba(255,255,255,.6)}
+.incbar .inc-i{background:linear-gradient(135deg,#a8fbff,#7a6bff 55%,#7a6bff);color:#031018;box-shadow:0 8px 18px -8px #7a6bff,inset 0 1px 0 rgba(255,255,255,.6)}
 .incbar .inc-t b{text-shadow:0 1px 2px rgba(0,0,0,.25)}
-.incbar .inc-t b [data-live]{color:#ffe08a}
+.incbar .inc-t b [data-live]{color:#a8fbff}
 .incbar .inc-t small{opacity:.8}
 html.lite .incbar::after{display:none}
 
@@ -208,11 +208,11 @@ html.lite .incbar::after{display:none}
 /* «Щедрые выходные» и ивент в листалке — полноценная карточка: иконка, заголовок, подпись в две строки */
 .st-sl>.prib,.st-sl>.evrib{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:12px;row-gap:2px;align-content:center;
   padding:12px 14px;border-radius:16px;font-size:14px}
-.st-sl>.prib{background:radial-gradient(120% 140% at 0% 0%,rgba(255,215,106,.28),transparent 55%),linear-gradient(135deg,#3a2a08,#1f1606 60%,#2a1d07);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1px rgba(255,197,61,.28)}
+.st-sl>.prib{background:radial-gradient(120% 140% at 0% 0%,rgba(34,233,255,.28),transparent 55%),linear-gradient(135deg,#3a2a08,#1f1606 60%,#2a1d07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1px rgba(34,233,255,.28)}
 .st-sl>.prib .prib-i,.st-sl>.evrib img{grid-row:1/3;align-self:center}
-.st-sl>.prib .prib-i{width:42px;height:42px;border-radius:13px;place-items:center;color:#3a2300;animation:none;
-  background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);box-shadow:0 8px 18px -8px #ffb52e,inset 0 1px 0 rgba(255,255,255,.6)}
+.st-sl>.prib .prib-i{width:42px;height:42px;border-radius:13px;place-items:center;color:#031018;animation:none;
+  background:linear-gradient(135deg,#a8fbff,#7a6bff 55%,#7a6bff);box-shadow:0 8px 18px -8px #7a6bff,inset 0 1px 0 rgba(255,255,255,.6)}
 .st-sl>.prib .prib-i .ic{width:22px;height:22px;animation:pribspin 6s linear infinite}
 .st-sl>.prib b,.st-sl>.evrib b{grid-column:2;font-size:15px;align-self:end}
 .st-sl>.prib .prib-s,.st-sl>.evrib span{grid-column:2;grid-row:2;align-self:start;font-size:12.5px;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
@@ -248,7 +248,7 @@ html.lite .incbar::after{display:none}
 .felt .fl{display:flex;position:static;gap:0;flex:initial;line-height:1.35}
 
 /* theme.css задаёт «верхний свет» через background-image — он затирал собственные градиенты плашек. Возвращаем: свет + родной фон */
-.bankbar:not(.crisis){background-image:linear-gradient(180deg,rgba(255,255,255,.07),transparent 55%),radial-gradient(120% 160% at 0% 0%,rgba(255,200,80,.26),transparent 55%),linear-gradient(120deg,#3a2a05,#1a1408 60%)}
+.bankbar:not(.crisis){background-image:linear-gradient(180deg,rgba(255,255,255,.07),transparent 55%),radial-gradient(120% 160% at 0% 0%,rgba(34,233,255,.26),transparent 55%),linear-gradient(120deg,#3a2a05,#1a1408 60%)}
 .richbar{background-image:linear-gradient(180deg,color-mix(in srgb,var(--text) 4%,transparent),transparent 60%),linear-gradient(90deg,color-mix(in srgb,var(--gold) 20%,var(--card)),var(--card) 75%)}
 .prib{background-image:linear-gradient(180deg,color-mix(in srgb,var(--text) 4%,transparent),transparent 60%),linear-gradient(90deg,color-mix(in srgb,var(--gold) 22%,var(--card)),var(--card) 70%)}
 .tme{background-image:linear-gradient(180deg,color-mix(in srgb,var(--text) 4%,transparent),transparent 60%),radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--accent) 28%,var(--card)),var(--card) 70%)}

@@ -4,7 +4,7 @@
 .bkhero{text-align:center;padding:22px 14px 18px;border-radius:24px;color:#fff;background:radial-gradient(120% 100% at 50% 0%,#c08a1e,#2b1a03);box-shadow:0 16px 36px -16px #c08a1e;display:flex;flex-direction:column;align-items:center;gap:4px}
 .bkhero>span:not(.bk-big){font-size:12px;text-transform:uppercase;letter-spacing:.08em;opacity:.75;font-weight:700}
 .bkhero>b{font-size:32px;font-weight:900}
-.bk-big{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,#ffe17a,#ffab2e);color:#3a2300;margin-bottom:6px}
+.bk-big{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg,#a8fbff,#7a6bff);color:#031018;margin-bottom:6px}
 .bk-big .ic{width:30px;height:30px}
 .bk-chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:6px}
 .bk-chips em{font-style:normal;font-size:12.5px;font-weight:800;padding:4px 10px;border-radius:9px;background:rgba(0,0,0,.3)}
@@ -39,8 +39,8 @@
 .bankbar em{white-space:nowrap}
 .bk-empty{padding:14px;font-size:13px;text-align:center}
 /* покупка акций — золотые кнопки, видно сразу */
-.bks-buy button{position:relative;overflow:hidden;background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);color:#3a2300;
-  box-shadow:0 6px 18px -6px rgba(255,170,30,.75),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .12s}
+.bks-buy button{position:relative;overflow:hidden;background:linear-gradient(135deg,#a8fbff,#7a6bff 55%,#7a6bff);color:#031018;
+  box-shadow:0 6px 18px -6px rgba(122,107,255,.75),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .12s}
 .bks-buy button:active{transform:scale(.95)}
 .bks-buy button b{font-size:17px;font-weight:900}
 .bks-buy button span{color:#5a3800;font-weight:800}
@@ -55,10 +55,10 @@
 /* ---------- v2: экран банка ---------- */
 .bkh{position:relative;overflow:hidden;padding:18px;border-radius:24px;color:#fff;
   background:radial-gradient(130% 120% at 100% 0%,#8a5a0c 0%,#4a2c05 45%,#1a1003 100%);
-  box-shadow:0 18px 40px -22px #e0a020,inset 0 0 0 1px rgba(255,214,120,.18)}
+  box-shadow:0 18px 40px -22px #e0a020,inset 0 0 0 1px rgba(168,251,255,.18)}
 .bkh::after{content:"";position:absolute;right:-50px;top:-60px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,110,.32),transparent 70%);pointer-events:none}
 .bkh-top{display:flex;align-items:center;gap:14px}
-.bkh-i{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);color:#3a2300;box-shadow:0 8px 20px -8px #ffb52e,inset 0 1px 0 rgba(255,255,255,.6)}
+.bkh-i{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,#a8fbff,#7a6bff 55%,#7a6bff);color:#031018;box-shadow:0 8px 20px -8px #7a6bff,inset 0 1px 0 rgba(255,255,255,.6)}
 .bkh-i .ic{width:28px;height:28px}
 .bkh-top>div>span{display:block;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;opacity:.7}
 .bkh-top>div>b{display:block;font-size:clamp(24px,8vw,32px);font-weight:900;letter-spacing:-.02em;white-space:nowrap}
@@ -109,17 +109,17 @@
 .loan-bar i{display:block;height:100%;border-radius:4px;background:#2fd47a}
 /* адрес банка и перевод в банк */
 .bkh-addr{position:relative;z-index:1;display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;padding:9px 12px;border-radius:13px;text-align:left;color:#fff;
-  background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px rgba(255,214,120,.14)}
+  background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px rgba(168,251,255,.14)}
 .bkh-addr span{flex:none;font-size:11px;font-weight:700;opacity:.65}
-.bkh-addr b{flex:1;min-width:0;font:700 12.5px/1.2 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.02em;color:#ffe7a3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bkh-addr b{flex:1;min-width:0;font:700 12.5px/1.2 ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.02em;color:#a8fbff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bkh-addr .ic{flex:none;width:16px;height:16px;opacity:.75}
 .bkh-gift{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;width:100%;margin-top:8px;padding:11px 12px;border-radius:13px;
-  font-weight:800;font-size:14.5px;color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);box-shadow:0 8px 20px -10px #ffb52e,inset 0 1px 0 rgba(255,255,255,.6)}
+  font-weight:800;font-size:14.5px;color:#031018;background:linear-gradient(135deg,#a8fbff,#7a6bff 55%,#7a6bff);box-shadow:0 8px 20px -10px #7a6bff,inset 0 1px 0 rgba(255,255,255,.6)}
 .bkh-gift .ic{width:17px;height:17px}
 .bkh-gift em{flex-basis:100%;font-style:normal;font-size:11.5px;font-weight:700;opacity:.7;text-align:center;margin-top:-2px}
 .bkg{text-align:center;padding:18px 8px 4px}
-.bkg-i{width:68px;height:68px;margin:0 auto 12px;border-radius:22px;display:grid;place-items:center;color:#3a2300;
-  background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00);box-shadow:0 14px 30px -10px #ffb52e,inset 0 1px 0 rgba(255,255,255,.6)}
+.bkg-i{width:68px;height:68px;margin:0 auto 12px;border-radius:22px;display:grid;place-items:center;color:#031018;
+  background:linear-gradient(135deg,#a8fbff,#7a6bff 55%,#7a6bff);box-shadow:0 14px 30px -10px #7a6bff,inset 0 1px 0 rgba(255,255,255,.6)}
 .bkg-i .ic{width:34px;height:34px}
 .bkg h2{margin:0 0 8px;font-size:22px}
 .bkg p{margin:0 auto;max-width:320px;color:var(--hint);font-size:14px}
@@ -132,7 +132,7 @@
 .bkcr-i .ic{width:22px;height:22px}
 .bkcr b{display:block;font-size:16px;font-weight:900;letter-spacing:.02em;text-transform:uppercase}
 .bkcr span{display:block;font-size:12.5px;opacity:.82;margin-top:2px}
-.bkcr em{display:block;font-style:normal;font-size:12.5px;font-weight:800;color:#ffd76a;margin-top:6px}
+.bkcr em{display:block;font-style:normal;font-size:12.5px;font-weight:800;color:#22e9ff;margin-top:6px}
 .bkh.crisis{background:radial-gradient(130% 120% at 100% 0%,#8a1a1a 0%,#4a0c0c 45%,#1a0404 100%);box-shadow:0 18px 40px -22px #ff3b4e,inset 0 0 0 1px rgba(255,120,120,.25)}
 /* плашка банка в «Играх»: кризис и тикер выигрышей */
 .bankbar{position:relative}
@@ -160,16 +160,16 @@
 button.bkh-top{width:100%;text-align:left;color:inherit;position:relative;z-index:1}
 .bkh-tap{cursor:pointer;transition:transform .15s}.bkh-tap:active{transform:scale(.98)}
 .bkh-tap>div{flex:1;min-width:0}
-.bkh-vlt{flex:none;display:inline-flex;align-items:center;gap:4px;padding:6px 6px 6px 9px;border-radius:12px;font-style:normal;background:rgba(0,0,0,.3);box-shadow:inset 0 0 0 1px rgba(255,214,120,.2)}
+.bkh-vlt{flex:none;display:inline-flex;align-items:center;gap:4px;padding:6px 6px 6px 9px;border-radius:12px;font-style:normal;background:rgba(0,0,0,.3);box-shadow:inset 0 0 0 1px rgba(168,251,255,.2)}
 .bkh-vlt b{font-size:14px!important;font-weight:900;letter-spacing:0!important}
 .bkh-vlt .ic{width:15px;height:15px;opacity:.85}
 .bkh-vlt .ic:last-child{width:14px;height:14px;opacity:.6}
 /* хранилище банка */
 .vlh{position:relative;display:flex;align-items:center;gap:16px;margin-top:44px;padding:18px;border-radius:24px;color:#fff;overflow:hidden;
-  background:radial-gradient(120% 140% at 100% 0%,rgba(255,200,80,.3),transparent 55%),linear-gradient(135deg,#2a2112,#120d06 70%);
-  box-shadow:0 18px 40px -22px #e0a020,inset 0 0 0 1px rgba(255,214,120,.2),inset 0 1px 0 rgba(255,255,255,.12)}
-.vlh-door{position:relative;flex:none;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;color:#3a2300;
-  background:radial-gradient(circle at 35% 30%,#fff1b8,#ffc53d 45%,#b07400);box-shadow:0 10px 24px -8px #ffb52e,inset 0 -4px 8px rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.6)}
+  background:radial-gradient(120% 140% at 100% 0%,rgba(34,233,255,.3),transparent 55%),linear-gradient(135deg,#2a2112,#120d06 70%);
+  box-shadow:0 18px 40px -22px #e0a020,inset 0 0 0 1px rgba(168,251,255,.2),inset 0 1px 0 rgba(255,255,255,.12)}
+.vlh-door{position:relative;flex:none;width:76px;height:76px;border-radius:50%;display:grid;place-items:center;color:#031018;
+  background:radial-gradient(circle at 35% 30%,#fff1b8,#22e9ff 45%,#b07400);box-shadow:0 10px 24px -8px #7a6bff,inset 0 -4px 8px rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.6)}
 .vlh-door::before{content:"";position:absolute;inset:9px;border-radius:50%;border:2px dashed rgba(58,35,0,.35);animation:vl-spin 16s linear infinite}
 .vlh-door i{position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(58,35,0,.45)}
 .vlh-door i:nth-child(1){top:6px;left:35px}.vlh-door i:nth-child(2){bottom:6px;left:35px}.vlh-door i:nth-child(3){top:35px;right:6px}
@@ -178,7 +178,7 @@ button.bkh-top{width:100%;text-align:left;color:inherit;position:relative;z-inde
 .vlh-t{min-width:0}
 .vlh-t span{display:block;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;opacity:.7}
 .vlh-t b{display:block;font-size:24px;font-weight:900;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vlh-t em{display:block;font-style:normal;font-size:15px;font-weight:800;color:#ffe08a}
+.vlh-t em{display:block;font-style:normal;font-size:15px;font-weight:800;color:#a8fbff}
 .vl-how{margin:12px 2px;font-size:13px;line-height:1.45;color:var(--hint)}
 .vl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .vl-it{display:flex;flex-direction:column;gap:3px;min-width:0;padding:8px;border-radius:16px;cursor:pointer;
@@ -186,17 +186,17 @@ button.bkh-top{width:100%;text-align:left;color:inherit;position:relative;z-inde
 .vl-it.mine{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--gold) 60%,transparent)}
 .vl-g{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;filter:saturate(.85)}
 .vl-g .gift{width:100%;height:100%;border-radius:0}
-.vl-mine{position:absolute;left:5px;top:5px;padding:2px 6px;border-radius:7px;font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#3a2300;background:var(--gold)}
+.vl-mine{position:absolute;left:5px;top:5px;padding:2px 6px;border-radius:7px;font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#031018;background:var(--gold)}
 .vl-it>b{font-size:13.5px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vl-from{font-size:11px;color:var(--hint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vl-bar{height:4px;border-radius:2px;background:color-mix(in srgb,var(--text) 10%,transparent);overflow:hidden;margin-top:2px}
-.vl-bar i{display:block;height:100%;border-radius:2px;background:linear-gradient(90deg,#ff9f1a,#ffd76a)}
+.vl-bar i{display:block;height:100%;border-radius:2px;background:linear-gradient(90deg,#ff9f1a,#22e9ff)}
 .vl-left{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:var(--hint);white-space:nowrap}
 .vl-left .ic{width:11px;height:11px}
 .bkh-vrow{position:relative;z-index:1;display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:9px 12px;border-radius:13px;text-align:left;color:#fff;
-  background:linear-gradient(90deg,rgba(255,214,120,.16),rgba(0,0,0,.25));box-shadow:inset 0 0 0 1px rgba(255,214,120,.22);transition:transform .15s}
+  background:linear-gradient(90deg,rgba(168,251,255,.16),rgba(0,0,0,.25));box-shadow:inset 0 0 0 1px rgba(168,251,255,.22);transition:transform .15s}
 .bkh-vrow:active{transform:scale(.98)}
-.bkh-vi{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffb52e 55%,#f08c00)}
+.bkh-vi{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:#031018;background:linear-gradient(135deg,#a8fbff,#7a6bff 55%,#7a6bff)}
 .bkh-vi .ic{width:17px;height:17px}
 .bkh-vt{flex:1;min-width:0}
 .bkh-vt b{display:block;font-size:14px}
@@ -226,17 +226,17 @@ button.bkh-top{width:100%;text-align:left;color:inherit;position:relative;z-inde
    Вклады в банк + уровень банка
    ============================================================ */
 .bklvl{flex:none;display:inline-flex;align-items:center;gap:4px;margin-left:auto;padding:5px 10px;border-radius:999px;
-  font-size:11.5px;font-weight:700;color:#ffd76a;background:color-mix(in srgb,#ffd76a 12%,transparent);
-  border:1px solid color-mix(in srgb,#ffd76a 30%,transparent)}
+  font-size:11.5px;font-weight:700;color:#22e9ff;background:color-mix(in srgb,#22e9ff 12%,transparent);
+  border:1px solid color-mix(in srgb,#22e9ff 30%,transparent)}
 .bklvl .ic{width:13px;height:13px}
 .bkdep{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
 .bkdep-lvl{display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:8px}
 .bkdep-lvl span{display:flex;justify-content:space-between;align-items:baseline}
 .bkdep-lvl small{color:var(--hint);font-size:11.5px}
 .bkdep .cbar{height:6px;border-radius:4px;background:color-mix(in srgb,var(--hint) 15%,transparent);overflow:hidden}
-.bkdep .cbar div{height:100%;border-radius:4px;background:linear-gradient(90deg,#ffd76a,#ff9d4d)}
+.bkdep .cbar div{height:100%;border-radius:4px;background:linear-gradient(90deg,#22e9ff,#ff9d4d)}
 .bk-lvl{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:2px 7px;border-radius:999px;
-  font-size:10.5px;font-weight:700;font-style:normal;color:#ffd76a;background:color-mix(in srgb,#ffd76a 14%,transparent)}
+  font-size:10.5px;font-weight:700;font-style:normal;color:#22e9ff;background:color-mix(in srgb,#22e9ff 14%,transparent)}
 .bk-lvl .ic{width:11px;height:11px}
 .row.dep .s{white-space:normal}
 

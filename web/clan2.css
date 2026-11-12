@@ -14,7 +14,7 @@
 .ava.fr-clan,.ava.fr-clang{--frw:calc(1px + max(1px,var(--s)*.025));box-shadow:0 0 0 1.5px var(--bg);isolation:isolate}
 .ava.fr-clan::before,.ava.fr-clang::before{content:"";position:absolute;inset:calc(-1.5px - var(--frw));border-radius:50%;z-index:-1;opacity:.9;
   background:conic-gradient(from 210deg,var(--ca),var(--cb),var(--ca),var(--cb),var(--ca))}
-.ava.fr-clang::before{background:conic-gradient(from var(--fra,0deg),#ffe58a,#ffab2e,#fff3c4,#ffab2e,#ffe58a);animation:frSpin 4s linear infinite;filter:drop-shadow(0 0 3px #ffc93d77)}
+.ava.fr-clang::before{background:conic-gradient(from var(--fra,0deg),#a8fbff,#7a6bff,#a8fbff,#7a6bff,#a8fbff);animation:frSpin 4s linear infinite;filter:drop-shadow(0 0 3px #ffc93d77)}
 .lite .ava.fr-clang::before{animation:none}
 
 /* узор герба на обложке клана (4+ ур.) */
@@ -32,17 +32,17 @@
 .cllv{margin-top:12px;border-radius:18px;background:var(--card);overflow:hidden}
 .cllv summary{display:flex;align-items:center;gap:12px;padding:12px 14px;list-style:none;cursor:pointer}
 .cllv summary::-webkit-details-marker{display:none}
-.cllv summary>.ic:first-child{width:20px;height:20px;color:var(--gold,#ffc93d);flex:none}
+.cllv summary>.ic:first-child{width:20px;height:20px;color:var(--gold,#22e9ff);flex:none}
 .cllv summary .grow{min-width:0;display:flex;flex-direction:column}.cllv summary b{font-size:14.5px}.cllv summary span{font-size:12px;color:var(--hint)}
 .cllv summary>.ic:last-child{width:16px;height:16px;color:var(--hint);transform:rotate(90deg);transition:transform .2s;flex:none}
 .cllv[open] summary>.ic:last-child{transform:rotate(-90deg)}
 .cllv-l{display:grid;gap:2px;padding:0 8px 8px}
 .cllv-r{display:flex;align-items:center;gap:10px;padding:8px 6px;border-radius:12px}
-.cllv-r.cur{background:color-mix(in srgb,var(--gold,#ffc93d) 12%,transparent)}
+.cllv-r.cur{background:color-mix(in srgb,var(--gold,#22e9ff) 12%,transparent)}
 .cllv-r .grow{min-width:0;display:flex;flex-direction:column}.cllv-r b{font-size:12.5px;line-height:1.3}.cllv-r span{font-size:11px;color:var(--hint)}
 .cllv-r:not(.done) b{opacity:.7}
 .cllv-n{flex:none;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:900;background:var(--card2);color:var(--hint)}
-.cllv-r.done .cllv-n{background:var(--gold,#ffc93d);color:#3a2300}.cllv-n .ic{width:14px;height:14px}
+.cllv-r.done .cllv-n{background:var(--gold,#22e9ff);color:#031018}.cllv-n .ic{width:14px;height:14px}
 
 /* чат клана */
 .cc-s .gtitle{display:flex;align-items:center;justify-content:center;gap:8px}.cc-s .gtitle .ic{width:22px;height:22px}
@@ -64,7 +64,7 @@
 .cc-sys{align-self:center;display:flex;align-items:center;gap:6px;max-width:92%;margin:6px 0 2px;padding:5px 11px;border-radius:12px;
   background:color-mix(in srgb,var(--card) 70%,transparent);font-size:12px;color:var(--hint);text-align:center}
 .cc-sys .ic{width:14px;height:14px;flex:none}.cc-sys b{color:var(--text)}
-.cc-sys.win{background:color-mix(in srgb,var(--gold,#ffc93d) 14%,var(--card));color:var(--text)}.cc-sys.win>.ic{color:var(--gold,#ffc93d)}
+.cc-sys.win{background:color-mix(in srgb,var(--gold,#22e9ff) 14%,var(--card));color:var(--text)}.cc-sys.win>.ic{color:var(--gold,#22e9ff)}
 .cc-in{display:flex;align-items:flex-end;gap:8px;padding-top:8px;border-top:1px solid color-mix(in srgb,var(--hint) 18%,transparent)}
 .cc-in textarea{flex:1;min-width:0;resize:none;max-height:96px;padding:10px 14px;border-radius:20px;border:0;background:var(--card);color:var(--text);font:inherit;font-size:15px;line-height:1.3;outline:none}
 .cc-send{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#fff}
@@ -72,6 +72,6 @@
 
 /* скидка клана в оформлении */
 .sty-disc{display:flex;align-items:center;gap:8px;margin:12px 0 -2px;padding:9px 12px;border-radius:14px;font-size:12.5px;font-weight:700;
-  background:color-mix(in srgb,var(--gold,#ffc93d) 14%,var(--card));color:var(--text)}
-.sty-disc .ic{width:16px;height:16px;color:var(--gold,#ffc93d)}
+  background:color-mix(in srgb,var(--gold,#22e9ff) 14%,var(--card));color:var(--text)}
+.sty-disc .ic{width:16px;height:16px;color:var(--gold,#22e9ff)}
 .sty-full{font-size:11px;color:var(--hint);margin-bottom:-3px}

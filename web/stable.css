@@ -125,7 +125,7 @@ nav.tabs button.tab-fair i .ic{filter:drop-shadow(0 0 7px #16c88d99)}
 /* ============================================================
    Цвет акцента и прозрачность: выбирает игрок
    ============================================================ */
-:root{--ac:rgb(255,197,61);--ac-on:#2a1c00;--gp:60;
+:root{--ac:rgb(34,233,255);--ac-on:#2a1c00;--gp:60;
   --ac-l:color-mix(in srgb,var(--ac) 62%,#fff);--ac-d:color-mix(in srgb,var(--ac) 76%,#000);
   --gold:var(--ac);--accent:var(--ac);--accent-text:var(--ac-on);
   --solid:color-mix(in srgb,var(--bg) calc(100% - var(--gp) * .85%),transparent);

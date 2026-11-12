@@ -17,7 +17,7 @@
   background:radial-gradient(120% 100% at 50% 100%,#2a1d63,#0d0b22 70%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
 .cd-arena canvas{position:absolute;inset:0;width:100%;height:100%}
 .cd-m{position:absolute;left:0;right:0;top:34%;text-align:center;font-size:46px;font-weight:900;color:#fff;letter-spacing:-.02em;text-shadow:0 4px 24px rgba(0,0,0,.5);pointer-events:none}
-.cd-m.hot{color:#ffd76a}.cd-m.boom{color:#ff6b6b}
+.cd-m.hot{color:#22e9ff}.cd-m.boom{color:#ff6b6b}
 .cd-sub{position:absolute;left:0;right:0;top:62%;text-align:center;font-size:13px;font-weight:700;color:rgba(255,255,255,.7);pointer-events:none}
 .cd-s .btn.cta{width:100%}
 /* больше/меньше */

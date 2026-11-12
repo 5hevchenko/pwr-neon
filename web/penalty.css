@@ -19,7 +19,7 @@
     radial-gradient(circle,rgba(255,255,255,.55) 0 1.1px,transparent 1.8px) 5px 4px/11px 8px,
     radial-gradient(circle,rgba(110,180,255,.6) 0 1.2px,transparent 2px) 8px 2px/17px 10px}
 .pn-fans.b{opacity:.45;transform:translateY(3px);background:
-    radial-gradient(circle,rgba(255,215,106,.7) 0 1.2px,transparent 2px) 3px 1px/19px 7px,
+    radial-gradient(circle,rgba(34,233,255,.7) 0 1.2px,transparent 2px) 3px 1px/19px 7px,
     radial-gradient(circle,rgba(198,255,61,.55) 0 1.1px,transparent 1.8px) 9px 5px/23px 9px;animation:pn-twinkle 2.4s steps(2) infinite}
 @keyframes pn-twinkle{50%{opacity:.25}}
 .pn-crowd.roar .pn-fans{animation:pn-roar 1.1s ease-out}
@@ -51,7 +51,7 @@
 .pn-z i{position:absolute;inset:8px;border-radius:50%;border:2px dashed rgba(255,255,255,.55);background:rgba(255,255,255,.06);transition:all .2s;animation:pn-zone 2.4s linear infinite}
 .pn-z i::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:rgba(255,255,255,.8)}
 @keyframes pn-zone{to{transform:rotate(360deg)}}
-.pn-z:active i,.pn-z.aim i{border-style:solid;border-color:#ffd76a;background:rgba(255,215,106,.22);box-shadow:0 0 16px rgba(255,215,106,.7);transform:scale(1.15)}
+.pn-z:active i,.pn-z.aim i{border-style:solid;border-color:#22e9ff;background:rgba(34,233,255,.22);box-shadow:0 0 16px rgba(34,233,255,.7);transform:scale(1.15)}
 .pn-z.cov i{border:2px solid #ff4d5e;background:rgba(255,77,94,.35);box-shadow:0 0 18px rgba(255,77,94,.8);animation:none}
 .pn-z.cov i::after{width:14px;height:14px;margin:-7px;background:#fff;box-shadow:inset 0 3px 0 #ff7a1a}
 .pn-stage.busy .pn-z{pointer-events:none}

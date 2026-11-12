@@ -65,6 +65,6 @@
 .lg-rt{font-size:24px;font-weight:900;letter-spacing:-.01em}
 .lg-res.up .lg-rt{color:#5cf5ab}.lg-res.down .lg-rt{color:#ff6b78}
 .lg-res p{margin:6px 0 0;color:var(--hint);font-size:14px}
-.lg-rw{margin-top:12px;padding:8px 18px;border-radius:999px;font-size:20px;font-weight:900;color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffb52e);box-shadow:0 8px 22px -8px #ffb52e}
+.lg-rw{margin-top:12px;padding:8px 18px;border-radius:999px;font-size:20px;font-weight:900;color:#031018;background:linear-gradient(135deg,#a8fbff,#7a6bff);box-shadow:0 8px 22px -8px #7a6bff}
 .lg-res .btn{width:100%;margin-top:18px}
 @media (prefers-reduced-motion:reduce){.lg-shine,.lg-emb,.lg-hero::before{animation:none}}

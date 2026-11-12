@@ -9,7 +9,7 @@
 .pm-sky i{position:absolute;border-radius:50%;filter:blur(1.5px);opacity:.5;animation:pm-bok 9s ease-in-out infinite alternate;
   background:radial-gradient(circle,color-mix(in srgb,var(--mc) 70%,#fff) 0,transparent 68%)}
 .pm-sky i:nth-child(1){left:8%;top:18%;width:38px;height:38px}
-.pm-sky i:nth-child(2){left:78%;top:12%;width:24px;height:24px;animation-delay:-3s;background:radial-gradient(circle,#ffd76a 0,transparent 68%)}
+.pm-sky i:nth-child(2){left:78%;top:12%;width:24px;height:24px;animation-delay:-3s;background:radial-gradient(circle,#22e9ff 0,transparent 68%)}
 .pm-sky i:nth-child(3){left:84%;top:46%;width:46px;height:46px;animation-delay:-5s;opacity:.3}
 .pm-sky i:nth-child(4){left:14%;top:56%;width:18px;height:18px;animation-delay:-1s;background:radial-gradient(circle,#9fd3ff 0,transparent 68%)}
 .pm-sky i:nth-child(5){left:30%;top:8%;width:12px;height:12px;animation-delay:-7s}

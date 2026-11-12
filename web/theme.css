@@ -16,7 +16,7 @@ h1,h2,h3{letter-spacing:-.015em}
 .btn{position:relative;overflow:hidden;isolation:isolate;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 20px -10px color-mix(in srgb,var(--accent) 70%,transparent)}
 .btn::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 55%);pointer-events:none}
-.btn.gold{background:linear-gradient(135deg,#ffe58a 0%,#ffc53d 45%,#ff9f1c 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(150,80,0,.25),0 10px 24px -10px #ffab2e}
+.btn.gold{background:linear-gradient(135deg,#a8fbff 0%,#22e9ff 45%,#7a6bff 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(150,80,0,.25),0 10px 24px -10px #7a6bff}
 .btn.gold::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;z-index:-1;pointer-events:none;
   background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);animation:btnshine 4.5s ease-in-out infinite}
 @keyframes btnshine{0%,70%{transform:translateX(0) skewX(-18deg)}100%{transform:translateX(420%) skewX(-18deg)}}
@@ -40,7 +40,7 @@ header{box-shadow:0 1px 0 color-mix(in srgb,var(--text) 6%,transparent)}
 .bal{background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 16%,var(--card)),var(--card) 70%);
   box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent),0 4px 14px -8px color-mix(in srgb,var(--gold) 70%,transparent);transition:transform .15s}
 .bal:active{transform:scale(.96)}
-.bal .plus{background:linear-gradient(135deg,#ffe58a,#ffab2e);box-shadow:0 0 10px -2px #ffc53d}
+.bal .plus{background:linear-gradient(135deg,#a8fbff,#7a6bff);box-shadow:0 0 10px -2px #22e9ff}
 
 /* --- нижние вкладки: активная иконка светится золотом --- */
 nav.tabs{box-shadow:0 10px 34px rgba(0,0,0,.45),inset 0 0 0 1px color-mix(in srgb,var(--text) 8%,transparent),inset 0 1px 0 color-mix(in srgb,var(--text) 10%,transparent)}
@@ -93,10 +93,10 @@ html.lite nav.tabs{background-color:var(--card)}
 html.lite header{background:var(--bg)}
 html.lite .sheet{background:var(--bg)}
 /* ===== ивент «Хэллоуин» ===== */
-html.ev-halloween{--gold:#ff9f1c}
+html.ev-halloween{--gold:#7a6bff}
 html.ev-halloween::before{background:radial-gradient(60% 40% at 0% 0%,rgba(255,120,20,.2),transparent 70%),radial-gradient(55% 35% at 100% 30%,rgba(140,60,220,.2),transparent 70%),radial-gradient(70% 40% at 50% 100%,rgba(255,120,20,.12),transparent 70%)!important}
 html.ev-halloween header{box-shadow:0 1px 0 rgba(255,140,30,.35)}
-html.ev-halloween nav.tabs button.on i{color:#ff9f1c;filter:drop-shadow(0 0 6px rgba(255,140,30,.7))}
+html.ev-halloween nav.tabs button.on i{color:#7a6bff;filter:drop-shadow(0 0 6px rgba(255,140,30,.7))}
 .ev-deco img{position:fixed;z-index:14;width:44px;height:44px;object-fit:contain;pointer-events:none;opacity:.9;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
 .ev-deco .l{left:4px;bottom:calc(84px + var(--bot));animation:evbob 3.4s ease-in-out infinite}
 .ev-deco .r{right:4px;bottom:calc(84px + var(--bot));animation:evbob 3.8s ease-in-out infinite reverse}
@@ -106,7 +106,7 @@ html.lite .ev-deco{display:none}
   background:linear-gradient(90deg,rgba(255,120,20,.28),rgba(140,60,220,.18) 60%,var(--card));box-shadow:inset 0 0 0 1px rgba(255,140,30,.45)}
 .evrib img{width:30px;height:30px;object-fit:contain}.evrib b{white-space:nowrap}.evrib span{flex:1;min-width:0;color:var(--hint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .evrib>.ic{width:16px;height:16px;color:var(--hint)}
-.case.ev{box-shadow:0 0 0 2px #ff9f1c,0 12px 30px -10px rgba(255,120,20,.8)}
+.case.ev{box-shadow:0 0 0 2px #7a6bff,0 12px 30px -10px rgba(255,120,20,.8)}
 .evtag{position:absolute;top:8px;right:8px;z-index:6;padding:3px 8px;border-radius:9px;font-size:10.5px;font-weight:900;letter-spacing:.03em;color:#fff;background:linear-gradient(135deg,#ff7a1a,#8c3cdc)}
 /* ===== мелочи для «вау» ===== */
 /* скелетон загрузки */
@@ -145,9 +145,9 @@ html.lite .gift.shine::before{display:none}
 /* новый уровень */
 .lvup2{position:relative;text-align:center;overflow:hidden;padding-top:6px}
 .lvup2 .lv-rays{position:absolute;left:50%;top:70px;width:340px;height:340px;margin:-170px 0 0 -170px;opacity:.35;pointer-events:none;
-  background:repeating-conic-gradient(#ffd76a 0 7deg,transparent 7deg 18deg);-webkit-mask:radial-gradient(circle,#000,transparent 62%);mask:radial-gradient(circle,#000,transparent 62%);animation:wonspin 10s linear infinite}
+  background:repeating-conic-gradient(#22e9ff 0 7deg,transparent 7deg 18deg);-webkit-mask:radial-gradient(circle,#000,transparent 62%);mask:radial-gradient(circle,#000,transparent 62%);animation:wonspin 10s linear infinite}
 .lvup2>span{position:relative;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--hint)}
-.lvup2>b{position:relative;display:block;font-size:72px;font-weight:900;line-height:1.05;background:linear-gradient(180deg,#fff3b0,#ffab2e);-webkit-background-clip:text;background-clip:text;color:transparent;
+.lvup2>b{position:relative;display:block;font-size:72px;font-weight:900;line-height:1.05;background:linear-gradient(180deg,#a8fbff,#7a6bff);-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 4px 14px rgba(255,170,40,.5));animation:bwpop .6s cubic-bezier(.2,1.8,.4,1)}
 .lvup2 p{position:relative;margin:4px 0 12px}
 .lv-new{position:relative;display:grid;gap:6px;margin-bottom:12px}
@@ -160,11 +160,11 @@ html.lite .gift.shine::before{display:none}
 .fly-gift{position:fixed;z-index:125;object-fit:contain;pointer-events:none;filter:drop-shadow(0 8px 14px rgba(0,0,0,.45))}
 nav.tabs button.bag-pop{animation:bagpop .5s cubic-bezier(.2,1.8,.4,1)}
 @keyframes bagpop{40%{transform:scale(1.25) translateY(-4px)}}
-.bag-plus{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:900;padding:1px 6px;border-radius:8px;background:var(--gold);color:#3a2300;animation:bagplus 1.2s ease-out forwards;pointer-events:none}
+.bag-plus{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:900;padding:1px 6px;border-radius:8px;background:var(--gold);color:#031018;animation:bagplus 1.2s ease-out forwards;pointer-events:none}
 @keyframes bagplus{0%{opacity:0;transform:translate(-50%,6px)}20%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-14px)}}
 /* «почти!» в слотах */
-.sreel.near-pair{box-shadow:inset 0 0 0 3px #ffd76a,0 0 14px #ffd76a}
+.sreel.near-pair{box-shadow:inset 0 0 0 3px #22e9ff,0 0 14px #22e9ff}
 .sreel.near-odd{animation:nearodd .5s ease-in-out 2}
 @keyframes nearodd{25%{transform:translateY(-6px)}75%{transform:translateY(4px)}}
 .snear{position:absolute;left:50%;top:50%;z-index:5;transform:translate(-50%,-50%);padding:5px 12px;border-radius:12px;font-weight:900;font-size:15px;color:#3a1600;
-  background:linear-gradient(135deg,#fff3b0,#ffab2e);box-shadow:0 8px 20px rgba(0,0,0,.4);animation:pop .5s cubic-bezier(.2,1.6,.4,1);white-space:nowrap}
+  background:linear-gradient(135deg,#a8fbff,#7a6bff);box-shadow:0 8px 20px rgba(0,0,0,.4);animation:pop .5s cubic-bezier(.2,1.6,.4,1);white-space:nowrap}

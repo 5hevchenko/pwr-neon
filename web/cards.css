@@ -53,7 +53,7 @@
 .deckc{position:relative}.deckc span{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:900;font-size:18px;text-shadow:0 1px 4px #000}
 .cursuit{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;color:#fff;font-weight:700;font-size:14px}
 .cursuit .suit{width:16px;height:16px;fill:#fff}.cursuit.red .suit{fill:#ff6b81}
-.cursuit b{color:#ffd76a}
+.cursuit b{color:#22e9ff}
 .log{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:8px;font-size:12px;color:rgba(255,255,255,.7);min-height:46px}
 .log i{font-style:normal;font-weight:800;color:#fff;display:inline-flex;align-items:center}.log i.red{color:#ff8a9b}
 .log .suit{width:11px;height:11px;fill:currentColor}
@@ -103,7 +103,7 @@
 .deckc span{z-index:2}
 .cursuit{display:inline-flex;margin:12px auto 0;padding:5px 12px;border-radius:12px;background:rgba(0,0,0,.28);width:max-content;max-width:100%}
 .t101 .cursuit{display:flex;width:max-content;margin:12px auto 0}
-.alert6{text-align:center;margin-top:8px;font-size:13px;font-weight:800;color:#ffd76a}
+.alert6{text-align:center;margin-top:8px;font-size:13px;font-weight:800;color:#22e9ff}
 .lastmv{text-align:center;margin-top:8px;font-size:13px;color:rgba(255,255,255,.78);min-height:18px}
 .lastmv i{font-style:normal;font-weight:900;color:#fff;display:inline-flex;align-items:center}.lastmv i.red{color:#ff9aa8}
 .lastmv .suit{width:12px;height:12px;fill:currentColor}
@@ -116,7 +116,7 @@
 .hrow{align-items:center;gap:10px}
 .bjsc{flex:none;min-width:40px;height:40px;padding:0 8px;border-radius:20px;display:grid;place-items:center;font-size:19px;font-weight:900;color:#fff;
   background:rgba(0,0,0,.38);border:2px solid rgba(255,255,255,.35);box-shadow:0 4px 12px rgba(0,0,0,.3);animation:bjsc .3s cubic-bezier(.2,1.4,.4,1)}
-.bjsc.bj21{background:linear-gradient(#ffd76a,#e8a91c);color:#3a2300;border-color:#fff3c4}
+.bjsc.bj21{background:linear-gradient(#22e9ff,#e8a91c);color:#031018;border-color:#a8fbff}
 .bjsc.bust{background:#d8344a;border-color:#ff9aa8}
 @keyframes bjsc{from{transform:scale(.5);opacity:0}}
 

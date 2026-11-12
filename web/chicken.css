@@ -1,6 +1,6 @@
 /* ================= «Курица» ================= */
 .ckroad{position:relative;height:250px;border-radius:24px;overflow:hidden;background:#24262e;
-  box-shadow:inset 0 0 0 2px rgba(255,210,63,.35),0 18px 40px -16px rgba(0,0,0,.7)}
+  box-shadow:inset 0 0 0 2px rgba(34,233,255,.35),0 18px 40px -16px rgba(0,0,0,.7)}
 /* бордюры сверху и снизу */
 .ckroad::before,.ckroad::after{content:"";position:absolute;left:0;right:0;height:16px;z-index:4;pointer-events:none;
   background:repeating-linear-gradient(90deg,#8d919c 0 26px,#7b7f8a 26px 28px);box-shadow:0 2px 0 #5d616b,0 4px 8px rgba(0,0,0,.4)}
@@ -33,11 +33,11 @@
     radial-gradient(circle at 35% 30%,#6c707c,#3a3d46 70%);
   box-shadow:inset 0 0 0 4px #4b4f59,inset 0 0 0 6px #2a2c33,0 3px 6px rgba(0,0,0,.5);transition:.3s}
 .ckman span{padding:3px 7px;border-radius:8px;background:rgba(20,22,28,.85);font-size:12px;font-weight:900;color:#e8e9ef;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.4)}
-.cklane.next .ckman{box-shadow:inset 0 0 0 4px #ffd23f,inset 0 0 0 6px #7a5600,0 0 0 4px rgba(255,210,63,.18),0 0 22px rgba(255,210,63,.55);animation:cknext 1.1s ease-in-out infinite}
-.cklane.next .ckman span{background:#ffd23f;color:#3a2600}
+.cklane.next .ckman{box-shadow:inset 0 0 0 4px #22e9ff,inset 0 0 0 6px #7a5600,0 0 0 4px rgba(34,233,255,.18),0 0 22px rgba(34,233,255,.55);animation:cknext 1.1s ease-in-out infinite}
+.cklane.next .ckman span{background:#22e9ff;color:#3a2600}
 @keyframes cknext{50%{transform:scale(1.07)}}
-.cklane.done .ckman{background:radial-gradient(circle at 35% 30%,#fff3b0,#ffc21a 55%,#c27a00);box-shadow:inset 0 0 0 4px #e9a300,inset 0 0 0 6px #8a5400,0 3px 8px rgba(0,0,0,.5)}
-.cklane.done .ckman span{background:rgba(90,52,0,.85);color:#fff3c4}
+.cklane.done .ckman{background:radial-gradient(circle at 35% 30%,#a8fbff,#22e9ff 55%,#c27a00);box-shadow:inset 0 0 0 4px #e9a300,inset 0 0 0 6px #8a5400,0 3px 8px rgba(0,0,0,.5)}
+.cklane.done .ckman span{background:rgba(90,52,0,.85);color:#a8fbff}
 
 /* шлагбаум у пройденной полосы */
 .ckbar{position:absolute;left:5px;right:5px;top:24px;height:14px;z-index:3;opacity:0;transform:translateY(-14px) scaleX(.4);transition:.35s cubic-bezier(.3,1.6,.5,1);
@@ -67,4 +67,4 @@
 @keyframes ckfly{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
 
 .ckbtns{display:flex;gap:8px;margin-top:12px}.ckbtns .btn.cta{flex:1;margin:0}
-.ck-s .ghead img{background:radial-gradient(circle,#ffe58a,#ffb31f);border-radius:16px;padding:2px}
+.ck-s .ghead img{background:radial-gradient(circle,#a8fbff,#7a6bff);border-radius:16px;padding:2px}

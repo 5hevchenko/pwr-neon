@@ -41,7 +41,7 @@
 .fs-bob{position:absolute;left:0;top:0;z-index:5;width:0;height:0;will-change:transform}
 .fs-bob i{position:absolute;left:-6px;top:-20px;width:12px;height:24px;border-radius:50% 50% 45% 45%/60% 60% 40% 40%;
   background:linear-gradient(180deg,#ff3b4e 0 48%,#fff 48% 62%,#2a2d38 62%);box-shadow:0 0 10px rgba(255,80,90,.6),inset -2px 0 3px rgba(0,0,0,.3);transition:transform .25s}
-.fs-bob i::before{content:"";position:absolute;left:50%;top:-6px;width:2px;height:7px;margin-left:-1px;background:#ffd76a;border-radius:1px}
+.fs-bob i::before{content:"";position:absolute;left:50%;top:-6px;width:2px;height:7px;margin-left:-1px;background:#22e9ff;border-radius:1px}
 .fs-bob.under i{transform:translateY(12px) scaleY(.6);opacity:.8}
 .fs-ring{position:absolute;z-index:4;width:12px;height:4px;margin:-2px 0 0 -6px;border-radius:50%;pointer-events:none;
   box-shadow:0 0 0 1.5px rgba(220,240,255,.7);animation:fs-ring 1.4s ease-out forwards}
@@ -59,7 +59,7 @@
   background:rgba(4,12,24,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
 .fs-tens.on{opacity:1;transform:none}
 .fs-tens span{font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7)}
-.fs-tens div{position:relative;flex:1;height:7px;border-radius:4px;background:linear-gradient(90deg,#4cf0a0,#ffd76a 55%,#ff4d5e);overflow:hidden}
+.fs-tens div{position:relative;flex:1;height:7px;border-radius:4px;background:linear-gradient(90deg,#4cf0a0,#22e9ff 55%,#ff4d5e);overflow:hidden}
 .fs-tens i{position:absolute;right:0;top:0;bottom:0;width:92%;background:#0d1626;transition:width .15s linear}
 .fs-tens.hot{animation:fs-hot .12s linear infinite}
 @keyframes fs-hot{50%{transform:translateX(1px)}}

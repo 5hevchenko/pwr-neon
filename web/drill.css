@@ -35,13 +35,13 @@
   conic-gradient(from 200deg at 22% 70%,transparent 0 20deg,rgba(120,220,255,.6) 20deg 32deg,transparent 32deg) ,
   conic-gradient(from 160deg at 70% 80%,transparent 0 18deg,rgba(220,140,255,.55) 18deg 30deg,transparent 30deg),
   radial-gradient(circle,rgba(180,230,255,.7) 0 1px,transparent 1.5px) 0 0/19px 15px}
-.dr-layer.L10{background:radial-gradient(70% 120% at 50% 100%,#fff3b0 0%,#ffc53d 25%,#ff7a1a 55%,#7a1e08 100%);box-shadow:inset 0 0 40px rgba(255,200,80,.6)}
+.dr-layer.L10{background:radial-gradient(70% 120% at 50% 100%,#a8fbff 0%,#22e9ff 25%,#ff7a1a 55%,#7a1e08 100%);box-shadow:inset 0 0 40px rgba(34,233,255,.6)}
 .dr-layer.L10::before{background:radial-gradient(circle,rgba(255,255,255,.8) 0 1px,transparent 1.5px) 0 0/13px 11px;animation:dr-core 1.6s ease-in-out infinite alternate}
 @keyframes dr-core{to{opacity:.3}}
 .dr-ln{position:absolute;left:8px;top:50%;transform:translateY(-50%);z-index:2;display:flex;flex-direction:column;gap:1px;padding:5px 9px;border-radius:10px;max-width:29%;
   background:rgba(8,6,16,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
 .dr-ln b{font-size:10.5px;font-weight:800;color:rgba(255,255,255,.78);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dr-ln em{font-style:normal;font-size:14px;font-weight:900;color:#ffd76a;font-variant-numeric:tabular-nums;text-shadow:0 0 10px rgba(255,200,60,.4)}
+.dr-ln em{font-style:normal;font-size:14px;font-weight:900;color:#22e9ff;font-variant-numeric:tabular-nums;text-shadow:0 0 10px rgba(34,233,255,.4)}
 .dr-layer.L10 .dr-ln em{color:#fff}
 /* колонки буров */
 .dr-col{position:absolute;top:0;width:0;z-index:3}
@@ -67,7 +67,7 @@
 @keyframes dr-smoke{to{transform:translateY(-30px) scale(1.6);opacity:0}}
 .dr-col.lead .dr-bsvg{filter:drop-shadow(0 0 10px var(--c)) drop-shadow(0 0 2px #fff);transform:none}
 .dr-col.lead .dr-bit::before{content:"";position:absolute;left:50%;top:-30px;width:24px;height:16px;margin-left:-12px;animation:none;border-radius:0;
-  background:linear-gradient(180deg,#fff0a6,#ffc21a);clip-path:polygon(0 100%,0 20%,25% 55%,50% 0,75% 55%,100% 20%,100% 100%);filter:drop-shadow(0 0 6px #ffc21a)}
+  background:linear-gradient(180deg,#fff0a6,#22e9ff);clip-path:polygon(0 100%,0 20%,25% 55%,50% 0,75% 55%,100% 20%,100% 100%);filter:drop-shadow(0 0 6px #22e9ff)}
 .dr-stage.drilling{animation:dr-rumble .1s linear infinite}
 @keyframes dr-rumble{50%{transform:translate(.6px,-.4px)}}
 /* табло гонки */
@@ -97,10 +97,10 @@
 .dr-modes small{font-size:10.5px;font-weight:800;opacity:.7}
 .dr-stage.depth .dr-layer{cursor:pointer}
 .dr-stage.depth .dr-layer.deep::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.28);pointer-events:none}
-.dr-layer.tgt{box-shadow:inset 0 0 0 2.5px #ffd76a,inset 0 0 26px rgba(255,215,106,.45);z-index:1}
-.dr-layer.tgt .dr-ln{box-shadow:inset 0 0 0 1.5px #ffd76a;background:rgba(40,28,6,.75)}
+.dr-layer.tgt{box-shadow:inset 0 0 0 2.5px #22e9ff,inset 0 0 26px rgba(34,233,255,.45);z-index:1}
+.dr-layer.tgt .dr-ln{box-shadow:inset 0 0 0 1.5px #22e9ff;background:rgba(40,28,6,.75)}
 .dr-tgt{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:2;display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:8px;
-  font-size:10.5px;font-weight:900;letter-spacing:.06em;color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffb52e);box-shadow:0 4px 12px -4px #ffb52e}
+  font-size:10.5px;font-weight:900;letter-spacing:.06em;color:#031018;background:linear-gradient(135deg,#a8fbff,#7a6bff);box-shadow:0 4px 12px -4px #7a6bff}
 .dr-tgt .ic{width:12px;height:12px}
 .dr-stage.depth .dr-col.idle{opacity:.18;filter:grayscale(1)}
 .dr-stage.depth .dr-race{display:none}

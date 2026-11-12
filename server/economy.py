@@ -76,8 +76,13 @@ def usd_stars(usd):
     return max(1, round(PWR_A * usd ** PWR_B))
 
 
+def _pwr_rarity(usd):
+    """«Редкость» единственной модели скина (‰) — только для цвета ленточки: дорогой скин — LEGENDARY / EPIC. На ценность не влияет."""
+    return 5 if usd >= 500 else 10 if usd >= 100 else 15 if usd >= 20 else 20 if usd >= 3 else 30
+
+
 for _c, _d in PWR["cols"].items():
-    CATALOG[_c] = {"released": 1794441600, "models": [[_d["m"], 10]],
+    CATALOG[_c] = {"released": 1794441600, "models": [[_d["m"], _pwr_rarity(_d["usd"])]],
                    "backdrops": CATALOG[CUSTOM_DONOR]["backdrops"], "symbols": CATALOG[CUSTOM_DONOR]["symbols"]}
     REMOTE[_c] = _d["img"]
 

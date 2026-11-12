@@ -47,5 +47,5 @@
 .stk-row b{font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
 .stk-row em{font-style:normal;font-size:11.5px;font-weight:700;color:#2fd47a}
 .stk-pl{width:22px;flex:none;text-align:center;font-style:normal;font-weight:900;font-size:13px;color:var(--hint)}
-.stk-pl.p1{color:#ffd76a}.stk-pl.p2{color:#d6e0f0}.stk-pl.p3{color:#e3a06a}
+.stk-pl.p1{color:#22e9ff}.stk-pl.p2{color:#d6e0f0}.stk-pl.p3{color:#e3a06a}
 .stk-none{padding:14px;text-align:center;font-size:13px}

@@ -1,0 +1,185 @@
+/* ================= NEON: тема «неон / киберпанк». Подключается последней и перекрывает оформление всех модулей. =================
+   Палитра: бирюзовый (действие) · пурпурный (акцент игрока) · фиолетовый (глубина) · тёплый жёлтый (валюта и «легендарное»).
+   Форма: меньше скруглений, срезанные углы у главных кнопок, тонкие светящиеся рамки, сетка и свечение на фоне.
+   html.lite (режим оптимизации) отключает размытия и бесконечные анимации — как и раньше. */
+@font-face{font-family:"Tektur";src:url("fonts/tektur-cyr.woff2") format("woff2");font-weight:400 900;font-display:swap;
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Tektur";src:url("fonts/tektur-lat.woff2") format("woff2");font-weight:400 900;font-display:swap;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+:root{
+  --cy:#22e9ff;--mg:#ff2fd0;--vi:#8b5cff;--yl:#ffe14a;--lm:#5dffa8;
+  --bg:#05040d;
+  --card:color-mix(in srgb,#7d6bff 11%,var(--solid,#0b0919));--card2:color-mix(in srgb,#7d6bff 20%,var(--solid,#0b0919));   /* «прозрачность» из настроек игрока по-прежнему работает */
+  --text:#f2efff;--hint:#8d86b6;
+  --accent:var(--cy);--accent-text:#031018;--link:var(--cy);
+  --sep:rgba(139,120,255,.16);--line:rgba(139,120,255,.2);
+  --gold:var(--yl);--green:#3dffa0;--red:#ff4d7a;--pink:#ff5fd2;--purple:#a77bff;--blue:#3fb8ff;
+  --ac:#22e9ff;--ac-on:#031018;   /* акцент по умолчанию; игрок может выбрать свой — кнопки и панель идут за ним */
+  --r:14px;
+  --disp:"Tektur","Manrope",-apple-system,BlinkMacSystemFont,Roboto,"Segoe UI",sans-serif;
+  --edge:linear-gradient(135deg,rgba(34,233,255,.55),rgba(139,92,255,.18) 40%,rgba(255,47,208,.5));
+  --glow-cy:0 0 22px -6px rgba(34,233,255,.75);--glow-mg:0 0 22px -6px rgba(255,47,208,.75);
+  color-scheme:dark;
+}
+
+/* ---------- фон: сетка в перспективе и три пятна света ---------- */
+html{background:var(--bg)}
+body{background:transparent}
+html::before{background:
+  radial-gradient(62% 34% at 8% -2%,rgba(255,47,208,.2),transparent 72%),
+  radial-gradient(58% 32% at 98% 6%,rgba(34,233,255,.17),transparent 72%),
+  radial-gradient(80% 42% at 50% 106%,rgba(139,92,255,.24),transparent 72%)!important}
+html::after{opacity:1!important;background:
+  linear-gradient(rgba(139,120,255,.055) 1px,transparent 1px) 0 0/100% 34px,
+  linear-gradient(90deg,rgba(139,120,255,.055) 1px,transparent 1px) 0 0/34px 100%!important;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 62%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 62%,transparent 100%)}
+
+/* ---------- типографика ---------- */
+h1,h2,h3,.gtitle,.sec-t,nav.tabs button,.btn,.case .nm,.promo>button b,.bal .num,.lvtag,.hot,.qtag,.seg button,.ocount button,
+.chero h2,.won h2,.won-rar,.rib,.pr,.cprice{font-family:var(--disp)}
+h1,h2,h3,.gtitle{letter-spacing:.01em}
+header h1{font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:clamp(15px,4.6vw,18px);
+  background:linear-gradient(90deg,#fff,var(--cy) 55%,var(--mg));-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 10px rgba(34,233,255,.35))}
+.gtitle{text-transform:uppercase;letter-spacing:.06em}
+.sec-t{font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--cy);margin:22px 4px 10px;justify-content:flex-start;gap:10px}
+.sec-t::before{content:"";width:14px;height:2px;background:var(--mg);box-shadow:0 0 8px var(--mg);flex:none}
+.sec-t::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(34,233,255,.4),transparent)}
+.sec-t>*{order:1}
+
+/* ---------- шапка ---------- */
+header{background:linear-gradient(180deg,rgba(5,4,13,.94),rgba(5,4,13,.72))!important;
+  border-bottom:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(34,233,255,.55),rgba(255,47,208,.55),transparent) 1}
+.bal{border-radius:10px!important;background:linear-gradient(180deg,#16112e,#0d0a1e)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,225,74,.35),0 0 18px -8px rgba(255,225,74,.7)!important}
+.bal .num{font-weight:700;letter-spacing:.02em;color:#fff}
+.bal .plus{border-radius:6px!important;background:var(--yl)!important;color:#1a1500!important}
+header .fr-btn,header .adm-btn,.me-btn{border-radius:10px!important}
+header .fr-btn:not(.pay-pill),header .adm-btn{background:#120e26!important;box-shadow:inset 0 0 0 1px rgba(139,120,255,.28)!important;color:#cfc8ff!important}
+header .pay-pill{background:linear-gradient(135deg,var(--cy),var(--vi))!important;color:#031018!important;box-shadow:var(--glow-cy)!important}
+.badge-dot{background:var(--mg)!important;box-shadow:0 0 10px var(--mg);border-color:var(--bg)!important}
+.ava.ring{background:conic-gradient(var(--cy) var(--p,0%),rgba(139,120,255,.3) 0)!important}
+.ava .lv{background:var(--mg)!important;color:#fff!important;border-radius:5px!important}
+
+/* ---------- нижняя панель ---------- */
+nav.tabs{border-radius:16px!important;background:rgba(12,9,28,.86)!important;padding:5px!important;
+  box-shadow:0 14px 40px -10px #000,inset 0 0 0 1px rgba(139,120,255,.26),0 0 34px -14px rgba(34,233,255,.6)!important}
+nav.tabs::before{content:"";position:absolute;left:18%;right:18%;top:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--cy),var(--mg),transparent);opacity:.9}
+nav.tabs button{border-radius:11px!important;color:#7f78a8!important;font-size:9.5px!important;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+nav.tabs button i{filter:none!important}
+nav.tabs button.on{background:transparent!important;color:#fff!important}
+nav.tabs button.on i{color:var(--cy)!important;filter:drop-shadow(0 0 8px rgba(34,233,255,.9))!important}
+.tab-ind{border-radius:11px!important;background:linear-gradient(180deg,rgba(34,233,255,.2),rgba(139,92,255,.1))!important;
+  box-shadow:inset 0 0 0 1px rgba(34,233,255,.5),0 0 20px -6px rgba(34,233,255,.8)!important}
+nav.tabs .tab-fair{color:var(--lm)!important}
+
+/* ---------- карточки и списки: стекло с тонкой светящейся рамкой ---------- */
+.box,.betp,.rules,.bankbar,.richbar,.ideabtn,.prib,.tme,.clme,.clnone,.cashl,.gd-bar,.tr-bar,.lv-tick,.al-bar,.homecard,.invbar{
+  border-radius:var(--r)!important;border:1px solid transparent!important;
+  background:linear-gradient(180deg,rgba(24,18,52,.92),rgba(13,10,30,.94)) padding-box,var(--edge) border-box!important;
+  box-shadow:0 12px 30px -18px #000!important}
+.row{border-color:var(--sep)!important}
+.row.tap:active{background:rgba(34,233,255,.07)!important}
+.pic{border-radius:10px!important}
+input,textarea,select{background:#0c0920!important;border-radius:10px!important;box-shadow:inset 0 0 0 1px rgba(139,120,255,.3)}
+input:focus,textarea:focus{box-shadow:inset 0 0 0 1px var(--cy),0 0 0 3px rgba(34,233,255,.16)!important}
+
+/* ---------- кнопки ---------- */
+.btn{border-radius:10px!important;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:13.5px}
+.btn.sm{font-size:11.5px}
+/* главная кнопка: срезанные углы, цвет — акцент игрока (--ac), свечение повторяет форму */
+html .btn.gold,html .btn.cta:not(.green):not(.red):not(.ghost):not(.wait){--mid:color-mix(in srgb,var(--ac) 80%,var(--ac-l));
+  color:var(--ac-on)!important;border-radius:0!important;overflow:visible!important;box-shadow:none!important;
+  background:
+    linear-gradient(135deg,transparent 9px,var(--ac-l) 9.5px,var(--mid) 58%) left/50.5% 100% no-repeat,
+    linear-gradient(-45deg,transparent 9px,color-mix(in srgb,var(--ac) 40%,var(--vi)) 9.5px,var(--mid) 58%) right/50.5% 100% no-repeat!important;
+  filter:drop-shadow(0 0 11px color-mix(in srgb,var(--ac) 55%,transparent)) drop-shadow(0 6px 14px rgba(90,60,255,.3))}
+html .btn.gold::before,html .btn.gold::after,html .btn.cta:not(.green):not(.red):not(.ghost):not(.wait)::before,html .btn.cta:not(.green):not(.red):not(.ghost):not(.wait)::after{display:none!important}
+html .btn.gold.sm{background:
+    linear-gradient(135deg,transparent 6px,var(--ac-l) 6.5px,var(--mid) 60%) left/50.5% 100% no-repeat,
+    linear-gradient(-45deg,transparent 6px,color-mix(in srgb,var(--ac) 40%,var(--vi)) 6.5px,var(--mid) 60%) right/50.5% 100% no-repeat!important}
+html .btn.gold[disabled],html .btn.cta[disabled]:not(.green):not(.red):not(.ghost):not(.wait){filter:grayscale(.6) brightness(.7)}
+.btn.gold svg,.btn.gold .xtr{filter:none}
+.btn.green{background:linear-gradient(135deg,#7dffb8,#22d3a0)!important;color:#01140c!important;box-shadow:0 0 22px -6px rgba(61,255,160,.8)!important}
+.btn.ghost{background:rgba(139,120,255,.1)!important;box-shadow:inset 0 0 0 1px rgba(139,120,255,.4)!important;color:#dcd6ff!important}
+.btn.red{background:rgba(255,77,122,.14)!important;box-shadow:inset 0 0 0 1px rgba(255,77,122,.55)!important;color:#ff8fa8!important}
+.seg{border-radius:10px!important;background:#0c0920!important;box-shadow:inset 0 0 0 1px rgba(139,120,255,.25)!important}
+.seg button{border-radius:8px!important;text-transform:uppercase;letter-spacing:.05em;font-size:12px}
+.seg button.on{background:linear-gradient(180deg,rgba(34,233,255,.22),rgba(139,92,255,.14))!important;color:#fff!important;
+  box-shadow:inset 0 0 0 1px rgba(34,233,255,.55),0 0 16px -6px var(--cy)!important}
+.quick button,.amt>button,.ocount button{border-radius:8px!important;background:#120e26!important;box-shadow:inset 0 0 0 1px rgba(139,120,255,.28)!important}
+.ocount button.on{background:linear-gradient(180deg,rgba(34,233,255,.25),rgba(139,92,255,.16))!important;color:#fff!important;
+  box-shadow:inset 0 0 0 1px var(--cy),0 0 16px -6px var(--cy)!important}
+
+/* ---------- главная: быстрые действия, листалка ---------- */
+.promo{gap:8px!important}
+.promo>button{border-radius:12px!important;border:1px solid transparent!important;min-height:66px;
+  background:linear-gradient(180deg,#17122f,#0d0a1e) padding-box,linear-gradient(135deg,rgba(139,120,255,.45),rgba(139,120,255,.1)) border-box!important}
+html .promo>button.ready{border:1px solid transparent!important;
+  background:linear-gradient(180deg,#14213f,#120d2c) padding-box,linear-gradient(135deg,var(--cy),var(--mg)) border-box!important;
+  box-shadow:0 0 24px -10px var(--cy)!important}
+.promo>button b{font-size:12.5px;letter-spacing:.04em;text-transform:uppercase}
+.promo .pic{box-shadow:0 0 16px -4px currentColor}
+.stories .st-sl>*{border-radius:var(--r)!important}
+.st-dots i{border-radius:2px!important;height:3px!important;background:rgba(139,120,255,.35)!important}
+.st-dots i.on{background:var(--cy)!important;box-shadow:0 0 8px var(--cy)}
+.ob{border:1px solid transparent!important;background:linear-gradient(160deg,#1c1446,#0e0a24) padding-box,var(--edge) border-box!important}
+.ob-bar i,.ob-bar span{border-radius:2px!important}
+
+/* ---------- витрина кейсов ---------- */
+.case{border-radius:var(--r)!important;border:1px solid transparent!important;
+  background:
+    linear-gradient(100deg,color-mix(in srgb,var(--k1) 20%,#0e0a22) 0,#0e0a22 46%,#0b0819) padding-box,
+    linear-gradient(120deg,color-mix(in srgb,var(--k1) 85%,#fff 0%),rgba(139,120,255,.16) 45%,rgba(34,233,255,.4)) border-box!important;
+  box-shadow:0 14px 30px -20px var(--k1),inset 0 0 40px -30px var(--k1)!important;transition:transform .15s,box-shadow .2s}
+.case:active{transform:scale(.985)}
+.case .gl-art{border-radius:10px!important;background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--k1) 55%,transparent),transparent 72%),#0a0718!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--k1) 50%,transparent),0 0 22px -8px var(--k1)!important}
+.case .gl-art img.cv{filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
+.case .nm{font-weight:700;letter-spacing:.02em}
+.case .pr{border-radius:8px!important;background:#0a0718!important;box-shadow:inset 0 0 0 1px rgba(255,225,74,.4)!important;color:var(--yl)!important;font-weight:700}
+.case .lvtag,.case .hot,.case .hunttag{border-radius:6px!important}
+.case .hot{background:linear-gradient(90deg,var(--mg),#ff7a45)!important;box-shadow:0 0 14px -2px var(--mg)}
+.case .lock{background:rgba(5,4,13,.72)!important;color:#b9b2e6!important;border-radius:8px!important}
+.case .minis img{border-radius:6px!important;box-shadow:0 0 0 1px rgba(139,120,255,.4)!important}
+.case.mega{background:linear-gradient(100deg,rgba(255,47,208,.22),#0e0a22 50%) padding-box,linear-gradient(120deg,var(--mg),var(--yl),var(--cy)) border-box!important}
+
+/* ---------- шторки и окна ---------- */
+.sheet{border-radius:18px 18px 0 0!important;background:linear-gradient(180deg,#120d2a 0,#080614 46%)!important;
+  box-shadow:0 -1px 0 rgba(34,233,255,.6),0 -18px 60px -20px rgba(139,92,255,.6)!important}
+.sheet::before{background:linear-gradient(90deg,var(--cy),var(--mg))!important;height:3px!important;width:44px!important;border-radius:2px!important;box-shadow:0 0 10px var(--cy)}
+.sheet .x,.sheet .sbal{border-radius:9px!important;background:#151030!important;box-shadow:inset 0 0 0 1px rgba(139,120,255,.3)!important}
+.modal>#modal-body,.modal>div{border-radius:16px!important;border:1px solid transparent;
+  background:linear-gradient(180deg,#17122f,#0b0819) padding-box,var(--edge) border-box!important}
+.toast{border-radius:10px!important;background:rgba(14,10,34,.96)!important;box-shadow:inset 0 0 0 1px rgba(34,233,255,.5),0 0 26px -8px var(--cy)!important;font-weight:600}
+.toast.err{box-shadow:inset 0 0 0 1px rgba(255,77,122,.7),0 0 26px -8px var(--red)!important}
+.toast.ok{box-shadow:inset 0 0 0 1px rgba(61,255,160,.7),0 0 26px -8px var(--green)!important}
+
+/* ---------- открытие кейса ---------- */
+.chero{border-radius:16px!important;border:1px solid transparent!important;
+  background:radial-gradient(90% 70% at 50% 0,color-mix(in srgb,var(--k1) 45%,transparent),transparent 70%) padding-box,linear-gradient(180deg,#130e2c,#080614) padding-box,var(--edge) border-box!important}
+.chero h2{text-transform:uppercase;letter-spacing:.08em;text-shadow:-1.5px 0 rgba(34,233,255,.7),1.5px 0 rgba(255,47,208,.7)}
+.chero .cprice{border-radius:8px!important;background:rgba(5,4,13,.6)!important;box-shadow:inset 0 0 0 1px rgba(255,225,74,.4)!important;color:var(--yl)!important}
+.roul{border-radius:12px!important;background:#07051a!important;box-shadow:inset 0 0 0 1px rgba(139,120,255,.35),inset 0 0 40px -10px rgba(139,92,255,.5)!important}
+.roul .mark{background:var(--cy)!important;box-shadow:0 0 14px 2px var(--cy)!important;width:2px!important}
+.roul .it .gift{border-radius:10px!important}
+.gift{border-radius:12px!important}
+.gcell{border-radius:12px!important}
+.gcell .chance{border-radius:6px!important;background:rgba(5,4,13,.78)!important;font-family:var(--disp);letter-spacing:.02em}
+.won h2{text-transform:uppercase;letter-spacing:.04em}
+.won-rar{border-radius:6px!important;letter-spacing:.14em}
+.disc{color:#6d6694!important}
+
+/* ---------- полосы прогресса ---------- */
+.cbar,.ob-bar,.pbar{border-radius:2px!important;background:rgba(139,120,255,.18)!important}
+.cbar>div{border-radius:2px!important;background:linear-gradient(90deg,var(--cy),var(--mg))!important;box-shadow:0 0 10px -1px var(--cy)}
+
+/* ---------- экран загрузки ---------- */
+.np-boot{background:radial-gradient(60% 40% at 50% 46%,rgba(139,92,255,.35),transparent 75%),var(--bg)!important}
+
+/* ---------- режим оптимизации и доступность ---------- */
+html.lite .btn.gold,html.lite .btn.cta{filter:none!important}
+html.lite header{border-image:none;border-bottom-color:rgba(34,233,255,.3)}
+html.lite html::after,html.lite::after{display:none}
+@media (prefers-reduced-motion:reduce){.case{transition:none}}

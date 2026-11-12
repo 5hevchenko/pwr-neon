@@ -10,7 +10,7 @@
 @keyframes frToxic{50%{box-shadow:0 0 0 2px var(--bg),0 0 0 var(--frw) #c8ff3f,0 0 22px 5px #7dff3f88}}
 .ava.fr-rainbow,.ava.fr-diamond{box-shadow:0 0 0 2px var(--bg);isolation:isolate}
 .ava.fr-rainbow::before,.ava.fr-diamond::before{content:"";position:absolute;inset:calc(-2px - var(--frw));border-radius:50%;z-index:-1;
-  background:conic-gradient(from var(--fra,0deg),#ff5a6e,#ffc93d,#4fd67a,#3fa8ff,#c86bff,#ff5a6e);animation:frSpin 3s linear infinite}
+  background:conic-gradient(from var(--fra,0deg),#ff5a6e,#22e9ff,#4fd67a,#3fa8ff,#c86bff,#ff5a6e);animation:frSpin 3s linear infinite}
 .ava.fr-diamond::before{background:conic-gradient(from var(--fra,0deg),#fff,#9fe8ff,#e0c8ff,#fff,#bff6ff,#fff);filter:drop-shadow(0 0 6px #bfefff)}
 @property --fra{syntax:"<angle>";inherits:false;initial-value:0deg}
 @keyframes frSpin{to{--fra:360deg}}
@@ -19,10 +19,10 @@
 /* эффекты ника */
 .unm{min-width:0}
 .nk{font-weight:800}
-.nk-gold{background:linear-gradient(90deg,#ffe08a,#ffb52e,#ffe9a8,#ffb52e);-webkit-background-clip:text;background-clip:text;color:transparent}
+.nk-gold{background:linear-gradient(90deg,#a8fbff,#7a6bff,#ffe9a8,#7a6bff);-webkit-background-clip:text;background-clip:text;color:transparent}
 .nk-neon{color:#7ff6ff;text-shadow:0 0 6px #3ff0ff,0 0 12px #3ff0ff88}
 .nk-fire{background:linear-gradient(0deg,#ff3d1f,#ff8a1f 50%,#ffd23d);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 4px #ff6a1f88)}
-.nk-rainbow{background:linear-gradient(90deg,#ff5a6e,#ffc93d,#4fd67a,#3fa8ff,#c86bff,#ff5a6e);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:nkRb 3s linear infinite}
+.nk-rainbow{background:linear-gradient(90deg,#ff5a6e,#22e9ff,#4fd67a,#3fa8ff,#c86bff,#ff5a6e);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:nkRb 3s linear infinite}
 @keyframes nkRb{to{background-position:200% 0}}
 .lite .nk-rainbow{animation:none}
 h2.nk{display:inline-block}
@@ -66,7 +66,7 @@ h2.nk{display:inline-block}
 .sty-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .sty-grid.nick{grid-template-columns:repeat(2,minmax(0,1fr))}
 .sty-it{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px 10px;border-radius:16px;background:var(--card);border:1.5px solid transparent;min-width:0;text-align:center}
-.sty-it.on{border-color:var(--gold,#ffc93d)}
+.sty-it.on{border-color:var(--gold,#22e9ff)}
 .sty-it>b{font-size:12.5px}
 .sty-it small{font-size:11px;color:var(--green,#4fd67a);font-weight:700}
 .sty-pv{height:64px;display:grid;place-items:center;max-width:100%}
@@ -80,7 +80,7 @@ h2.nk{display:inline-block}
 .pbadges.chosen{gap:6px;margin-top:10px;padding:0 8px}
 .pbadges.chosen .pbadge{width:auto;height:auto;max-width:100%;padding:4px 10px 4px 7px;border-radius:11px;color:var(--text);background:var(--card);box-shadow:none;
   display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;line-height:1.2}
-.pbadges.chosen .pbadge .ic{width:14px;height:14px;color:var(--gold,#ffc93d)}
+.pbadges.chosen .pbadge .ic{width:14px;height:14px;color:var(--gold,#22e9ff)}
 .pwrap.acc .pbadges.chosen .pbadge .ic{color:var(--pac)}
 /* строка имени: длинное имя обрезается, уровень и тег клана не сжимаются и не переносятся */
 .pname{padding:0 12px;box-sizing:border-box;width:100%}

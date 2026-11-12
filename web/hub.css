@@ -5,8 +5,8 @@ body:not([data-view="crypto"]) .bh-nav{display:none}
   transition:background .2s,color .2s,transform .15s}
 .bh-nav button:active{transform:scale(.95)}
 .bh-nav button .ic{width:20px;height:20px}
-.bh-nav button.on{color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffab2e);box-shadow:0 8px 18px -10px #ffab2e}
-.bh-nav button.on .ic{color:#3a2300}
+.bh-nav button.on{color:#031018;background:linear-gradient(135deg,#a8fbff,#7a6bff);box-shadow:0 8px 18px -10px #7a6bff}
+.bh-nav button.on .ic{color:#031018}
 #v-crypto>#inc-body>.inchero:first-child,#v-crypto>#bk-body>*:first-child{margin-top:0}
 /* ===== колокольчик ===== */
 .bell-btn.ring>.ic{animation:bellRing 2.4s ease-in-out infinite;transform-origin:50% 10%}
@@ -93,12 +93,12 @@ html.lite .bell-btn.ring>.ic{animation:none}
 /* ===== покупка звёзд: ×2 первая покупка и быстрое пополнение ===== */
 .shop-first{display:flex;align-items:center;gap:12px;margin:10px 0;padding:10px 12px;border-radius:14px;
   background:linear-gradient(120deg,#ffe58a33,#ff9a3d22);border:1px solid #ffc94d55}
-.shop-first>b{flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:18px;font-weight:900;color:#3a2300;
-  background:linear-gradient(145deg,#ffe58a,#ffab2e);box-shadow:0 6px 16px -8px #ffab2e}
+.shop-first>b{flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:18px;font-weight:900;color:#031018;
+  background:linear-gradient(145deg,#a8fbff,#7a6bff);box-shadow:0 6px 16px -8px #7a6bff}
 .shop-first>span{font-size:12px;color:var(--hint);line-height:1.3}.shop-first>span b{display:block;font-size:13.5px;color:var(--text)}
 .shop-get s{margin-left:6px;font-size:12px;color:var(--hint)}
 .stc.st-shop{background:radial-gradient(120% 140% at 100% 0,#ffd25e33,transparent 60%),linear-gradient(135deg,#3a2a0c,#1d1608);border-color:#ffc94d40}
-.st-shop .stc-i{background:linear-gradient(145deg,#ffe58a,#ffab2e);color:#3a2300}
+.st-shop .stc-i{background:linear-gradient(145deg,#a8fbff,#7a6bff);color:#031018}
 .st-shop .stc-i b{font-size:16px;font-weight:900}
 .qb-h{text-align:center;margin:4px 0 6px}
 .qb-h .shop-ic{display:inline-grid;width:56px;height:56px;margin-bottom:6px}
@@ -110,7 +110,7 @@ html.lite .bell-btn.ring>.ic{animation:none}
 .qb-p>em{font-style:normal;font-size:11px;font-weight:800;color:#4cf0a0;min-height:14px}
 .qb-p .tgp{font-size:12px}
 .qb-p.best{border-color:var(--gold);background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 16%,var(--card)),var(--card))}
-.qb-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);padding:2px 8px;border-radius:8px;font-style:normal;font-size:10px;font-weight:800;color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffab2e);white-space:nowrap}
+.qb-tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);padding:2px 8px;border-radius:8px;font-style:normal;font-size:10px;font-weight:800;color:#031018;background:linear-gradient(135deg,#a8fbff,#7a6bff);white-space:nowrap}
 /* ===== огоньки (v2): трёхслойное пламя с градиентом, число рядом, как в TikTok ===== */
 .fl{position:relative;display:inline-flex;align-items:center;gap:3px;flex:none;line-height:1}
 .fl svg{width:24px;height:24px;overflow:visible;flex:none}
@@ -158,7 +158,7 @@ html.lite .fl svg *{animation:none!important}
 /* ===== платное: набор дня, сундук, VIP ===== */
 .pr-wrap{display:flex;flex-direction:column;gap:10px;margin:12px 0}
 .pr-offer{position:relative;padding:14px;border-radius:18px;overflow:hidden;background:radial-gradient(120% 120% at 100% 0,#ff9a3d40,transparent 60%),linear-gradient(140deg,#3a1d0c,#1c120b);border:1px solid #ffb35a55}
-.pr-tag{display:inline-block;margin-bottom:10px;padding:3px 9px;border-radius:8px;font-size:11px;font-weight:800;color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffab2e)}
+.pr-tag{display:inline-block;margin-bottom:10px;padding:3px 9px;border-radius:8px;font-size:11px;font-weight:800;color:#031018;background:linear-gradient(135deg,#a8fbff,#7a6bff)}
 .pr-o-body{display:flex;gap:12px;align-items:center;margin-bottom:12px}
 .pr-o-body img{width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5))}
 .pr-o-body b{display:block;font-size:22px}.pr-o-body span{display:block;font-size:12.5px;color:var(--hint)}
@@ -179,8 +179,8 @@ html.lite .pr-c-ic img{animation:none}
 .pr-vip.on{background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 14%,var(--card)),var(--card))}
 .pr-vip b{display:block;font-size:14px}.pr-vip span{font-size:11.5px;color:var(--hint);line-height:1.3}
 .pr-vip .btn{flex:none;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
-.pr-v-badge,.vipb{flex:none;display:inline-grid;place-items:center;font-weight:900;color:#3a2300;background:linear-gradient(135deg,#fff0a8,#ffc94d 45%,#e89a1c);letter-spacing:.04em}
-.pr-v-badge{width:44px;height:44px;border-radius:13px;font-size:13px;box-shadow:0 6px 16px -8px #ffab2e}
+.pr-v-badge,.vipb{flex:none;display:inline-grid;place-items:center;font-weight:900;color:#031018;background:linear-gradient(135deg,#fff0a8,#ffc94d 45%,#e89a1c);letter-spacing:.04em}
+.pr-v-badge{width:44px;height:44px;border-radius:13px;font-size:13px;box-shadow:0 6px 16px -8px #7a6bff}
 .vipb{margin-left:6px;padding:2px 7px;border-radius:7px;font-size:11px;vertical-align:middle}
 .ava.fr-vip{--frc:#ffc94d;box-shadow:0 0 0 2px var(--bg),0 0 0 calc(2px + max(2px,var(--s)*.05)) var(--frc),0 0 10px 1px #ffc94d55}
 .stc.st-offer{background:radial-gradient(120% 140% at 100% 0,#ff9a3d33,transparent 60%),linear-gradient(135deg,#3a1d0c,#1c120b);border-color:#ffb35a40}

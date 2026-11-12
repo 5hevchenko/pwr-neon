@@ -11,8 +11,8 @@
 /* HUD: крупный множитель с металлическим градиентом */
 .ar-hud{position:absolute;left:0;right:0;top:14px;z-index:20;display:flex;flex-direction:column;align-items:center;pointer-events:none}
 .ar-x{font-weight:900;font-size:46px;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;
-  background:linear-gradient(180deg,#fff 0%,#fff 38%,#ffe7a3 62%,#ffb41f 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 2px 0 rgba(0,0,0,.35)) drop-shadow(0 0 18px rgba(255,190,60,.35))}
+  background:linear-gradient(180deg,#fff 0%,#fff 38%,#a8fbff 62%,#ffb41f 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.35)) drop-shadow(0 0 18px rgba(122,107,255,.35))}
 .ar-x.dim{background:linear-gradient(180deg,#fff,#c9cbe0);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35));opacity:.92}
 .ar-x.bad{background:linear-gradient(180deg,#ffd0d0,#ff4d5e);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 18px rgba(255,60,80,.5))}
 .ar-x.good{background:linear-gradient(180deg,#eafff4,#4cf0a0 60%,#14b06c);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 22px rgba(76,240,160,.55))}
@@ -46,9 +46,9 @@
 .ar-step b{display:block;font-size:13px;font-weight:900;font-variant-numeric:tabular-nums}
 .ar-step span{display:block;font-size:9.5px;font-weight:800;color:var(--hint);letter-spacing:.04em;margin-top:1px}
 .ar-step.done{opacity:.45}
-.ar-step.cur{background:linear-gradient(180deg,#ffd76a,#ffa31a);color:#3a2300;box-shadow:0 6px 16px -6px #ffa31a}
+.ar-step.cur{background:linear-gradient(180deg,#22e9ff,#ffa31a);color:#031018;box-shadow:0 6px 16px -6px #ffa31a}
 .ar-step.cur span{color:rgba(58,35,0,.7)}
-.ar-step.nx{box-shadow:inset 0 0 0 1.5px #ffd76a}
+.ar-step.nx{box-shadow:inset 0 0 0 1.5px #22e9ff}
 
 /* сегмент с цветной точкой (сложность/риск) */
 .ar-seg button{display:flex;align-items:center;justify-content:center;gap:6px}
@@ -59,7 +59,7 @@
 .btn.cta:disabled{opacity:.55;filter:saturate(.6);animation:none}
 
 /* летящие искры / частицы */
-.ar-spark{position:absolute;z-index:22;width:var(--s,6px);height:var(--s,6px);border-radius:50%;pointer-events:none;background:var(--c,#ffd76a);box-shadow:0 0 10px var(--c,#ffd76a);
+.ar-spark{position:absolute;z-index:22;width:var(--s,6px);height:var(--s,6px);border-radius:50%;pointer-events:none;background:var(--c,#22e9ff);box-shadow:0 0 10px var(--c,#22e9ff);
   animation:ar-spk var(--d,.8s) cubic-bezier(.2,.7,.4,1) forwards}
 @keyframes ar-spk{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
 .ar-legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;margin-bottom:10px}

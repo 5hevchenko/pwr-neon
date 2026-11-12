@@ -191,11 +191,11 @@ def tasks_state(uid):
     n = _ads_today(uid)
     items = [
         {"id": "sub", "icon": "megaphone", "t": "Подпишись на канал", "reward": int(SUB_REWARD * k), "done": sub_done, "on": sub_on,
-         "why": "" if sub_on else "Заработает с ботом и каналом (PWR_CHANNEL)",
+         "why": "" if sub_on else "Скоро появится",
          "url": ("https://t.me/" + CHANNEL.lstrip("@")) if CHANNEL.startswith("@") else ""},
         {"id": "invite", "icon": "userPlus", "t": "Пригласи друга", "reward": 0, "done": False, "on": True, "why": "", "have": u["refs"]},
         {"id": "ad", "icon": "play", "t": "Посмотри рекламу", "reward": int(AD_REWARDS[min(n, len(AD_REWARDS) - 1)] * k), "done": n >= len(AD_REWARDS),
-         "on": ads_on, "why": "" if ads_on else "Реклама не подключена (ADSGRAM_BLOCK)", "have": n, "need": len(AD_REWARDS)},
+         "on": ads_on, "why": "" if ads_on else "Скоро появится", "have": n, "need": len(AD_REWARDS)},
     ]
     return {"items": items, "k": k, "adsBlock": ADS_BLOCK if ads_on else "", "resetIn": day_start() + 86400 - now()}
 

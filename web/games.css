@@ -44,7 +44,7 @@
 .autof input{background:none;padding:0;text-align:right;font-weight:800}
 .autof span{color:var(--hint);font-weight:800}
 .btn.cta{margin-top:12px;padding:16px;font-size:17px;border-radius:16px;background:linear-gradient(135deg,#6a8bff,#8a5cff);color:#fff;box-shadow:0 8px 22px -8px #7a6cff}
-.btn.cta.gold{background:linear-gradient(135deg,#ffd76a,#ffa31a);color:#3a2300;box-shadow:0 8px 22px -8px #ffa31a}
+.btn.cta.gold{background:linear-gradient(135deg,#22e9ff,#ffa31a);color:#031018;box-shadow:0 8px 22px -8px #ffa31a}
 .btn.cta.green{background:linear-gradient(135deg,#4cf0a0,#16b874);color:#03250f;box-shadow:0 8px 24px -6px #22d083;animation:pulse2 1s ease-in-out infinite}
 @keyframes pulse2{50%{box-shadow:0 8px 34px -4px #22d083}}
 
@@ -125,18 +125,18 @@
 /* колесо */
 .wheel{--wr:calc(min(330px,84vw) / 2 + 4px);position:relative;width:min(330px,84vw);aspect-ratio:1;margin:18px auto 14px}
 .wheel::before{content:"";position:absolute;inset:-16px;border-radius:50%;z-index:0;
-  background:conic-gradient(from 0deg,#ffd76a,#c88a00,#ffe9a3,#c88a00,#ffd76a,#c88a00,#ffe9a3,#c88a00,#ffd76a);box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 40px -10px #ffb81f}
+  background:conic-gradient(from 0deg,#22e9ff,#3b2fa8,#ffe9a3,#3b2fa8,#22e9ff,#3b2fa8,#ffe9a3,#3b2fa8,#22e9ff);box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 40px -10px #7a6bff}
 .wheel canvas{position:relative;z-index:1;width:100%;height:100%;border-radius:50%;box-shadow:0 0 0 3px #7a5200}
 .bulbs{position:absolute;left:50%;top:50%;z-index:2;width:0;height:0}
-.bulbs i{position:absolute;left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;background:#fff6c8;box-shadow:0 0 8px 2px #ffd76a;animation:bulb 1.2s steps(1) infinite}
+.bulbs i{position:absolute;left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;background:#a8fbff;box-shadow:0 0 8px 2px #22e9ff;animation:bulb 1.2s steps(1) infinite}
 .bulbs i:nth-child(odd){animation-delay:.6s}
 .bulbs.fast i{animation-duration:.25s}
 .bulbs.fast i:nth-child(odd){animation-delay:.125s}
 @keyframes bulb{50%{background:#7a5a1a;box-shadow:none}}
 .wptr{position:absolute;left:50%;top:-22px;transform:translateX(-50%);z-index:4;width:34px;height:44px;
-  background:linear-gradient(#fff3c4,#ffb81f);clip-path:polygon(50% 100%,0 0,100% 0);filter:drop-shadow(0 4px 4px rgba(0,0,0,.5))}
+  background:linear-gradient(#a8fbff,#7a6bff);clip-path:polygon(50% 100%,0 0,100% 0);filter:drop-shadow(0 4px 4px rgba(0,0,0,.5))}
 .whub{position:absolute;left:50%;top:50%;z-index:3;width:24%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;
-  background:radial-gradient(circle at 40% 30%,#fff1b8,#ffb81f 45%,#a86a00);box-shadow:0 0 0 5px #5a3a00,0 8px 22px rgba(0,0,0,.55),inset 0 -6px 12px rgba(0,0,0,.25)}
+  background:radial-gradient(circle at 40% 30%,#fff1b8,#7a6bff 45%,#3b2fa8);box-shadow:0 0 0 5px #5a3a00,0 8px 22px rgba(0,0,0,.55),inset 0 -6px 12px rgba(0,0,0,.25)}
 .whub .xtr{width:46%;height:46%;filter:drop-shadow(0 2px 2px rgba(120,60,0,.6))}
 .wres{text-align:center;font-size:18px;font-weight:900;margin-bottom:10px;min-height:24px;color:var(--hint)}
 .wres.win{color:#4cf0a0;animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
@@ -190,7 +190,7 @@
 .coin3d{perspective:800px;display:flex;justify-content:center;margin:18px 0}
 .coin{position:relative;width:140px;height:140px;transform-style:preserve-3d}
 .coin .face{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  background:radial-gradient(circle at 35% 30%,#fff1b8,#ffb81f 50%,#a86a00);box-shadow:inset 0 0 0 6px #ffd76a,inset 0 0 0 9px #a86a00,0 14px 30px rgba(0,0,0,.5)}
+  background:radial-gradient(circle at 35% 30%,#fff1b8,#7a6bff 50%,#3b2fa8);box-shadow:inset 0 0 0 6px #22e9ff,inset 0 0 0 9px #3b2fa8,0 14px 30px rgba(0,0,0,.5)}
 .coin .face .ava{box-shadow:0 0 0 3px #7a4d00}
 .coin .fb{transform:rotateY(180deg)}
 .dice{display:flex;gap:6px;align-items:center;min-height:44px}
@@ -215,8 +215,8 @@
 .pgbar>div{flex:1}.pgbar b{display:block;font-size:14px}.pgbar span{font-size:12px;color:var(--hint)}
 
 .bankbar{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;margin-bottom:12px;
-  background:linear-gradient(120deg,#3a2a05,#1a1408 60%);box-shadow:inset 0 0 0 1px rgba(255,200,80,.25),0 10px 26px -14px #ffb81f;color:#fff}
-.bankbar .bk-i{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#ffe17a,#ffab2e);color:#3a2300;flex:none}
+  background:linear-gradient(120deg,#3a2a05,#1a1408 60%);box-shadow:inset 0 0 0 1px rgba(34,233,255,.25),0 10px 26px -14px #7a6bff;color:#fff}
+.bankbar .bk-i{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#a8fbff,#7a6bff);color:#031018;flex:none}
 .bankbar .bk-i .ic{width:22px;height:22px}
 .bankbar>div{flex:1}
 .bankbar>div span{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;opacity:.7;font-weight:700}
@@ -241,14 +241,14 @@
 .jpprize>div{border-radius:14px;padding:10px 6px;text-align:center;background:var(--card)}
 .jpprize span{display:block;font-size:11.5px;color:var(--hint);font-weight:700}
 .jpprize b{font-size:15px}
-.jpprize .p1{box-shadow:inset 0 0 0 1.5px #ffd76a}.jpprize .p1 b{color:#ffd76a}
+.jpprize .p1{box-shadow:inset 0 0 0 1.5px #22e9ff}.jpprize .p1 b{color:#22e9ff}
 .jpme{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
 .jpme>div{background:var(--card);border-radius:14px;padding:9px;text-align:center}
 .jpme>div>span{display:block;font-size:11px;color:var(--hint)}.jpme b{font-size:17px}
 .jpbuy{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .jpbuy button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:13px;background:var(--card2)}
 .jpbuy b{font-size:16px}.jpbuy span{font-size:11.5px;color:var(--gold);font-weight:700}
-.place.p1{color:#ffd76a}.place.p2{color:#d6dde8}.place.p3{color:#e6a06a}
+.place.p1{color:#22e9ff}.place.p2{color:#d6dde8}.place.p3{color:#e6a06a}
 .gcard .gc-t,.gcard .gc-s,.gcard .gc-chips{position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.45)}
 /* ALL IN в краше */
 .cbtns{display:flex;gap:8px;margin-top:12px}.cbtns .btn.cta{flex:1;margin:0}

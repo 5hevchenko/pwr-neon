@@ -3,7 +3,7 @@
 .mk2-tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;border-radius:14px;background:var(--card);color:var(--hint);font-size:12px;font-weight:800;transition:transform .12s,background .2s,color .2s}
 .mk2-tabs button .ic{width:19px;height:19px}
 .mk2-tabs button:active{transform:scale(.95)}
-.mk2-tabs button.on{color:#3a2300;background:linear-gradient(135deg,#ffe58a,#ffab2e);box-shadow:0 8px 18px -10px #ffab2e}
+.mk2-tabs button.on{color:#031018;background:linear-gradient(135deg,#a8fbff,#7a6bff);box-shadow:0 8px 18px -10px #7a6bff}
 .mk2-hero{display:flex;align-items:center;gap:12px;padding:14px;border-radius:20px;margin-bottom:10px;color:#fff;overflow:hidden;position:relative}
 .mk2-hero.shop{background:radial-gradient(120% 120% at 100% 0%,#7c5cff,#1d1450 70%);box-shadow:0 14px 30px -16px #7c5cff}
 .mk2-hero.orders{background:radial-gradient(120% 120% at 100% 0%,#16b874,#06301e 70%);box-shadow:0 14px 30px -16px #16b874}

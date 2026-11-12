@@ -33,11 +33,11 @@
 /* лоток тиража: 2 ряда по 5 лунок */
 .kn-tray{flex:1;min-width:0;padding:9px 10px 10px;border-radius:18px;background:rgba(6,3,18,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),inset 0 8px 20px rgba(0,0,0,.4)}
 .kn-tl{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;font-size:10.5px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5)}
-.kn-tl b{font-size:13px;letter-spacing:0;text-transform:none;color:#ffd76a;font-family:"NP Num",-apple-system,Roboto,sans-serif}
+.kn-tl b{font-size:13px;letter-spacing:0;text-transform:none;color:#22e9ff;font-family:"NP Num",-apple-system,Roboto,sans-serif}
 .kn-slots{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;justify-items:center}
 .kn-slots>i{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.45);box-shadow:inset 0 2px 5px rgba(0,0,0,.7),0 1px 0 rgba(255,255,255,.06)}
 .kn-slots .kn-ball.in{width:28px;height:28px;animation:kn-land .3s cubic-bezier(.2,1.6,.4,1)}
-.kn-slots .kn-ball.hit{box-shadow:inset -2px -3px 5px rgba(0,0,0,.35),0 0 0 2px #ffd76a,0 0 14px rgba(255,215,106,.8)}
+.kn-slots .kn-ball.hit{box-shadow:inset -2px -3px 5px rgba(0,0,0,.35),0 0 0 2px #22e9ff,0 0 14px rgba(34,233,255,.8)}
 @keyframes kn-land{0%{transform:scale(1.35)}100%{transform:none}}
 .kn-fly{position:absolute;z-index:24;pointer-events:none;will-change:transform}
 .kn-fly .kn-ball{width:28px;height:28px}
@@ -52,9 +52,9 @@
 @keyframes kn-pick{0%{transform:scale(.85)}100%{transform:none}}
 .kn-c.drawn{color:rgba(255,255,255,.4);background:rgba(0,0,0,.35);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--a) 70%,transparent)}
 .kn-c.drawn::after{content:"";position:absolute;inset:28%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 8%,var(--a) 40%,transparent 72%);opacity:.35}
-.kn-c.hit{color:#3a2300;background:linear-gradient(160deg,#fff2b8,#ffcf4a 45%,#ff9f1a);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.7),0 0 0 2px rgba(255,215,106,.35),0 0 20px rgba(255,190,60,.7);
+.kn-c.hit{color:#031018;background:linear-gradient(160deg,#fff2b8,#ffcf4a 45%,#ff9f1a);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.7),0 0 0 2px rgba(34,233,255,.35),0 0 20px rgba(122,107,255,.7);
   animation:kn-hit .5s cubic-bezier(.2,1.6,.4,1);z-index:2}
-.kn-c.hit::before{content:"";position:absolute;inset:-3px;border-radius:13px;border:2px solid #ffd76a;animation:kn-ring .7s ease-out forwards;pointer-events:none}
+.kn-c.hit::before{content:"";position:absolute;inset:-3px;border-radius:13px;border:2px solid #22e9ff;animation:kn-ring .7s ease-out forwards;pointer-events:none}
 @keyframes kn-hit{0%{transform:scale(.7) rotate(-8deg)}60%{transform:scale(1.18) rotate(3deg)}100%{transform:none}}
 @keyframes kn-ring{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.6)}}
 .kn-c.miss{opacity:.55;background:linear-gradient(160deg,#5b4a86,#3a2d63)}
@@ -69,7 +69,7 @@
 .kn-ph b{color:var(--text);font-family:"NP Num",-apple-system,Roboto,sans-serif}
 .kn-pays .ar-step span{text-transform:none}
 .kn-pays .ar-step.zero b{color:var(--hint);font-weight:700}
-.kn-pays .ar-step.cur{background:linear-gradient(180deg,#ffe58a,#ffb52e)}
+.kn-pays .ar-step.cur{background:linear-gradient(180deg,#a8fbff,#7a6bff)}
 .kn-empty{display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;border-radius:12px;background:var(--card);color:var(--hint);font-size:12.5px;font-weight:700}
 .kn-empty .ic{width:16px;height:16px;flex:none}
 .kn-s .ghead img{background:#12062e;border-radius:14px;padding:3px}
