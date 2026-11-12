@@ -817,7 +817,7 @@ function giftSheetHTML(o, mine) {
       ${g.price != null ? `<div class="row kv"><span class="k">На маркете</span><span class="v star">⭐ ${fmt(g.price)}</span></div>` : ""}
       ${seller ? `<div class="row kv tap" data-act="profile" data-id="${seller.id}"><span class="k">Владелец</span><span class="v" style="display:flex;align-items:center;gap:8px">${avaHTML(seller, 24)}${esc(seller.name)}</span><span class="hint">›</span></div>` : ""}
     </div>${acts}
-    <div class="disc">Игровой предмет. Это не настоящий подарок Telegram.</div>`;
+    <div class="disc">${g.src === "cs" ? "Скин CS. Его можно продать за полную ценность или вывести в Steam, когда вывод включён." : "Игровой предмет. Это не настоящий подарок Telegram."}</div>`;
 }
 async function giftChanged() {
   closeSheet();
@@ -910,7 +910,7 @@ function franchiseInfo() {
 
 // ============================================================ приглашение
 function invite() {
-  const text = ME.refBonus ? `Залетай в кейс-симулятор подарков 🎁 По моей ссылке получишь +${ME.refBonus} ⭐ на старт (игровых)` : "Залетай в кейс-симулятор подарков 🎁";
+  const text = ME.refBonus ? `Залетай открывать кейсы 🎁 По моей ссылке получишь +${ME.refBonus} ⭐ на старт (игровых)` : "Залетай открывать кейсы 🎁";
   const url = `https://t.me/share/url?url=${enc(ME.refLink)}&text=${enc(text)}`;
   if (inTg) tg.openTelegramLink(url); else { navigator.clipboard?.writeText(ME.refLink); toast("Ссылка скопирована"); }
 }
@@ -1029,7 +1029,8 @@ document.addEventListener("click", e => {
   let bootErr = null;
   for (let i = 0; i < 6; i++) {   // сервер мог перезапускаться (выкладка обновления) — пробуем ещё, прежде чем показать ошибку
     try { await loadMe(); bootErr = null; break; }
-    catch (e) { bootErr = e; if (i < 5) await new Promise(r => setTimeout(r, 1000 * (i + 1))); }
+    catch (e) { bootErr = e; if (!inTg && /Сессия устарела|unauthorized/.test(String(e && e.message || e))) break;   // вне Telegram на боевом сервере ждать нечего
+      if (i < 5) await new Promise(r => setTimeout(r, 1000 * (i + 1))); }
   }
   if (bootErr) {
     $("#boot") && $("#boot").remove();
