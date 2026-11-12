@@ -225,3 +225,8 @@ fillQuests = async function (el) {
   const b = el.querySelector("#q-body"), d = b && b.querySelector(".disc");
   if (b && !b.querySelector(".pt-k,.pt-wrap")) { const w = document.createElement("div"); w.className = "pt-wrap"; w.innerHTML = pwrTasksHTML(); d ? d.before(w) : b.appendChild(w); }
 };
+
+/* «Задания» в нижней панели: счётчик готовых наград */
+function pwrQuestDot() { const e = document.getElementById("tq-n"); if (!e) return; const n = ME && ME.quests ? ME.quests : 0; e.textContent = n ? (n > 9 ? "9+" : n) : ""; e.classList.toggle("on", !!n); }
+const _rhPwr = renderHeader;
+renderHeader = function () { const r = _rhPwr.apply(this, arguments); pwrQuestDot(); return r; };

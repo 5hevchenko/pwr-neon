@@ -126,3 +126,9 @@ html.has-genbg::after{display:none}
 .chero{position:relative}
 .pp-burst{position:absolute;left:50%;top:50%;width:130%;aspect-ratio:1;transform:translate(-50%,-52%);object-fit:cover;mix-blend-mode:screen;pointer-events:none;z-index:3;opacity:1;transition:opacity .45s}
 .pp-burst.out{opacity:0}
+
+/* вкладка «Задания» в нижней панели */
+nav.tabs .tab-quests{position:relative;color:var(--yl)!important}
+nav.tabs .tab-quests i{color:var(--yl)!important;filter:drop-shadow(0 0 7px rgba(255,225,74,.55))!important}
+nav.tabs .tq-n{display:none;position:absolute;top:2px;left:calc(50% + 5px);min-width:15px;height:15px;padding:0 4px;border-radius:8px;background:var(--mg);color:#fff;font:700 9px/15px inherit;font-style:normal;letter-spacing:0;box-shadow:0 0 10px rgba(255,47,208,.8)}
+nav.tabs .tq-n.on{display:block}
