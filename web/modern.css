@@ -146,3 +146,5 @@ html .btn.gold,html .btn.cta:not(.green):not(.red):not(.ghost):not(.wait),html .
 html .ghub .gcard .gfav{top:8px!important;right:8px!important;bottom:auto!important}
 /* окно пропуска: обложки дорожек — квадратные картинки со своим фоном */
 .pp-tier img,.pp-t-art img,.pp-hero img{border-radius:18px}
+/* скрытые карточки остаются скрытыми (вкладки витрины, отложенная отрисовка) */
+.case.pwr-hide,.case.defer,.gcard.pwr-hide,.case[hidden],.gcard[hidden]{display:none!important}
