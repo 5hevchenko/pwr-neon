@@ -274,3 +274,46 @@ Object.assign(ACT, {
     catch (e) { el.disabled = false; }
   },
 });
+
+/* ---------------- «Угадай дроп» на тир-кейсах ---------------- */
+GAMES.push({ id: "guess", t: "Угадай дроп", s: "Три подарка из кейса, один — настоящий дроп. Угадал — забираешь все три", img: "Crystal Ball", k: ["#22e9ff", "#0a1a3a"], chips: ["шанс 1 из 3", "приз ×3"] });
+Object.assign(GAME_OPEN, { guess: () => openGuess() });
+GAME_SECTIONS.find(s => s[0] === "Подарки")[2].push("guess");
+GCAT.guess = "gifts";
+let GS = null, GS_C = null, GS_BUSY = false;
+async function openGuess() {
+  openSheet(`${gameHead("Crystal Ball", "Угадай дроп", "Плати цену кейса и выбирай один из трёх подарков")}<div id="gs-body"><div class="hint" style="padding:18px;text-align:center">Загрузка…</div></div>`, "gs-s");
+  GS = await api("guess"); GS_C = GS_C || (GS.cases[0] || {}).id; gsPaint();
+}
+function gsPaint(res) {
+  const b = document.getElementById("gs-body"); if (!b) return;
+  const cell = (g, i, cls, act) => `<button class="gs-c ${cls || ""}"${act ? ` data-act="gs-pick" data-i="${i}"` : " disabled"}>${giftHTML(g, { plain: true, lite: true })}<span class="cap">${esc(g.col)}<br><small>⭐ ${short(g.value || g.ev || 0)}</small></span></button>`;
+  if (res) {
+    b.innerHTML = `<div class="gs-res ${res.win ? "w" : "l"}">${res.win ? `Угадал! Все три подарка твои · ⭐ ${fmt(res.pay)}` : "Не угадал — выпал подарок с меткой"}</div>
+      <div class="gs-row">${res.choices.map((g, i) => cell(g, i, (i === res.correct ? "ok " : "") + (i === res.pick ? "me" : ""))).join("")}</div>
+      <div class="btns"><button class="btn cta" data-act="gs-again">Ещё раз</button></div>`;
+    return;
+  }
+  const r = GS.round;
+  if (r) {
+    b.innerHTML = `<div class="gs-res">Какой подарок выпадет? Выбери один</div><div class="gs-row">${r.choices.map((g, i) => cell(g, i, "", true)).join("")}</div>
+      <p class="hint">Каждый из трёх выпадает с шансом 1/3. Угадаешь — заберёшь все три подарка.</p>`;
+    return;
+  }
+  const c = GS.cases.find(x => x.id === GS_C) || GS.cases[0];
+  b.innerHTML = `<div class="sec-t">Кейс</div><div class="gs-cases">${GS.cases.map(x => `<button class="${x.id === (c && c.id) ? "on" : ""}" data-act="gs-case" data-id="${x.id}"><b>${esc(x.name)}</b><span>⭐ ${short(x.price)}</span></button>`).join("")}</div>
+    <div class="btns"><button class="btn cta" data-act="gs-start"${c ? "" : " disabled"}>Играть за ⭐ ${c ? fmt(c.price) : 0}</button></div>
+    <p class="hint">Из кейса выбираются три разных подарка с обычными шансами кейса, один из них — настоящий дроп. Угадал — забираешь все три, не угадал — ничего. Возврат такой же, как у обычного открытия этого кейса. Подарки продаются за полную ценность.</p>`;
+}
+Object.assign(ACT, {
+  "gs-case": el => { GS_C = el.dataset.id; gsPaint(); },
+  "gs-start": async el => {
+    if (GS_BUSY) return; GS_BUSY = true;
+    try { const r = await post("guess/start", { cid: GS_C }); setStars(r.stars); GS.round = r; H.imp("light"); gsPaint(); } finally { GS_BUSY = false; }
+  },
+  "gs-pick": async el => {
+    if (GS_BUSY) return; GS_BUSY = true;
+    try { const r = await post("guess/pick", { i: +el.dataset.i }); setStars(r.stars); GS.round = null; r.win ? H.ok() : H.imp("heavy"); gsPaint(r); } finally { GS_BUSY = false; }
+  },
+  "gs-again": () => gsPaint(),
+});

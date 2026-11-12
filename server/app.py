@@ -1034,10 +1034,10 @@ def open_case(cid: str, n: int = 1, uid=Depends(auth)):
             if u["last_free"] + free_every(u) > t:
                 err("Бесплатный кейс ещё перезаряжается")
             db.execute("UPDATE users SET last_free=? WHERE id=?", (t, uid))
-        elif cid in E.RU_CASES and not c["price"]:   # бесплатный кейс RubUp — раз в минуту
+        elif cid in E.RU_CASES and not c["price"]:   # бесплатный тир-кейс — раз в E.RU_FREE_EVERY секунд
             left = (u["ru_free_at"] or 0) + E.RU_FREE_EVERY - t
             if left > 0:
-                err(f"Следующий бесплатный кейс — через {left} сек.")
+                err(f"Следующий бесплатный кейс — через {left // 3600} ч {left % 3600 // 60} мин" if left >= 3600 else f"Следующий бесплатный кейс — через {max(1, left // 60)} мин")
             db.execute("UPDATE users SET ru_free_at=? WHERE id=?", (t, uid))
         if u["stars"] < price * (n - keys):
             err("Не хватает звёзд")
@@ -2860,6 +2860,7 @@ import legacy  # noqa: E402,F401 — наследие: итоги прошлых
 import share  # noqa: E402,F401 — карточка большого выигрыша
 import pwr  # noqa: E402,F401 — слияние с PWR SKINBOX: боевой пропуск и задания
 import withdraw  # noqa: E402,F401 — вывод скинов CS в Steam через market.csgo.com
+import guess  # noqa: E402,F401 — «Угадай дроп» на тир-кейсах
 
 
 # ---------------- картинки подарков (api.changes.tg); на проде перед этим стоит кэш nginx ----------------
