@@ -52,10 +52,6 @@ for _c in ("title TEXT DEFAULT ''", "frame TEXT DEFAULT ''", "frame_until INTEGE
         pass
 db.executescript("""CREATE TABLE IF NOT EXISTS season_results(season TEXT PRIMARY KEY, result TEXT, ts INTEGER);
 CREATE TABLE IF NOT EXISTS season_excl(season TEXT, user INTEGER, why TEXT, PRIMARY KEY(season, user));""")
-# Октябрь 2026: Севчик накрутил звёзды через дыру в бонусе за уровень (Плинко ×10) — в рейтинг сезона не попадает.
-# Юни извинился и прощён — возвращён в сезон 16.10.2026.
-db.executemany("INSERT OR IGNORE INTO season_excl(season,user,why) VALUES('2026-10',?,'накрутка бонуса за уровень')", [(6044718138,)])
-db.execute("DELETE FROM season_excl WHERE season='2026-10' AND user=982643862")
 
 
 def season_bounds(t=None):

@@ -103,12 +103,14 @@ def _gift_art(col, model, size=512):
             return Image.open(f"{own}_512.png").convert("RGBA")
         except Exception:
             return None
-    url = f"https://api.changes.tg/model/{urllib.parse.quote(col)}/{urllib.parse.quote(model)}.png?size={size}"
+    if not A.GIFT_ASSETS:   # внешний источник картинок отключён
+        return None
+    url = f"{A.GIFT_ASSETS}/model/{urllib.parse.quote(col)}/{urllib.parse.quote(model)}.png?size={size}"
     os.makedirs(_ART_DIR, exist_ok=True)
     f = os.path.join(_ART_DIR, hashlib.md5(url.encode()).hexdigest() + ".png")
     try:
         if not os.path.exists(f):
-            req = urllib.request.Request(url, headers={"User-Agent": "NePridymal/1.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "PWRNeon/1.0"})
             data = urllib.request.urlopen(req, timeout=8).read()
             with open(f, "wb") as o:
                 o.write(data)

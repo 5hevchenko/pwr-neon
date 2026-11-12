@@ -28,7 +28,8 @@ from fastapi.staticfiles import StaticFiles
 import economy as E
 
 TOKEN = os.environ["BOT_TOKEN"]
-APP_URL = os.environ.get("APP_URL", "https://2.27.44.210/np/")
+# адрес игры: APP_URL, иначе домен Railway, иначе локальный — чужих адресов по умолчанию нет
+APP_URL = (os.environ.get("APP_URL") or (f"https://{os.environ['RAILWAY_PUBLIC_DOMAIN']}/np/" if os.environ.get("RAILWAY_PUBLIC_DOMAIN") else "http://127.0.0.1:8000/np/"))
 BOT_NAME = os.environ.get("BOT_USERNAME", "NePridymalhzbot")
 VIA_BOT = ContextVar("via_bot", default=0)        # франшиза: id дочернего бота, через которого пришёл запрос (0 — главный)
 CUR_TOKEN = ContextVar("cur_token", default=None)  # франшиза: ответы на апдейт дочернего бота — его токеном
@@ -2861,7 +2862,12 @@ import pwr  # noqa: E402,F401 — слияние с PWR SKINBOX: боевой п
 
 
 # ---------------- картинки подарков (api.changes.tg); на проде перед этим стоит кэш nginx ----------------
-ASSET_CACHE = os.path.join(os.path.dirname(__file__), ".asset_cache")
+# GIFT_ASSETS — откуда брать картинки подарков Telegram (по умолчанию открытый api.changes.tg); "off" — только свой кэш, наружу не ходим.
+# ASSET_CACHE — папка кэша: на постоянном диске картинка скачивается один раз и дальше живёт у нас.
+GIFT_ASSETS = os.environ.get("GIFT_ASSETS", "https://api.changes.tg").strip().rstrip("/")
+GIFT_ASSETS = "" if GIFT_ASSETS.lower() in ("off", "0", "none") else GIFT_ASSETS
+ASSET_CACHE = os.environ.get("ASSET_CACHE") or os.path.join(os.path.dirname(__file__), ".asset_cache")
+DISK_CACHE = bool(DEV or SERVE_WEB or os.environ.get("ASSET_CACHE"))   # за nginx кэширует он; свой диск — когда nginx нет или папка задана явно
 _WEBP_SEM = asyncio.Semaphore(2)   # одновременно не больше 2 конверсий — одно ядро, игра важнее
 
 
@@ -2949,11 +2955,13 @@ async def asset(path: str, request: Request):
     if isinstance(custom, Response):
         return custom
     raw = custom or raw
+    # ключ кэша не зависит от источника: сменили или отключили GIFT_ASSETS — уже скачанное остаётся нашим
     url = raw if raw.startswith("https://") else (
         "https://api.changes.tg/"
         + raw
         + ("?" + request.url.query if request.url.query else "")
     )
+    src = url if raw.startswith("https://") else (GIFT_ASSETS + url[len("https://api.changes.tg"):] if GIFT_ASSETS else "")
     ct = "application/json" if raw.endswith(".json") else "image/png"
     # Браузер шлёт Accept: image/webp — отдаём webp (в 3–5 раз легче). Заголовок x-webp ставил nginx,
     # которого тут нет (фронт отдаёт сам uvicorn), поэтому смотрим и на Accept: иначе телефон
@@ -2963,7 +2971,7 @@ async def asset(path: str, request: Request):
         or "image/webp" in request.headers.get("accept", "").lower()
     )
     hdrs = {"Cache-Control": "public, max-age=2592000"}
-    if DEV or SERVE_WEB:  # без nginx кэшируем на диск, на проде кэширует nginx
+    if DISK_CACHE:  # без nginx кэшируем на диск, на проде кэширует nginx
         try:
             os.makedirs(ASSET_CACHE, exist_ok=True)
         except OSError as e:
@@ -2979,16 +2987,22 @@ async def asset(path: str, request: Request):
         if r is None:   # ни одно зеркало не ответило серверу — пусть браузер возьмёт картинку у Steam сам
             return Response(status_code=302, headers={"Location": "https://" + STEAM_HOSTS[0] + "/economy/image/" + url[len(STEAM_IMG):], "Cache-Control": "no-store"})
     else:
-        r = await http.get(url, headers={"User-Agent": f"NePridymal/1.0 (+t.me/{BOT_NAME})"}, timeout=30, follow_redirects=True)
+        if not src:   # внешний источник отключён, а в своём кэше картинки нет
+            return Response(status_code=404, headers={"Cache-Control": "no-store"})
+        try:
+            r = await http.get(src, headers={"User-Agent": f"PWRNeon/1.0 (+t.me/{BOT_NAME})"}, timeout=30, follow_redirects=True)
+        except Exception as e:   # источник недоступен — не 500, а «нет картинки», фронт покажет заглушку
+            print("asset upstream:", raw[:80], type(e).__name__, flush=True)
+            return Response(status_code=502, headers={"Cache-Control": "no-store"})
     if r.status_code != 200:   # чужой 3xx/4xx наружу не отдаём как есть: браузер запоминает 301 навсегда
         return Response(status_code=404 if r.status_code == 404 else 502, headers={"Cache-Control": "no-store"})
-    if DEV or SERVE_WEB:
+    if DISK_CACHE:
         _cache_write(f, r.content)
     if want_webp:
         try:
             async with _WEBP_SEM:
                 body = await asyncio.to_thread(_to_webp, r.content)
-            if DEV or SERVE_WEB:
+            if DISK_CACHE:
                 _cache_write(f + ".webp", body)
             return Response(body, media_type="image/webp", headers=hdrs)
         except Exception as e:  # не вышло — отдаём PNG как раньше
