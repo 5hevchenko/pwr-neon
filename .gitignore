@@ -8,6 +8,8 @@ web/u/
 web/bundle.js
 web/bundle.css
 web/index.html
+web/gen/
+web/genart.js
 bin/
 venv/
 .venv/

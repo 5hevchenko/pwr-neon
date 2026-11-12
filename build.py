@@ -6,6 +6,13 @@ import os
 import re
 
 WEB = os.environ.get("WEB_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
+try:   # арт Higgsfield (tools/fetch_art.py): скачать в web/gen/ и записать web/genart.js — до склейки бандла
+    import runpy
+    runpy.run_path(os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "fetch_art.py"))["main"]()
+except Exception as _e:
+    print("арт Higgsfield пропущен:", _e)
+if not os.path.exists(os.path.join(WEB, "genart.js")):
+    open(os.path.join(WEB, "genart.js"), "w", encoding="utf-8").write("window.GEN_ART = {};\n")
 rd = lambda f: open(os.path.join(WEB, f), encoding="utf-8").read()
 src = rd("index.src.html")
 css = re.findall(r'<link rel="stylesheet" href="([a-z0-9]+\.css)\?v=[^"]*">', src)

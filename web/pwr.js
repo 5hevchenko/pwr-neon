@@ -8,6 +8,11 @@ let CTAB = (() => { try { return localStorage.getItem("np_ctab") || "all"; } cat
 const CTABS = [["all", "Все"], ["tg", "Подарки"], ["cs", "CS"], ["ru", "RubUp"]];
 const pwrLoad = async () => { try { PWR = await api("pwr"); } catch (e) {} return PWR; };
 const pwrImg = (name, s = 256) => A.orig(name, s);
+// арт и ролики из Higgsfield (tools/fetch_art.py → web/gen/): используем только то, что скачалось при сборке
+const GEN = window.GEN_ART || {};
+if (GEN.bg) { document.documentElement.style.setProperty("--gen-bg", `url("${GEN.bg}")`); document.documentElement.classList.add("has-genbg"); }
+for (const g of GAMES) if (GEN["game_" + g.id]) g.imgUrl = GEN["game_" + g.id];
+const pwrLite = () => document.documentElement.classList.contains("lite");
 // адреса картинок с меткой версии: первая выкладка отдавала по скинам CS ответ 301, и браузеры его запомнили
 for (const k of ["model", "orig"]) { const f = A[k]; A[k] = (...a) => f(...a) + "&r=2"; }
 
@@ -16,7 +21,7 @@ function pwrBannerHTML() {
   const p = PWR && PWR.pass; if (!p) return "";
   const mine = p.tiers.filter(t => t.owned), ready = mine.filter(t => !t.done).length;
   const best = mine[mine.length - 1] || p.tiers[0], f = p.tiers[0];
-  return `<button class="pp-banner${ready ? " ready" : ""}" data-act="pwr-pass" style="--pc:${best.color}">
+  return `<button class="pp-banner${ready ? " ready" : ""}${GEN.pass_banner ? " art" : ""}" data-act="pwr-pass" style="--pc:${best.color}${GEN.pass_banner ? `;--art:url('${GEN.pass_banner}')` : ""}">
     <span class="pp-b-art"><img src="${pwrImg(best.cover)}" alt=""></span>
     <span class="pp-b-t"><i>Battle Pass</i><b>Боевой пропуск</b>
       <small>${ready ? `${ready} ${plural(ready, ["кейс ждёт", "кейса ждут", "кейсов ждут"])} — забери` : `Новые кейсы через ${clock(p.resetIn)}`}</small>
@@ -28,7 +33,7 @@ function pwrPaint() {
   const group = id => (CASES.find(c => c.id === id) || {}).group || "tg";
   if (!v.querySelector(".ctabs")) {
     const n = g => CASES.filter(c => c.id !== "free" && (g === "all" || c.group === g)).length;
-    grid.insertAdjacentHTML("beforebegin", `<div class="ctabs">${CTABS.map(([k, t]) => `<button data-act="ctab" data-v="${k}" class="${CTAB === k ? "on" : ""}">${t}<em>${n(k)}</em></button>`).join("")}</div>`);
+    grid.insertAdjacentHTML("beforebegin", `<div class="ctabs${GEN.cat_tg ? " art" : ""}">${CTABS.map(([k, t]) => `<button data-act="ctab" data-v="${k}" class="${CTAB === k ? "on" : ""}">${GEN["cat_" + k] ? `<img src="${GEN["cat_" + k]}" alt="">` : ""}${t}<em>${n(k)}</em></button>`).join("")}</div>`);
   }
   v.querySelectorAll(".ctabs button").forEach(b => b.classList.toggle("on", b.dataset.v === CTAB));
   let hidden = 0, next = 99;
@@ -59,6 +64,26 @@ renderCases = async function () {
   if (!PWR) pwrLoad().then(pwrPaint);
 };
 
+// вспышка при открытии кейса: ролик на чёрном фоне накладывается на шапку кейса в режиме «экран» (чёрное становится прозрачным)
+function pwrBurst(sheet) {
+  const hero = sheet && sheet.querySelector(".chero");
+  if (!GEN.case_burst || !hero || pwrLite() || OPEN.fast || hero.querySelector(".pp-burst")) return;
+  const v = document.createElement("video");
+  v.className = "pp-burst"; v.src = GEN.case_burst; v.muted = true; v.playsInline = true; v.setAttribute("playsinline", ""); v.preload = "auto";
+  const done = () => { v.classList.add("out"); setTimeout(() => v.remove(), 500); };
+  v.addEventListener("loadedmetadata", () => { try { v.currentTime = 0.9; } catch (e) {} }, { once: true });
+  v.addEventListener("ended", done, { once: true }); v.addEventListener("error", () => v.remove(), { once: true });
+  setTimeout(done, 4600);
+  hero.appendChild(v);
+  const p = v.play(); if (p && p.catch) p.catch(() => v.remove());
+}
+const _doPwr = doOpen;
+doOpen = async function (sheet, id) {
+  const c = CASES.find(x => x.id === id), n = c && (c.keys ? 1 : c.price ? OPEN.n : 1);
+  if (c && !opening && (c.keys || (ME.lv.level >= c.level && c.price * n <= ME.stars)) && !(id === "free" && !c.keys && ME.freeIn > 0)) pwrBurst(sheet);
+  return _doPwr(sheet, id);
+};
+
 // у кейсов SKINBOX нет планки ценности — правим подпись под списком «Что внутри»
 const _ocPwr = openCase;
 openCase = function (id) {
@@ -66,6 +91,7 @@ openCase = function (id) {
   const c = CASES.find(x => x.id === id), el = SHEETS[SHEETS.length - 1];
   if (!c || !el || !el._case || el._case.id !== id) return;
   el.classList.add("cs-" + (c.group || "tg"));
+  if (GEN.case_burst && !pwrLite() && !window._burstWarm) { window._burstWarm = 1; fetch(GEN.case_burst).catch(() => {}); }   // ролик вспышки — в кэш заранее
   const d = el.querySelector(".disc");
   if (c.src === "cs" && d) d.textContent = d.textContent.replace(/Из платного кейса не выпадает[^.]*\.\s*/, "Чем дороже скин, тем он реже. PWR Pass и VIP Pass повышают шансы на дорогие скины. Скин продаётся за полную ценность. ");
   if (c.src === "ru") {   // RubUp: шесть категорий с шансом, внутри категории подарки равновероятны; у каждого подарка твёрдая цена
@@ -106,7 +132,9 @@ function pwrTierHTML(t, p) {
 function pwrPassBody() {
   const p = PWR && PWR.pass;
   if (!p) return emptyHTML("hourglass", "Загружаем…");
-  return `<div class="pp-lead">Каждый день — кейс. Семь дней подряд — улучшенный кейс с наградами лучше.</div>
+  const hero = GEN.pass_banner ? `<div class="pp-hero">${GEN.pass_loop && !pwrLite()
+    ? `<video src="${GEN.pass_loop}" poster="${GEN.pass_banner}" autoplay muted loop playsinline preload="metadata"></video>` : `<img src="${GEN.pass_banner}" alt="">`}</div>` : "";
+  return `${hero}<div class="pp-lead">Каждый день — кейс. Семь дней подряд — улучшенный кейс с наградами лучше.</div>
     <div id="pp-won"></div>
     ${p.tiers.map(t => pwrTierHTML(t, p)).join("")}
     <div class="disc">С 1-го по 6-й день — кейс дня, на 7-й — улучшенный. Сутки считаются по UTC. Серия Free сгорает после пропущенного дня, серии PWR и VIP — нет. При покупке обоих пропусков их эффекты не суммируются. Скины CS здесь игровые: вывода в Steam нет.</div>`;
