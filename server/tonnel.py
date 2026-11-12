@@ -55,15 +55,41 @@ def _wtf():
     return ts, base64.b64encode(b"Salted__" + salt + ct).decode()
 
 
-async def _post(url, payload, timeout=15):
+PROXY = os.environ.get("TONNEL_PROXY", "").strip()   # http://user:pass@host:port — если площадка не пускает запросы с адреса сервера
+_PROFILES = ["chrome110", "chrome", "safari", "chrome131_android"]   # отпечатки браузера: первый — тот, с которым работает tonnelmp
+_UA110 = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+_STATE = {"profile": 0, "logged": False}
+
+
+async def _try(url, payload, timeout, profile):
+    head = dict(_HEAD, **{"accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7", "sec-fetch-dest": "empty", "sec-fetch-mode": "cors",
+                          "sec-fetch-site": "same-site"})
+    if profile == "chrome110":
+        head["user-agent"] = _UA110
+    kw = {"proxies": {"https": PROXY, "http": PROXY}} if PROXY else {}
+    async with AsyncSession(impersonate=profile, **kw) as s:
+        return await s.post(url, headers=head, json=payload, timeout=timeout)
+
+
+async def _post(url, payload, timeout=15, retry=True):
+    """Запрос к площадке. На 403 от защиты (только для безопасных к повтору запросов) пробуем другие отпечатки браузера и запоминаем рабочий."""
     if AsyncSession is None:
         raise TonnelError("curl_cffi не установлен")
-    try:
-        async with AsyncSession(impersonate="chrome") as s:
-            r = await s.post(url, headers=_HEAD, json=payload, timeout=timeout)
-    except Exception as e:
-        raise TonnelError(f"нет связи: {type(e).__name__}") from e
+    order = [_STATE["profile"]] + ([i for i in range(len(_PROFILES)) if i != _STATE["profile"]] if retry else [])
+    r = None
+    for i in order:
+        try:
+            r = await _try(url, payload, timeout, _PROFILES[i])
+        except Exception as e:
+            raise TonnelError(f"нет связи: {type(e).__name__}") from e
+        if r.status_code not in (403, 429):
+            _STATE["profile"] = i
+            break
     if r.status_code in (403, 429):
+        if not _STATE["logged"]:   # один раз — что именно ответила защита (страница проверки, запрет адреса…)
+            _STATE["logged"] = True
+            print("tonnel 403:", {k: v for k, v in r.headers.items() if k.lower() in ("server", "cf-mitigated", "cf-ray")},
+                  " ".join(r.text[:300].split()), flush=True)
         raise TonnelError(f"площадка отклонила запрос ({r.status_code}, защита Cloudflare)")
     if r.status_code != 200:
         raise TonnelError(f"ответ {r.status_code}")
@@ -98,7 +124,7 @@ async def buy(gift_id, price, receiver):
     TonnelError — ответа нет, исход неизвестен: такую заявку разбирает человек."""
     ts, wtf = _wtf()
     r = await _post(f"{BUY}buyGift/{int(gift_id)}", {"authData": AUTH, "asset": "TON", "price": float(price), "timestamp": ts, "wtf": wtf,
-                                                     "receiver": int(receiver), "anonymously": True, "showPrice": False}, timeout=25)
+                                                     "receiver": int(receiver), "anonymously": True, "showPrice": False}, timeout=25, retry=False)
     if isinstance(r, dict) and r.get("status") == "success":
         return True, ""
     return False, str((r or {}).get("message") or r)[:200] if isinstance(r, dict) else str(r)[:200]
