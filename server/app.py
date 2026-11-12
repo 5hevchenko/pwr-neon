@@ -2919,18 +2919,23 @@ STEAM_IMG = "https://" + STEAM_HOSTS[2] + "/economy/image/"   # так адре�
 
 
 async def _steam_get(tail):
-    """Картинка скина с первого ответившего зеркала Steam CDN; удачное зеркало в следующий раз пробуем первым."""
-    for host in list(STEAM_HOSTS):
-        try:
-            r = await http.get(f"https://{host}/economy/image/{tail}", headers={"User-Agent": "Mozilla/5.0"}, timeout=8, follow_redirects=True)
-        except Exception:
-            continue
-        if r.status_code == 200 and r.headers.get("content-type", "").startswith("image/"):
-            if STEAM_HOSTS[0] != host:
-                STEAM_HOSTS.remove(host)
-                STEAM_HOSTS.insert(0, host)
-            return r
-    return None
+    """Картинка скина: спрашиваем все зеркала Steam CDN сразу и берём первый удачный ответ (у каждого зеркала свои пробелы и задержки)."""
+    async def one(host):
+        r = await http.get(f"https://{host}/economy/image/{tail}", headers={"User-Agent": "Mozilla/5.0"}, timeout=8, follow_redirects=True)
+        if r.status_code != 200 or not r.headers.get("content-type", "").startswith("image/"):
+            raise ValueError(r.status_code)
+        return r
+    tasks = [asyncio.create_task(one(h)) for h in STEAM_HOSTS]
+    try:
+        for t in asyncio.as_completed(tasks):
+            try:
+                return await t
+            except Exception:
+                continue
+        return None
+    finally:
+        for t in tasks:
+            t.cancel()
 
 
 @app.get("/np/a/{path:path}")
