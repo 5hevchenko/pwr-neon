@@ -2914,6 +2914,25 @@ def _custom_asset(raw, request):
     return FileResponse(path, media_type="image/webp" if webp else "image/png", headers={"Cache-Control": "public, max-age=2592000"})
 
 
+STEAM_HOSTS = ["community.akamai.steamstatic.com", "community.cloudflare.steamstatic.com", "community.fastly.steamstatic.com", "steamcommunity-a.akamaihd.net"]
+STEAM_IMG = "https://" + STEAM_HOSTS[2] + "/economy/image/"   # так адрес картинки скина собирает _custom_asset (он же — ключ кэша)
+
+
+async def _steam_get(tail):
+    """Картинка скина с первого ответившего зеркала Steam CDN; удачное зеркало в следующий раз пробуем первым."""
+    for host in list(STEAM_HOSTS):
+        try:
+            r = await http.get(f"https://{host}/economy/image/{tail}", headers={"User-Agent": "Mozilla/5.0"}, timeout=8, follow_redirects=True)
+        except Exception:
+            continue
+        if r.status_code == 200 and r.headers.get("content-type", "").startswith("image/"):
+            if STEAM_HOSTS[0] != host:
+                STEAM_HOSTS.remove(host)
+                STEAM_HOSTS.insert(0, host)
+            return r
+    return None
+
+
 @app.get("/np/a/{path:path}")
 async def asset(path: str, request: Request):
     raw = request.scope["raw_path"].decode()[
@@ -2950,10 +2969,12 @@ async def asset(path: str, request: Request):
             return FileResponse(fw, media_type="image/webp", headers=hdrs)
         if not want_webp and os.path.exists(f):
             return FileResponse(f, media_type=ct, headers=hdrs)
-    r = await http.get(
-        url, headers={"User-Agent": f"NePridymal/1.0 (+t.me/{BOT_NAME})"}, timeout=30,
-        follow_redirects=True,   # Steam CDN отвечает 301 на соседний хост
-    )
+    if url.startswith(STEAM_IMG):   # скин CS: зеркала Steam CDN отвечают по-разному (часть картинок на одном из них — 404), перебираем
+        r = await _steam_get(url[len(STEAM_IMG):])
+        if r is None:   # ни одно зеркало не ответило серверу — пусть браузер возьмёт картинку у Steam сам
+            return Response(status_code=302, headers={"Location": "https://" + STEAM_HOSTS[0] + "/economy/image/" + url[len(STEAM_IMG):], "Cache-Control": "no-store"})
+    else:
+        r = await http.get(url, headers={"User-Agent": f"NePridymal/1.0 (+t.me/{BOT_NAME})"}, timeout=30, follow_redirects=True)
     if r.status_code != 200:   # чужой 3xx/4xx наружу не отдаём как есть: браузер запоминает 301 навсегда
         return Response(status_code=404 if r.status_code == 404 else 502, headers={"Cache-Control": "no-store"})
     if DEV or SERVE_WEB:
