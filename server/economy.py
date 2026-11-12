@@ -68,7 +68,9 @@ for _c, _m in CUSTOM.items():
 # фон и узор — только оформление плитки (берутся у коллекции-донора) и на ценность скина не влияют.
 PWR_DIR = os.path.join(os.path.dirname(__file__), "pwr")
 PWR = json.load(open(os.path.join(PWR_DIR, "data.json"), encoding="utf-8"))
-USD_COINS = 20000   # SKINBOX src/config/coin.ts: usdToCoins = round(usd × 20000)
+# Единая валюта: в SKINBOX было 20 000 коинов за $1 при курсе 250 коинов за 1 XTR. Здесь 1 XTR = 1 000 ⭐,
+# поэтому $1 = 80 000 ⭐ — скин стоит столько же Telegram Stars, сколько в оригинале (нужно для вывода скинов).
+USD_COINS = int(conf("pwr.usd_coins", 80000))
 PWR_COVERS = {f[:-9] for f in os.listdir(os.path.join(PWR_DIR, "assets")) if f.endswith("_512.webp")}   # обложки кейсов и значки пропуска
 REMOTE = {}   # коллекция (скин CS) → хэш картинки на Steam CDN
 
@@ -466,7 +468,8 @@ def build_pwr_cases():
 
 # ---- кейсы RubUp Web: цена кейса, шесть категорий с весами и конкретные подарки с твёрдой ценой — как в rubup-web (engine.draw)
 RU_CASES = {}   # cid → [(категория, вес, [(коллекция, модель, фон, узор, цена)])]
-RU_FREE_EVERY = 60   # бесплатный кейс RubUp — раз в минуту
+RU_FREE_EVERY = int(conf("pwr.tier_free_hours", 6.0) * 3600)   # бесплатный тир-кейс — как родной бесплатный, раз в 6 часов
+RU_MAX_PRICE = int(conf("pwr.tier_max_price", 100000))          # тир-кейсы дороже не показываем: джекпот ×47 не должен превышать банк (0 — без ограничения)
 
 
 def ru_open(cid, rng=random):
@@ -486,6 +489,8 @@ def ru_items(cid):
 
 def build_ru_cases():
     for d in PWR["rubup"]:
+        if RU_MAX_PRICE and d["price"] > RU_MAX_PRICE:
+            continue
         pools = [(label, w, [tuple(x) for x in d["tiers"].get(label, []) if x[0] in CATALOG]) for label, w in PWR["ru_tiers"]]
         pools = [p for p in pools if p[2]]
         RU_CASES[d["id"]] = pools

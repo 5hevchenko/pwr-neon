@@ -44,7 +44,7 @@ def _gift_accrual(uid, t, inc_ts):
     import app as _a
     fk = _a.FAUCET_K()
     total, per_day = 0.0, 0.0
-    for g in q("SELECT col, model, value, acq FROM gifts WHERE owner=? AND price IS NULL", uid):
+    for g in q("SELECT col, model, value, acq FROM gifts WHERE owner=? AND price IS NULL AND COALESCE(src,'')=''", uid):   # тир-кейсы и скины продаются за 100% — дохода не приносят
         mp = LOOK[g["col"]][0].get(g["model"], 99) if g["col"] in LOOK else 99
         day = g["value"] * GIFT_RATE * _rate_mult(mp) * fk
         per_day += day

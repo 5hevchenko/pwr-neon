@@ -105,7 +105,7 @@ openCase = function (id) {
         <span class="chance">${g.p < 1 ? g.p.toFixed(2) : g.p.toFixed(1)}%</span><div class="rbar"></div>
         <div class="cap">${esc(g.col)}<br><small>${esc(g.model)} · ⭐ ${short(g.ev)}</small></div></div>`).join("");
     }
-    if (!c.price) { const cp = el.querySelector(".cprice"); if (cp) cp.textContent = "Бесплатно раз в минуту"; }
+    if (!c.price) { const cp = el.querySelector(".cprice"); if (cp) cp.textContent = "Бесплатно · раз в " + (c.freeEvery >= 3600 ? Math.round(c.freeEvery / 3600) + " ч" : Math.max(1, Math.round((c.freeEvery || 60) / 60)) + " мин"); }
   }
 };
 

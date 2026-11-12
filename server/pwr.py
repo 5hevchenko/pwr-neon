@@ -11,6 +11,8 @@
 просмотра (здесь её начисляет только обратный вызов Adsgram с секретом ADS_SECRET) и выбор «улучшенного» кейса клиентом (здесь его решает серия)."""
 import hmac
 import math
+
+from settings import conf
 import os
 import secrets
 
@@ -22,8 +24,8 @@ from app import DEV, R, app, auth, bal, db, day_start, err, event, gift_out, not
 DAYS = 7
 XTR = {"PWR": 250, "VIP": 500}            # SKINBOX payment/config/passPayment.ts
 TASK_K = 1.5                              # user/config/adCoef.ts: passAdCoef
-SUB_REWARD = 100                          # userServices: подписка на группу
-AD_REWARDS = [5, 5, 15, 20, 10]           # user/config/adCoef.ts: adPrice
+SUB_REWARD = int(conf("pwr.sub_reward", 400))    # подписка на канал: 100 коинов SKINBOX в масштабе единой валюты (×4)
+AD_REWARDS = [int(x) for x in conf("pwr.ad_rewards", [50, 50, 75, 100, 75])]   # награда за 1-й…5-й ролик в день
 CHANNEL = os.environ.get("PWR_CHANNEL", "").strip()          # @канал или id: подписка проверяется ботом
 ADS_BLOCK = os.environ.get("ADSGRAM_BLOCK", "").strip()      # блок Adsgram (Rewarded)
 ADS_SECRET = os.environ.get("ADS_SECRET", "").strip()        # секрет в Reward URL блока

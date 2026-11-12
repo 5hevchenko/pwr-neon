@@ -1003,7 +1003,7 @@ def cases(uid=Depends(auth)):
         out.append({"id": c["id"], "title": E.case_title(c["id"], uid), "price": case_price(c), "full": c["price"], "keys": keys.get(c["id"], 0),
                     "level": c["level"], "cover": E.case_cover(c["id"], uid), **_case_limit(c["id"]),
                     "group": E.CASE_GROUP.get(c["id"], "tg"), "k": E.case_colors(c["id"]), "floor": bool(c["floor"]), "src": c.get("src"),
-                    **({"gifts": _ru_gifts(c["id"]), "freeIn": max(0, (_ru_free_at(uid) + E.RU_FREE_EVERY) - now()) if not c["price"] else 0} if c["id"] in E.RU_CASES else {}),
+                    **({"gifts": _ru_gifts(c["id"]), "freeIn": max(0, (_ru_free_at(uid) + E.RU_FREE_EVERY) - now()) if not c["price"] else 0, "freeEvery": E.RU_FREE_EVERY} if c["id"] in E.RU_CASES else {}),
                     "top": top, "pat": look_of(E.case_cover(c["id"], uid), c["id"])["symbol"],
                     "previews": [x["col"] for x in items[:3]], "items": items})
     return out
