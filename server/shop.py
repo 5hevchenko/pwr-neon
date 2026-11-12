@@ -151,6 +151,25 @@ def on_paid(m):
         print("refs on_buy", e, flush=True)
 
 
+def on_refund(m):
+    """refunded_payment: оплату вернули. Платёж обнуляется — он больше не даёт лимит вывода и не идёт в статистику,
+    купленные звёзды снимаются (не ниже нуля). Каждый возврат учитывается один раз."""
+    rp = m["refunded_payment"]
+    charge = rp.get("telegram_payment_charge_id")
+    with tx():
+        p = q1("SELECT * FROM payments WHERE charge=?", charge)
+        if not p or not p["xtr"]:
+            return
+        db.execute("UPDATE payments SET xtr=0 WHERE charge=?", (charge,))
+        if p["stars"]:
+            db.execute("UPDATE users SET stars=MAX(0, stars-?) WHERE id=?", (p["stars"], p["user"]))
+            event(p["user"], "refund", -p["stars"])
+    print("refund:", charge, p["user"], p["xtr"], flush=True)
+    import app as A
+    for aid in A.ADMINS:
+        notify(aid, f"↩️ Telegram вернул игроку <code>{p['user']}</code> оплату {p['xtr']} Stars. Платёж убран из лимита вывода, купленные звёзды сняты.")
+
+
 def gift_paid(uid, to, xtr, charge):
     """Подарок звёзд другу: платёж числится за покупателем (kind='gift'), звёзды — получателю.
     Деньги уже списаны Telegram, поэтому начисляем, даже если дружбу успели разорвать."""

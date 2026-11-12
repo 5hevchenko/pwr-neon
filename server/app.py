@@ -688,6 +688,8 @@ async def bot_loop():
                     await shop.on_pre_checkout(upd["pre_checkout_query"])
                 elif m and m.get("successful_payment"):
                     await asyncio.get_running_loop().run_in_executor(None, shop.on_paid, m)
+                elif m and m.get("refunded_payment"):   # Telegram вернул игроку оплату — она больше не считается покупкой
+                    await asyncio.get_running_loop().run_in_executor(None, shop.on_refund, m)
                 elif upd.get("inline_query"):   # @бот <сумма> в чате — инлайн-чек (pay.py)
                     await pay.on_inline(upd["inline_query"])
                 elif upd.get("chosen_inline_result"):   # чек отправлен в чат — резервируем средства

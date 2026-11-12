@@ -311,7 +311,49 @@ def _nice(x):
 
 
 FLOOR = 0.4    # из платного кейса не выпадает подарок дешевле ~40% его цены
-SAMPLES = 2000
+DRAW_TRIES = 25   # сколько раз _draw перебрасывает вариант в поисках ценности не ниже планки
+_DIST = {}
+
+
+def value_dist(col):
+    """Точное распределение ценности подарка коллекции: [(ценность, вероятность)] по возрастанию ценности."""
+    if col not in _DIST:
+        if col in REMOTE:
+            _DIST[col] = [(base(col), 1.0)]
+        else:
+            def rar(key):   # редкости одной черты и их вероятности (одинаковые редкости складываем)
+                d = collections.defaultdict(float)
+                for it in _cum(col, key)[0]:
+                    d[it[1]] += max(it[1], 0.1)
+                t = sum(d.values())
+                return [(r, w / t) for r, w in d.items()]
+            out = collections.defaultdict(float)
+            for pm, a in rar("models"):
+                for pb, b in rar("backdrops"):
+                    for ps, c in rar("symbols"):
+                        out[max(1, round(base(col) * mult(col, pm, pb, ps)))] += a * b * c
+            _DIST[col] = sorted(out.items())
+    return _DIST[col]
+
+
+def draw_ev(col, floor):
+    """Точная средняя ценность того, что выдаёт _draw для коллекции: первый вариант не ниже планки за DRAW_TRIES попыток,
+    а если такого не нашлось — лучший из них. Раньше это оценивалось случайной выборкой, и цена кейса гуляла от запуска к запуску."""
+    d = value_dist(col)
+    if not floor or d[0][0] >= floor:
+        return sum(v * p for v, p in d)
+    q = sum(p for v, p in d if v >= floor)
+    hi = sum(v * p for v, p in d if v >= floor) / q if q else 0.0
+    miss = (1 - q) ** DRAW_TRIES
+    acc = prev = emax = 0.0
+    for v, p in d:   # ожидание максимума из DRAW_TRIES вариантов при условии, что все ниже планки
+        if v >= floor:
+            break
+        acc += p / (1 - q)
+        cur = acc ** DRAW_TRIES
+        emax += v * (cur - prev)
+        prev = cur
+    return (1 - miss) * hi + miss * emax
 
 
 def _draw(c, floor, rng=random):
@@ -320,7 +362,7 @@ def _draw(c, floor, rng=random):
     if col in c.get("joke", ()):   # шуточный подарок выпадает как есть, без планки ценности
         return roll(col, rng)
     best = None
-    for _ in range(25):
+    for _ in range(DRAW_TRIES):
         d = roll(col, rng)
         if d["value"] >= floor:
             return d
@@ -347,14 +389,20 @@ def build_cases():
         odds = {x: wi / tw for x, wi in zip(cols, w)}
         c = {"id": cid, "title": title, "cover": cover, "level": lvl, "cols": cols, "cum": cum, "floor": 0, "odds": odds}
         floor = 0 if cid == "free" else FLOOR * price
-        for _ in range(2 if floor else 1):   # средняя ценность каждой коллекции с учётом планки
-            evs = {}
-            for x in cols:
-                one = {"cols": [x], "cum": [1.0]}
-                evs[x] = sum(_draw(one, floor)["value"] for _ in range(SAMPLES // len(cols) + 150)) / (SAMPLES // len(cols) + 150)
-            if floor:
-                price = _nice(sum(odds[x] * evs[x] for x in cols) / RTP)
+        seen = []
+        while True:   # планка зависит от цены, а цена — от планки: считаем, пока цена не перестанет меняться
+            evs = {x: draw_ev(x, floor) for x in cols}
+            if not floor:
+                break
+            price = _nice(sum(odds[x] * evs[x] for x in cols) / RTP)
+            if price in seen:   # цена сошлась (или пошла по кругу — тогда берём большую, в пользу игры)
+                if price != seen[-1]:
+                    price = max(seen[seen.index(price):])
+                    evs = {x: draw_ev(x, FLOOR * price) for x in cols}
                 floor = FLOOR * price
+                break
+            seen.append(price)
+            floor = FLOOR * price
         c.update(evs=evs, floor=floor, price=0 if cid == "free" else price)
         if cid in FIXED_PRICE:   # цена ровно заданная; базовые цены коллекций кейса подобраны так, что возврат ≈ RTP
             c.update(price=FIXED_PRICE[cid], floor=FLOOR * FIXED_PRICE[cid])
