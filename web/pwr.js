@@ -14,7 +14,7 @@ if (GEN.bg) { document.documentElement.style.setProperty("--gen-bg", `url("${GEN
 for (const g of GAMES) if (GEN["game_" + g.id]) g.imgUrl = GEN["game_" + g.id];
 const pwrLite = () => document.documentElement.classList.contains("lite");
 // адреса картинок с меткой версии: первая выкладка отдавала по скинам CS ответ 301, и браузеры его запомнили
-for (const k of ["model", "orig"]) { const f = A[k]; A[k] = (...a) => f(...a) + "&r=3"; }
+for (const k of ["model", "orig"]) { const f = A[k]; A[k] = (...a) => f(...a) + "&r=4"; }
 
 // ---------------- главная: баннер пропуска и вкладки витрины ----------------
 function pwrBannerHTML() {
