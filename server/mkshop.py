@@ -31,7 +31,7 @@ def _gen(ep):
     """Витрина и заказы на новую эпоху (внутри tx, один раз)."""
     if q1("SELECT 1 FROM mk_shop WHERE epoch=?", ep):
         return
-    cols = list(E.CATALOG)
+    cols = list(E.NATIVE)
     for n, lo, hi in TIERS:
         pool = [c for c in cols if lo <= E.base(c) < hi] or cols
         for c in random.sample(pool, min(n, len(pool))):

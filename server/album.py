@@ -7,21 +7,21 @@ from app import R, app, auth, bal, db, err, event, now, q, q1, tx
 
 # (сколько коллекций, звёзды, ключ кейса)
 TIERS = [(10, 3_000, None), (20, 0, "luck"), (30, 10_000, None), (40, 0, "lux"), (50, 25_000, None), (60, 0, "cups"),
-         (70, 50_000, None), (80, 0, "peach"), (90, 100_000, None), (100, 200_000, None), (110, 0, "mega"), (len(E.CATALOG), 1_000_000, None)]
+         (70, 50_000, None), (80, 0, "peach"), (90, 100_000, None), (100, 200_000, None), (110, 0, "mega"), (len(E.NATIVE), 1_000_000, None)]
 
 db.executescript("CREATE TABLE IF NOT EXISTS album_claims(user INTEGER, tier INTEGER, ts INTEGER, PRIMARY KEY(user, tier));")
 
 
 def _owned(uid, aged):
     sql = "SELECT col, COUNT(DISTINCT model) n FROM gifts WHERE owner=?" + (" AND COALESCE(acq,0)<=?" if aged else "") + " GROUP BY col"
-    return {r["col"]: r["n"] for r in (q(sql, uid, now() - 86400) if aged else q(sql, uid))}
+    return {r["col"]: r["n"] for r in (q(sql, uid, now() - 86400) if aged else q(sql, uid)) if r["col"] not in E.REMOTE}   # скины CS в альбом не входят
 
 
 @app.get(R + "/album")
 def album(uid=Depends(auth)):
     have, aged = _owned(uid, False), _owned(uid, True)
     claimed = {r["tier"] for r in q("SELECT tier FROM album_claims WHERE user=?", uid)}
-    cols = sorted(E.CATALOG, key=lambda c: -E.base(c))
+    cols = sorted(E.NATIVE, key=lambda c: -E.base(c))
     return {"cols": [{"col": c, "base": E.base(c), "models": len(E.CATALOG[c]["models"]), "have": have.get(c, 0), "aged": c in aged} for c in cols],
             "total": len(cols), "count": len(have), "eligible": len(aged),
             "tiers": [{"need": n, "stars": s, "key": E.case_title(k, uid) if k else None, "claimed": n in claimed} for n, s, k in TIERS]}

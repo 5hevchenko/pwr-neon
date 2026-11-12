@@ -63,17 +63,18 @@ for _c, _m in CUSTOM.items():
 
 
 # ---------------- слияние с PWR SKINBOX и RubUp Web (данные собирает tools/pwr_build.py → server/pwr/data.json) ----------------
-# Скины CS из SKINBOX — свои коллекции (одна степень износа = одна модель), картинки отдаёт Steam CDN (app.asset кэширует),
-# фоны и узоры — у коллекции-донора. Цена в ⭐ считается из долларовой цены SKINBOX: usd_stars().
+# Экономика обоих проектов перенесена как была: цены, шансы и ценности — из их данных и формул, единица 1 коин = 1 звезда RubUp = 1 ⭐.
+# Скины CS — свои коллекции (одна степень износа = одна модель), картинки отдаёт Steam CDN (app.asset кэширует),
+# фон и узор — только оформление плитки (берутся у коллекции-донора) и на ценность скина не влияют.
 PWR_DIR = os.path.join(os.path.dirname(__file__), "pwr")
 PWR = json.load(open(os.path.join(PWR_DIR, "data.json"), encoding="utf-8"))
-PWR_A, PWR_B = conf("pwr.usd_a", 3420), conf("pwr.usd_b", 0.659)   # ⭐ = a × usd^b: сжимает разброс цен скинов под экономику игры
+USD_COINS = 20000   # SKINBOX src/config/coin.ts: usdToCoins = round(usd × 20000)
 PWR_COVERS = {f[:-9] for f in os.listdir(os.path.join(PWR_DIR, "assets")) if f.endswith("_512.webp")}   # обложки кейсов и значки пропуска
-REMOTE = {}   # коллекция → хэш картинки на Steam CDN
+REMOTE = {}   # коллекция (скин CS) → хэш картинки на Steam CDN
 
 
-def usd_stars(usd):
-    return max(1, round(PWR_A * usd ** PWR_B))
+def usd_coins(usd):
+    return round(usd * USD_COINS)
 
 
 def _pwr_rarity(usd):
@@ -82,9 +83,11 @@ def _pwr_rarity(usd):
 
 
 for _c, _d in PWR["cols"].items():
+    assert _c not in CATALOG, f"скин SKINBOX «{_c}» совпал по имени с коллекцией игры — пересобери данные (tools/pwr_build.py)"
     CATALOG[_c] = {"released": 1794441600, "models": [[_d["m"], _pwr_rarity(_d["usd"])]],
                    "backdrops": CATALOG[CUSTOM_DONOR]["backdrops"], "symbols": CATALOG[CUSTOM_DONOR]["symbols"]}
     REMOTE[_c] = _d["img"]
+NATIVE = [c for c in CATALOG if c not in REMOTE]   # коллекции самой игры: альбом, маркет банка, апгрейд и прочее работают только с ними
 
 
 def custom_file(col, model=None):
@@ -137,7 +140,7 @@ BASE.update({"AWP Asiimov": 11500, "Desert Eagle Blaze": 18450, "Glock-18 Fade":
              "M4A4 Howl": 138400, "Sport Gloves": 115300, "Butterfly Knife": 207600, "AWP Dragon Lore": 461300})   # кейс «CS:GO Легенды»: при цене 33 333 возврат ≈ 90% (симуляция 200к открытий, 2026-11-11)
 
 
-BASE.update({_c: usd_stars(_d["usd"]) for _c, _d in PWR["cols"].items()})   # скины SKINBOX
+BASE.update({_c: usd_coins(_d["usd"]) for _c, _d in PWR["cols"].items()})   # скины SKINBOX: справочная цена в коинах
 
 
 def base(col):
@@ -184,12 +187,14 @@ def roll(col, rng=random):
     return {
         "col": col, "model": m[0], "backdrop": b[0], "symbol": s[0],
         "num": rng.randint(1, supply(col)),
-        "value": max(1, round(base(col) * mult(col, m[1], b[1], s[1]))),
+        "value": base(col) if col in REMOTE else max(1, round(base(col) * mult(col, m[1], b[1], s[1]))),   # у скина CS цена твёрдая
     }
 
 
 def expected_value(col):
     """Матожидание ценности подарка коллекции. Множитель — произведение по чертам, поэтому считаем раздельно."""
+    if col in REMOTE:
+        return base(col)
     d = CATALOG[col]
     mm, mb, ms = _MED[col]
     def part(items, med, k):
@@ -286,7 +291,6 @@ CASES_DEF = [
     ("csgo2", "CS:GO Легенды", "CS Case 2", 5, ["AWP Asiimov", "Desert Eagle Blaze", "Glock-18 Fade", "USP-S Kill Confirmed", "AK-47 Fire Serpent", "M4A4 Howl", "Sport Gloves", "Butterfly Knife", "AWP Dragon Lore"]),
     ("mega", "МЕГА", "Plush Pepe", 15, ["Plush Pepe", "Heart Locket", "Durov's Cap", "Precious Peach", "Mighty Arm", "Ion Gem", "Loot Bag"]),
 ]
-CASES_DEF += [(_d["id"], _d["title"], _d["cover"], 1, _d["cols"]) for _d in PWR["rubup"]]   # 39 кейсов RubUp Web (уровень — ниже, от цены)
 CASE_GROUP = {"csgo": "cs", "csgo2": "cs", **{_d["id"]: "ru" for _d in PWR["rubup"]}, **{_d["id"]: "cs" for _d in PWR["cases"]}}   # вкладка витрины: tg (по умолчанию) | ru | cs
 RTP = conf("economy.case_rtp", 0.9)  # возврат игроку
 FIXED_PRICE = {"csgo": 11111, "csgo2": 33333, "brawl": 5555, "mc": 3333}   # цена ровно такая (базовые цены коллекций подобраны под RTP)
@@ -403,75 +407,102 @@ def case_cover(cid, uid=None):
     return c["cover"]
 
 
-def open_case(cid, rng=random):
+def open_case(cid, rng=random, tier="FREE"):
+    if cid in PWR_CASES:   # кейс SKINBOX: шансы зависят от пропуска игрока
+        return pwr_open(cid, tier, rng)
+    if cid in RU_CASES:
+        return ru_open(cid, rng)
     c = CASES[cid]
     return _draw(c, c["floor"], rng)
 
 
-_PWR_MULT = None
+# ---- кейсы SKINBOX: цена, состав и шансы — как в cs-bot-backend (casesServices.weightedRandom, config/caseCoefs.ts)
+CASE_COEFS = {
+    "scavenger": {"FREE": 0.88, "PWR": 0.94, "VIP": 0.964}, "strike": {"FREE": 0.905, "PWR": 0.942, "VIP": 0.955},
+    "warborn": {"FREE": 1.35, "PWR": 1.38, "VIP": 1.395}, "carbon": {"FREE": 1.42, "PWR": 1.45, "VIP": 1.458},
+    "prime": {"FREE": 1.6, "PWR": 1.63, "VIP": 1.638}, "ghost": {"FREE": 1.65, "PWR": 1.68, "VIP": 1.7},
+    "neon": {"FREE": 1.97, "PWR": 2.01, "VIP": 2.03}, "void": {"FREE": 1.95, "PWR": 1.97, "VIP": 1.99},
+    "vault": {"FREE": 1.9, "PWR": 1.93, "VIP": 1.95}, "reign": {"FREE": 1.75, "PWR": 1.78, "VIP": 1.8},
+    "venom": {"FREE": 2, "PWR": 2.05, "VIP": 2.1}, "bloodline": {"FREE": 1.55, "PWR": 1.58, "VIP": 1.61},
+}
+PWR_CASES = {}   # cid → {"items": [(скин, цена в $)], "w": {уровень пропуска: [веса]}}
 
 
-def pwr_ev(col):
-    """Точное ожидание ценности скина SKINBOX: модель одна, фон и узор — как у донора, поэтому распределение множителя общее."""
-    global _PWR_MULT
-    if _PWR_MULT is None:
-        d = CATALOG[CUSTOM_DONOR]
-        _, mb, ms = _MED[CUSTOM_DONOR]
-        wb, ws = [max(x[1], 0.1) for x in d["backdrops"]], [max(x[1], 0.1) for x in d["symbols"]]
-        tb, ts = sum(wb), sum(ws)
-        acc = collections.defaultdict(float)
-        for b, pb in zip(d["backdrops"], wb):
-            for s, ps in zip(d["symbols"], ws):
-                k = min(8.0, max(0.6, (mb / max(b[1], 1)) ** 0.25 * (ms / max(s[1], 1)) ** 0.2))
-                acc[round(k, 4)] += pb / tb * ps / ts
-        _PWR_MULT = sorted(acc.items())
-    b = base(col)
-    return sum(p * max(1, round(b * k)) for k, p in _PWR_MULT)
+def pwr_odds(cid, tier="FREE"):
+    """Шансы скинов кейса SKINBOX для уровня пропуска (FREE / PWR / VIP)."""
+    pc = PWR_CASES[cid]
+    w = pc["w"].get(tier) or pc["w"]["FREE"]
+    tw = sum(w)
+    out = {}
+    for (col, _), wi in zip(pc["items"], w):
+        out[col] = out.get(col, 0) + wi / tw
+    return out
 
 
-PWR_MIN_P = 0.00005   # скин с шансом меньше 0,005% в кейс не кладём: в списке «Что внутри» не должно быть недостижимых призов
+def pwr_open(cid, tier="FREE", rng=random):
+    """Дроп кейса SKINBOX: вес = (1000 / цена)^(4 − 0.5 − 1 − коэф. кейса), ценность — цена предмета в коинах."""
+    pc = PWR_CASES[cid]
+    col, usd = rng.choices(pc["items"], weights=pc["w"].get(tier) or pc["w"]["FREE"])[0]
+    d = roll(col, rng)
+    d["value"] = usd_coins(usd)
+    return d
 
 
 def build_pwr_cases():
-    """Кейсы SKINBOX: список скинов кейса, вес = 1 / ценность^p (дешёвое часто, дорогое редко, планки нет).
-    Цена — долларовая цена SKINBOX в ⭐; p подбирается так, чтобы ожидание дропа = RTP × цена."""
     for d in PWR["cases"]:
-        cols = [x for x in d["cols"] if x in CATALOG]
-        evs = {x: pwr_ev(x) for x in cols}
-        price = _nice(usd_stars(d["usd"]))
-        flat = sum(evs.values()) / len(cols)   # ожидание при равных шансах — больше из этого набора не выжать
-        if flat < RTP * price:                 # скины дешевле, чем обещает цена: снижаем цену, чтобы возврат остался честным
-            price = max(25, int(flat / RTP * 0.98 // 2500 * 2500) or int(flat / RTP * 0.98))
-        target = RTP * price
-
-        def mean(p):
-            w = [evs[x] ** -p for x in cols]
-            return sum(wi * evs[x] for wi, x in zip(w, cols)) / sum(w)
-        while True:
-            lo, hi = 0.0, 8.0
-            for _ in range(50):
-                mid = (lo + hi) / 2
-                lo, hi = (mid, hi) if mean(mid) > target else (lo, mid)
-            w = [evs[x] ** -hi for x in cols]
-            tw = sum(w)
-            rare = [x for x, wi in zip(cols, w) if wi / tw < PWR_MIN_P]
-            if not rare or len(cols) <= 5:
-                break
-            cols.remove(max(rare, key=evs.get))   # убираем самый дорогой из недостижимых и пересчитываем
+        items = [(c, usd) for c, usd in d["items"] if c in CATALOG]
+        PWR_CASES[d["id"]] = {"items": items,
+                              "w": {t: [(1000 / usd) ** (4 - 0.5 - 1 - k) for _, usd in items] for t, k in CASE_COEFS[d["sid"]].items()}}
+        odds = pwr_odds(d["id"])
         cum, acc = [], 0.0
-        for x in w:
+        for x in odds.values():
             acc += x
             cum.append(acc)
-        CASES[d["id"]] = {"id": d["id"], "title": d["title"], "cover": d["cover"], "level": d["level"], "cols": cols, "cum": cum, "floor": 0,
-                          "odds": {x: wi / tw for x, wi in zip(cols, w)}, "evs": {x: evs[x] for x in cols}, "price": price, "color": d["color"]}
+        price = usd_coins(d["usd"])
+        FIXED_PRICE[d["id"]] = price   # цена твёрдая: курс банка и акции на неё не действуют
+        CASES[d["id"]] = {"id": d["id"], "title": d["title"], "cover": d["cover"], "level": 1, "cols": list(odds), "cum": cum, "floor": 0, "odds": odds,
+                          "evs": {c: usd_coins(usd) for c, usd in items}, "price": price, "color": d["color"], "src": "cs"}
 
 
-def _ru_levels():
-    """Уровень доступа кейсов RubUp — от цены (дорогие открываются позже)."""
+# ---- кейсы RubUp Web: цена кейса, шесть категорий с весами и конкретные подарки с твёрдой ценой — как в rubup-web (engine.draw)
+RU_CASES = {}   # cid → [(категория, вес, [(коллекция, модель, фон, узор, цена)])]
+RU_FREE_EVERY = 60   # бесплатный кейс RubUp — раз в минуту
+
+
+def ru_open(cid, rng=random):
+    pools = RU_CASES[cid]
+    label, _, pool = rng.choices(pools, weights=[p[1] for p in pools])[0]
+    col, model, backdrop, symbol, price = rng.choice(pool)
+    return {"col": col, "model": model, "backdrop": backdrop, "symbol": symbol, "num": rng.randint(1, supply(col)), "value": price, "tier": label}
+
+
+def ru_items(cid):
+    """Содержимое кейса RubUp для экрана «Что внутри»: каждый подарок с шансом (шанс категории делится поровну внутри неё)."""
+    pools = RU_CASES[cid]
+    tw = sum(p[1] for p in pools)
+    return [{"col": c, "model": m, "backdrop": b, "symbol": s, "ev": price, "p": w / tw / len(pool) * 100, "tier": label}
+            for label, w, pool in pools for c, m, b, s, price in pool]
+
+
+def build_ru_cases():
     for d in PWR["rubup"]:
-        c = CASES.get(d["id"])
-        if c:
-            c["level"] = next(l for lim, l in ((1500, 1), (4000, 2), (10000, 3), (25000, 5), (60000, 8), (150000, 11), (float("inf"), 14)) if c["price"] < lim)
+        pools = [(label, w, [tuple(x) for x in d["tiers"].get(label, []) if x[0] in CATALOG]) for label, w in PWR["ru_tiers"]]
+        pools = [p for p in pools if p[2]]
+        RU_CASES[d["id"]] = pools
+        tw = sum(p[1] for p in pools)
+        odds, val = {}, {}
+        for label, w, pool in pools:
+            for c, m, b, s, price in pool:
+                p = w / tw / len(pool)
+                odds[c] = odds.get(c, 0) + p
+                val[c] = val.get(c, 0) + p * price
+        cum, acc = [], 0.0
+        for x in odds.values():
+            acc += x
+            cum.append(acc)
+        FIXED_PRICE[d["id"]] = d["price"]
+        CASES[d["id"]] = {"id": d["id"], "title": d["title"], "cover": d["cover"], "level": 1, "cols": list(odds), "cum": cum, "floor": 0, "odds": odds,
+                          "evs": {c: val[c] / odds[c] for c in odds}, "price": d["price"], "src": "ru"}
 
 
 _COVER_K = {}
@@ -509,7 +540,7 @@ def case_colors(cid):
 
 build_cases()
 build_pwr_cases()
-_ru_levels()
+build_ru_cases()
 
 if __name__ == "__main__":
     for c in CASES.values():

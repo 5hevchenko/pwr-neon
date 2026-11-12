@@ -60,7 +60,7 @@ def _pay(uid, r, x):
     db.execute("DELETE FROM fish WHERE user=?", (uid,))
     db.execute("UPDATE users SET stars=stars+? WHERE id=?", (pay, uid))
     event(uid, "fish", pay - r["bet"], stake=r["bet"], res={"bust": r["bust"], "mult": x})
-    col = random.choice([c for c in CATCH if c in E.CATALOG] or list(E.CATALOG))
+    col = random.choice([c for c in CATCH if c in E.CATALOG] or list(E.NATIVE))
     return {"active": False, "won": True, "mult": x, "pay": pay, "bet": r["bet"], "bust": r["bust"], "gift": preview_out(col, E.roll(col))}
 
 

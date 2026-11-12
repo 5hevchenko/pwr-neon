@@ -35,6 +35,8 @@ function pwrPaint() {
   v.querySelectorAll(".case").forEach(c => {
     const g = group(c.dataset.id), hide = CTAB !== "all" && g !== CTAB;
     c.classList.toggle("pwr-hide", hide); c.dataset.g = g;
+    const cs = CASES.find(x => x.id === c.dataset.id), pr = c.querySelector(".pr");   // цены оригиналов: бесплатный кейс RubUp и суммы до миллиарда
+    if (cs && pr && cs.src && !pr.dataset.f) { pr.dataset.f = 1; if (!cs.price) pr.textContent = "Бесплатно"; else if (cs.price >= 1e7) pr.innerHTML = "⭐ " + short(cs.price); }
     if (!hide) c.classList.remove("defer");
     if (!hide && c.closest("#cases-locked")) { hidden++; next = Math.min(next, (CASES.find(x => x.id === c.dataset.id) || {}).level || 99); }
   });
@@ -64,9 +66,20 @@ openCase = function (id) {
   const c = CASES.find(x => x.id === id), el = SHEETS[SHEETS.length - 1];
   if (!c || !el || !el._case || el._case.id !== id) return;
   el.classList.add("cs-" + (c.group || "tg"));
-  if (c.price && c.floor === false) {
-    const d = el.querySelector(".disc");
-    if (d) d.textContent = d.textContent.replace(/Из платного кейса не выпадает[^.]*\.\s*/, "Чем дороже скин, тем он реже; возврат кейса — 90%. ");
+  const d = el.querySelector(".disc");
+  if (c.src === "cs" && d) d.textContent = d.textContent.replace(/Из платного кейса не выпадает[^.]*\.\s*/, "Чем дороже скин, тем он реже. PWR Pass и VIP Pass повышают шансы на дорогие скины. Скин продаётся за полную ценность. ");
+  if (c.src === "ru") {   // RubUp: шесть категорий с шансом, внутри категории подарки равновероятны; у каждого подарка твёрдая цена
+    if (d) d.textContent = d.textContent.replace(/Из платного кейса не выпадает[^.]*\.\s*/, "Шанс указан для категории; внутри категории подарки выпадают равновероятно. Подарок продаётся за полную ценность. ");
+    const grid = el.querySelector(".ggrid"), tiers = [];
+    c.gifts.forEach(g => { if (!tiers.includes(g.tier)) tiers.push(g.tier); });
+    const share = t => c.gifts.filter(g => g.tier === t).reduce((a, g) => a + g.p, 0);
+    if (grid) {
+      grid.insertAdjacentHTML("beforebegin", `<div class="ru-tiers">${tiers.map((t, i) => `<span class="rt-${i}"><b>${String(Math.round(share(t) * 10) / 10).replace(".", ",")}%</b>${esc(t)}</span>`).join("")}</div>`);
+      grid.innerHTML = [...c.gifts].sort((a, b) => b.ev - a.ev).map(g => `<div class="gcell item rt-${tiers.indexOf(g.tier)}">${giftHTML(g, { plain: true, lite: true })}
+        <span class="chance">${g.p < 1 ? g.p.toFixed(2) : g.p.toFixed(1)}%</span><div class="rbar"></div>
+        <div class="cap">${esc(g.col)}<br><small>${esc(g.model)} · ⭐ ${short(g.ev)}</small></div></div>`).join("");
+    }
+    if (!c.price) { const cp = el.querySelector(".cprice"); if (cp) cp.textContent = "Бесплатно раз в минуту"; }
   }
 };
 
@@ -78,7 +91,7 @@ function pwrTierHTML(t, p) {
   }).join("");
   const inside = [...(t.stars ? [`<span class="pp-in st"><b>⭐</b><small>${fmt(t.stars.min)}–${fmt(t.stars.max)}</small></span>`] : []),
     ...t.skins.slice(0, t.stars ? 4 : 5).map(s => `<span class="pp-in"><img src="${A.orig(s.col, 128)}" alt="" loading="lazy"><small>⭐ ${short(s.ev)}</small></span>`)].join("");
-  const cta = !t.owned ? `<button class="btn cta gold" data-act="pwr-buy" data-id="${t.id}">Купить · ⭐ ${fmt(t.price)} / ${t.days} дней</button>`
+  const cta = !t.owned ? `<button class="btn cta gold" data-act="pwr-buy" data-id="${t.id}">Купить за ${fmt(t.xtr)} Telegram Stars · ${t.days} дней</button>`
     : t.done ? `<button class="btn cta ghost" disabled>Открыт · новый через ${clock(p.resetIn)}</button>`
       : `<button class="btn cta gold" data-act="pwr-open" data-id="${t.id}">${t.improved ? "Открыть улучшенный кейс" : "Открыть кейс дня"}</button>`;
   return `<div class="pp-tier${t.owned ? " owned" : ""}${t.improved ? " imp" : ""}" style="--pc:${t.color}">
@@ -87,7 +100,7 @@ function pwrTierHTML(t, p) {
         <div class="pp-sub">День ${t.day} из ${t.days}${t.improved ? " · улучшенный кейс" : ""}</div>
         <div class="pp-track">${days}</div></div></div>
     <div class="pp-ins">${inside}</div>
-    <ul class="pp-ben">${t.benefits.map(b => `<li>${esc(b)}</li>`).join("")}</ul>
+    ${t.benefits.length ? `<ul class="pp-ben">${t.benefits.map(b => `<li>${esc(b)}</li>`).join("")}</ul>` : `<div style="height:12px"></div>`}
     ${cta}</div>`;
 }
 function pwrPassBody() {
@@ -96,7 +109,7 @@ function pwrPassBody() {
   return `<div class="pp-lead">Каждый день — кейс. Семь дней подряд — улучшенный кейс с наградами лучше.</div>
     <div id="pp-won"></div>
     ${p.tiers.map(t => pwrTierHTML(t, p)).join("")}
-    <div class="disc">Сутки считаются по UTC. Серия Free сгорает после пропущенного дня, серии PWR и VIP — нет. Скины CS здесь игровые: вывода в Steam нет. Шансы в кейсах пропуска: чем дороже приз, тем он реже.</div>`;
+    <div class="disc">С 1-го по 6-й день — кейс дня, на 7-й — улучшенный. Сутки считаются по UTC. Серия Free сгорает после пропущенного дня, серии PWR и VIP — нет. При покупке обоих пропусков их эффекты не суммируются. Скины CS здесь игровые: вывода в Steam нет.</div>`;
 }
 async function pwrPassOpen() {
   H.imp("light");
@@ -129,11 +142,19 @@ Object.assign(ACT, {
   },
   "pwr-buy": async el => {
     const t = PWR.pass.tiers.find(x => x.id === el.dataset.id); if (!t) return;
-    if (ME.stars < t.price) { H.err(); return toast("Не хватает звёзд ⭐"); }
+    if (!inTg || !tg.openInvoice) return toast("Покупка доступна только в Telegram");
     el.disabled = true;
-    try { const r = await post(`pwr/pass/${t.id}/buy`); PWR.pass = r.pass; setStars(r.stars); H.ok(); toast(`${t.title} активен на ${t.days} дней`, "ok"); burstAt(el); }
-    catch (e) { el.disabled = false; return; }
-    await pwrLoad(); pwrPassFill();
+    try {
+      const r = await post(`pwr/pass/${t.id}/invoice`);
+      tg.openInvoice(r.link, async status => {
+        el.disabled = false;
+        if (status === "failed") return toast("Оплата не прошла");
+        if (status !== "paid") return;
+        H.ok(); toast(`${t.title} активен на ${t.days} дней`, "ok");
+        for (let i = 0; i < 8; i++) { await sleep(1200); await pwrLoad(); if (PWR.pass.tiers.find(x => x.id === t.id).owned) break; }
+        CASES = []; pwrPassFill(); if (TAB === "cases") renderCases();   // с пропуском меняются шансы кейсов SKINBOX — перечитываем витрину
+      });
+    } catch (e) { el.disabled = false; }
   },
   "pwr-sub": async el => {
     const t = PWR.tasks.items.find(x => x.id === "sub");

@@ -96,7 +96,10 @@ async def on_pre_checkout(pq):
     """Telegram спрашивает, можно ли провести оплату — отвечаем за 10 секунд."""
     try:
         p = json.loads(pq.get("invoice_payload") or "{}")
-        if p.get("k"):
+        if str(p.get("k", "")).startswith("pass_"):   # боевой пропуск SKINBOX (pwr.py)
+            import pwr
+            ok = pwr.validate(p, pq.get("total_amount", 0)) and pq.get("currency") == "XTR"
+        elif p.get("k"):
             import premium
             ok = premium.validate(p, pq.get("total_amount", 0)) and pq.get("currency") == "XTR" and sale_on({"offer": "shop"}.get(p.get("k"), p.get("k")))
         else:
@@ -122,6 +125,9 @@ def on_paid(m):
         pass
     if not q1("SELECT 1 FROM users WHERE id=?", uid):
         uid = m["from"]["id"]
+    if str(p.get("k", "")).startswith("pass_"):
+        import pwr
+        return pwr.fulfill(uid, p["k"], xtr, charge)
     if p.get("k"):
         import premium
         return premium.fulfill(uid, p["k"], xtr, charge, p)

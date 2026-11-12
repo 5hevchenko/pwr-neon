@@ -44,7 +44,7 @@ def chance(m):
 
 
 def _prize(col):
-    col = col if col in E.CATALOG else random.choice(list(E.CATALOG))
+    col = col if col in E.CATALOG else random.choice(list(E.NATIVE))
     return preview_out(col, E.roll(col))
 
 

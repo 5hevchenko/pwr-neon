@@ -5,7 +5,7 @@
 
 | Что добавлено | Где |
 |---|---|
-| 12 кейсов SKINBOX и 842 скина CS (картинки — Steam CDN, цены — из долларовых цен SKINBOX) | `server/pwr/data.json`, `server/economy.py` |
+| 12 кейсов SKINBOX и 842 скина CS (картинки — Steam CDN) | `server/pwr/data.json`, `server/economy.py` |
 | 39 кейсов RubUp Web на подарках Telegram, с их обложками | там же |
 | Боевой пропуск: ежедневные кейсы Free / PWR / VIP, серия, улучшенный кейс на 7-й день | `server/pwr.py`, `web/pwr.js` |
 | Задания SKINBOX: подписка на канал, друг, реклама Adsgram | там же |
@@ -14,11 +14,16 @@
 
 Данные из старого проекта собирает `python tools/pwr_build.py <cs-bot-backend> <cs-bot-frontend>`.
 
-**Чего здесь нет намеренно:** вывода скинов в Steam (market.csgo.com) и оплаты пропуска за Telegram Stars — это отдельный этап,
-до него нужно закрыть находки аудита SKINBOX от 11.11.2026. Все скины и звёзды — игровые.
+**Экономика SKINBOX и RubUp перенесена как была** (1 коин SKINBOX = 1 звезда RubUp = 1 ⭐ игры):
+цены кейсов и скинов SKINBOX — `usd × 20000`, шансы — `(1000 / цена)^(2.5 − коэф. кейса)` с коэффициентами FREE / PWR / VIP, продажа скина за 100%;
+кейсы RubUp — их цены (50 … 1 000 000 000, бесплатный раз в минуту), шесть категорий 65 / 20 / 10 / 3,5 / 1,2 / 0,3%, твёрдая цена каждого подарка, продажа за 100%;
+пропуск — 250 / 500 Telegram Stars на 7 дней; задания — 100 коинов за подписку, 5 / 5 / 15 / 20 / 10 за рекламу (×1,5 с пропуском).
+Экономика самой игры (NePridymal) не тронута: её кейсы, альбом, маркет банка и апгрейд работают только со своими коллекциями.
+
+**Чего здесь нет намеренно:** вывода скинов в Steam (market.csgo.com) — это отдельный этап, до него нужно закрыть находки аудита SKINBOX от 11.11.2026.
 
 **Переменные окружения для заданий:** `PWR_CHANNEL` (@канал, бот — его админ), `ADSGRAM_BLOCK` и `ADS_SECRET`
-(Reward URL блока: `https://<домен>/np/api/pwr/ads/reward?userid=[userId]&secret=<ADS_SECRET>`). Цены пропуска и награды — `settings.toml`, раздел `[pass]`.
+(Reward URL блока: `https://<домен>/np/api/pwr/ads/reward?userid=[userId]&secret=<ADS_SECRET>`).
 
 **Запуск на Railway / в контейнере без бота (демо):** `DEV=1 SERVE_WEB=1 BOT_TOKEN=0:demo`, старт
 `python build.py && cd server && python -m uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1`, вход — `/np/?dev=<любой id>`.

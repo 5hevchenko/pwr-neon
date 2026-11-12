@@ -90,3 +90,10 @@ html:not(.lite) .pp-banner.ready .pp-b-go{animation:pp-pulse 1.8s ease-in-out in
 .pt-off{font-family:var(--disp);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:6px;color:#8d86b6;box-shadow:inset 0 0 0 1px rgba(139,120,255,.3)}
 .pt-dim .t{color:#a59fd0}
 details.locked.pwr-hide{display:none!important}
+
+/* кейсы RubUp: категории с шансом и подарки с твёрдой ценой */
+.ru-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 0 12px}
+.ru-tiers span{display:flex;flex-direction:column;gap:1px;padding:7px 9px;border-radius:9px;background:#0b081c;font-size:11.5px;color:#b3acd9;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tc) 55%,transparent)}
+.ru-tiers b{font-family:var(--disp);font-size:14px;color:var(--tc)}
+.rt-0{--tc:#8d86b6}.rt-1{--tc:#3fb8ff}.rt-2{--tc:#5dffa8}.rt-3{--tc:#a77bff}.rt-4{--tc:#ff5fd2}.rt-5{--tc:#ffe14a}
+.gcell[class*=rt-] .rbar{background:var(--tc);box-shadow:0 0 8px var(--tc)}

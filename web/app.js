@@ -160,6 +160,7 @@ const FEE = (k, d) => (ME && ME.fees && ME.fees[k] != null ? ME.fees[k] : d);
 const feeP = (k, d) => pctF(FEE(k, d));
 const pctF = v => String(+(v * 100).toFixed(2)).replace(".", ",") + "%";   // 0.025 → «2,5%»
 const sellP = () => pctF(1 - FEE("sell", .15));   // мгновенная продажа банку, «85%»
+const sellK = g => g && g.src ? 1 : 1 - FEE("sell", .15);   // предметы из кейсов SKINBOX и RubUp продаются за полную ценность, как в оригиналах
 
 // доход подарка: 2% ценности в сутки, легендарные ×2, эпики ×1,5
 const giftPerHour = g => g.value * .02 / 24 * (g.mp <= 5 ? 2 : g.mp <= 10 ? 1.5 : 1);
@@ -510,7 +511,7 @@ async function doOpenInner(sheet, id, c, n) {
     for (const p of plan) { const w = p.strip.children[r.win]; if (w) { w.classList.remove("cur"); w.classList.add("hitw"); } }
     H.imp("heavy"); await sleep(OPEN.fast ? 0 : 650);
   } else rouls.innerHTML = "";
-  const gifts = r.gifts, total = gifts.reduce((s, g) => s + g.value, 0), sellAll = gifts.reduce((s, g) => s + Math.floor(g.value * (1 - FEE("sell", .15))), 0);
+  const gifts = r.gifts, total = gifts.reduce((s, g) => s + g.value, 0), sellAll = gifts.reduce((s, g) => s + Math.floor(g.value * sellK(g)), 0);
   if (n === 1) {
     const g = gifts[0];
     const vt = valTier(g, sheet._ref), RAR = { gold: "Легендарный", pink: "Эпический", purple: "Редкий", blue: "Хороший", gray: "Обычный" };
@@ -786,7 +787,7 @@ function openGift(o) {
   giftHistory(el, g.id);
 }
 function giftSheetHTML(o, mine) {
-  const g = o.g, sell = Math.floor(g.value * (1 - FEE("sell", .15)));
+  const g = o.g, sell = Math.floor(g.value * sellK(g));
   const pinned = MYP && MYP.pinned.some(x => x.id === g.id);
   const seller = o.seller || (o.owner && !mine ? o.owner : null);
   let acts = "";
@@ -795,7 +796,7 @@ function giftSheetHTML(o, mine) {
       ? `<div class="btns"><button class="btn ghost" data-act="unlist" data-id="${g.id}">Снять с продажи</button></div>`
       : `<div class="btns"><button class="btn ghost" data-act="pin" data-id="${g.id}">${ic("pin")}${pinned ? "Открепить" : "Закрепить"}</button><button class="btn ghost" data-act="list" data-id="${g.id}">${ic("tag")}На маркет</button></div>
          <div class="btns"><button class="btn red" data-act="sell" data-id="${g.id}">${ic("coins")}Продать банку за ⭐ ${fmt(sell)}</button></div>
-         <p class="hint gsell-rate">Курс банка сейчас ${Math.round((1 - FEE("sell", .15)) * 100)}% от ценности. Банк больше — курс выше.</p>
+         <p class="hint gsell-rate">${g.src ? "Продаётся за полную ценность." : `Курс банка сейчас ${Math.round((1 - FEE("sell", .15)) * 100)}% от ценности. Банк больше — курс выше.`}</p>
          <div class="btns"><button class="btn gold" data-act="present" data-id="${g.id}">${ic("gift")}Подарить другу</button></div>
          ${g.value >= 100 ? `<div class="btns"><button class="btn ghost" data-act="loan" data-id="${g.id}">${ic("wallet")}Кредит под залог: ⭐ ${fmt(Math.floor(g.value * .5))}</button></div>` : ""}`;
   } else if (g.price != null) {
@@ -936,7 +937,7 @@ const ACT = {
   gift: el => openGift(REG.get(el.dataset.k)),
   sell: async el => {
     const g = topSheet()._o.g;
-    if (!await confirmM("Продать подарок?", `${esc(g.col)} #${fmt(g.num)} уйдёт за ⭐ ${fmt(Math.floor(g.value * (1 - FEE("sell", .15))))} (${sellP()} ценности). Хочешь дороже — выстави на маркет.`, "Продать")) return;
+    if (!await confirmM("Продать подарок?", `${esc(g.col)} #${fmt(g.num)} уйдёт за ⭐ ${fmt(Math.floor(g.value * sellK(g)))} (${g.src ? "100%" : sellP()} ценности). Хочешь дороже — выстави на маркет.`, "Продать")) return;
     const r = await post(`gift/${el.dataset.id}/sell`); setStars(r.stars); H.ok(); toast(`+⭐ ${fmt(r.paid)}`, "ok"); giftChanged();
   },
   list: async el => {

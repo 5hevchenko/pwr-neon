@@ -303,6 +303,11 @@ def sell_rate():
     return round(min(0.95, max(0.05, SELL_RATE + bank_k()["sell"])), 4)
 
 
+def sell_price(g):
+    """Мгновенная продажа: предметы из кейсов SKINBOX и RubUp — за полную ценность (как в оригиналах), остальное — по курсу банка."""
+    return int(g["value"]) if "src" in g.keys() and g["src"] else int(g["value"] * sell_rate())
+
+
 def case_price(c):
     if not c["price"]:
         return 0
@@ -344,6 +349,8 @@ def gift_out(r, owner=False):
     g = {"id": r["id"], "col": r["col"], "model": r["model"], "backdrop": r["backdrop"], "symbol": r["symbol"],
          "num": r["num"], "value": r["value"], "price": r["price"],
          "mp": ml.get(r["model"], 0), "bp": b[1], "sp": sl.get(r["symbol"], 0), "c": b[2:6]}
+    if "src" in r.keys() and r["src"]:
+        g["src"] = r["src"]
     if owner:
         g["owner"] = r["owner"]
     return g
@@ -943,6 +950,12 @@ def look_of(col, seed):
     return {"c": b[2:6], "symbol": s[0]}
 
 
+for _sql in ("ALTER TABLE gifts ADD COLUMN src TEXT",                       # откуда подарок: 'cs' — кейс или пропуск SKINBOX, 'ru' — кейс RubUp (продаются за 100% ценности)
+             "ALTER TABLE users ADD COLUMN ru_free_at INTEGER DEFAULT 0"):   # когда открыт бесплатный кейс RubUp
+    try:
+        db.execute(_sql)
+    except sqlite3.OperationalError:
+        pass
 db.execute("CREATE TABLE IF NOT EXISTS case_limit(cid TEXT PRIMARY KEY, n INTEGER)")
 for _cid, _n in E.LIMITED.items():
     db.execute("INSERT OR IGNORE INTO case_limit VALUES(?,?)", (_cid, _n))
@@ -954,19 +967,42 @@ def _case_limit(cid):
     return {"limit": E.LIMITED[cid], "left": q1("SELECT n FROM case_limit WHERE cid=?", cid)["n"]}
 
 
+_RU_GIFTS = {}
+
+
+def _ru_gifts(cid):
+    """Подарки кейса RubUp с оформлением (цвета фона) — список не меняется, считаем один раз."""
+    if cid not in _RU_GIFTS:
+        out = []
+        for x in E.ru_items(cid):
+            bl = LOOK[x["col"]][1]
+            b = bl.get(x["backdrop"]) or BACKDROPS.get(x["backdrop"])
+            out.append({**x, "p": round(x["p"], 4), "c": b[2:6], "mp": LOOK[x["col"]][0].get(x["model"], 0)})
+        _RU_GIFTS[cid] = out
+    return _RU_GIFTS[cid]
+
+
+def _ru_free_at(uid):
+    r = q1("SELECT ru_free_at FROM users WHERE id=?", uid)
+    return (r["ru_free_at"] or 0) if r else 0
+
+
 @app.get(R + "/cases")
 def cases(uid=Depends(auth)):
     keys = {r["cid"]: r["n"] for r in q("SELECT cid, n FROM case_keys WHERE user=? AND n>0", uid)}
     out = []
+    tier = __import__("pwr").tier_of(q1("SELECT * FROM users WHERE id=?", uid))   # шансы кейсов SKINBOX зависят от пропуска
     for c in E.CASES.values():
-        top = max(c["odds"], key=lambda x: E.base(x))
+        odds = E.pwr_odds(c["id"], tier) if c["id"] in E.PWR_CASES else c["odds"]
+        top = max(odds, key=lambda x: E.base(x))
         items = []
-        for k, v in c["odds"].items():
-            items.append({"col": k, "p": round(v * 100, 3), "base": E.base(k), "ev": round(c["evs"][k]), **look_of(k, "shop")})
+        for k, v in odds.items():
+            items.append({"col": k, "p": round(v * 100, 3 if v >= 0.00001 else 8), "base": E.base(k), "ev": round(c["evs"][k]), **look_of(k, "shop")})
         items.sort(key=lambda x: -x["ev"])
         out.append({"id": c["id"], "title": E.case_title(c["id"], uid), "price": case_price(c), "full": c["price"], "keys": keys.get(c["id"], 0),
                     "level": c["level"], "cover": E.case_cover(c["id"], uid), **_case_limit(c["id"]),
-                    "group": E.CASE_GROUP.get(c["id"], "tg"), "k": E.case_colors(c["id"]), "floor": bool(c["floor"]),
+                    "group": E.CASE_GROUP.get(c["id"], "tg"), "k": E.case_colors(c["id"]), "floor": bool(c["floor"]), "src": c.get("src"),
+                    **({"gifts": _ru_gifts(c["id"]), "freeIn": max(0, (_ru_free_at(uid) + E.RU_FREE_EVERY) - now()) if not c["price"] else 0} if c["id"] in E.RU_CASES else {}),
                     "top": top, "pat": look_of(E.case_cover(c["id"], uid), c["id"])["symbol"],
                     "previews": [x["col"] for x in items[:3]], "items": items})
     return out
@@ -975,7 +1011,7 @@ def cases(uid=Depends(auth)):
 @app.post(R + "/case/{cid}/open")
 def open_case(cid: str, n: int = 1, uid=Depends(auth)):
     c = E.CASES.get(cid) or err("нет такого кейса")
-    n = 1 if cid == "free" else max(1, min(10, n))
+    n = 1 if cid == "free" or not c["price"] else max(1, min(10, n))
     t = now()
     with tx():
         if cid in E.LIMITED:   # лимитный тираж: остаток уменьшается в той же транзакции
@@ -997,16 +1033,22 @@ def open_case(cid: str, n: int = 1, uid=Depends(auth)):
             if u["last_free"] + free_every(u) > t:
                 err("Бесплатный кейс ещё перезаряжается")
             db.execute("UPDATE users SET last_free=? WHERE id=?", (t, uid))
+        elif cid in E.RU_CASES and not c["price"]:   # бесплатный кейс RubUp — раз в минуту
+            left = (u["ru_free_at"] or 0) + E.RU_FREE_EVERY - t
+            if left > 0:
+                err(f"Следующий бесплатный кейс — через {left} сек.")
+            db.execute("UPDATE users SET ru_free_at=? WHERE id=?", (t, uid))
         if u["stars"] < price * (n - keys):
             err("Не хватает звёзд")
         ids = []
         rng = fair.stream(uid, "case", cid)
         drops = []
+        tier = __import__("pwr").tier_of(u)
         for i in range(n):
-            d = E.open_case(cid, rng)
+            d = E.open_case(cid, rng, tier)
             drops.append(d["value"])
-            cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created) VALUES(?,?,?,?,?,?,?,?)",
-                             (uid, d["col"], d["model"], d["backdrop"], d["symbol"], d["num"], d["value"], t))
+            cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created,src) VALUES(?,?,?,?,?,?,?,?,?)",
+                             (uid, d["col"], d["model"], d["backdrop"], d["symbol"], d["num"], d["value"], t, c.get("src")))
             ids.append(cur.lastrowid)
             if i < keys:
                 event(uid, "gift", d["value"])
@@ -1026,7 +1068,7 @@ def open_case(cid: str, n: int = 1, uid=Depends(auth)):
     gifts, strips = [], []
     for gid in ids:
         g = gift_out(q1("SELECT * FROM gifts WHERE id=?", gid))
-        strip = [preview_out(x["col"], x) for x in (E.open_case(cid) for _ in range(50))]
+        strip = [preview_out(x["col"], x) for x in (E.open_case(cid, random, tier) for _ in range(50))]
         strip[WIN] = g
         gifts.append(g)
         strips.append(strip)
@@ -1144,7 +1186,7 @@ def achievements(u, gifts, friends, worth):
 
 @app.get(R + "/collections")
 def collections(uid=Depends(auth)):
-    return {c: [len(d["models"]), E.base(c)] for c, d in E.CATALOG.items()}
+    return {c: [len(E.CATALOG[c]["models"]), E.base(c)] for c in E.NATIVE}
 
 
 @app.post(R + "/gifts/sell")
@@ -1158,7 +1200,7 @@ async def sell_many(req: Request, uid=Depends(auth)):
             g = own_gift(gid, uid)
             if g["price"] is not None:
                 err("сначала сними выбранные подарки с маркета")
-            total += int(g["value"] * sell_rate())
+            total += sell_price(g)
             db.execute("DELETE FROM gifts WHERE id=?", (gid,))
             unpin(uid, gid)
             cancel_trades_with(gid)
@@ -1297,7 +1339,7 @@ def cancel_trades_with(gid):
 def sell(gid: int, uid=Depends(auth)):
     with tx():
         g = own_gift(gid, uid)
-        pay = int(g["value"] * sell_rate())
+        pay = sell_price(g)
         db.execute("DELETE FROM gifts WHERE id=?", (gid,))
         db.execute("UPDATE users SET stars=stars+? WHERE id=?", (pay, uid))
         unpin(uid, gid)
@@ -1501,7 +1543,8 @@ def upg_all():
     global UPG_TARGETS
     if UPG_TARGETS is None:
         out = []
-        for col, d in E.CATALOG.items():
+        for col in E.NATIVE:
+            d = E.CATALOG[col]
             mm, mb, ms = E._MED[col]
             for m in d["models"]:
                 out.append((col, m[0], m[1], max(1, round(E.base(col) * E.mult(col, m[1], mb, ms)))))
@@ -1722,7 +1765,7 @@ def swap_options(gid: int, uid=Depends(auth)):
         err("сначала сними подарок с маркета")
     v = g["value"]
     found, seen = [], {(g["col"], g["model"])}
-    cols = list(E.CATALOG)
+    cols = list(E.NATIVE)
     for _ in range(1500):
         if len(found) >= 12:
             break
@@ -2456,7 +2499,8 @@ def sets(uid=Depends(auth)):
         own[r["col"]] = r["n"]
     claimed = {(r["col"], r["tier"]) for r in q("SELECT col, tier FROM set_claims WHERE user=?", uid)}
     out = {}
-    for col, d in E.CATALOG.items():
+    for col in E.NATIVE:
+        d = E.CATALOG[col]
         tiers = [{"tier": t, "reward": set_reward(col, t), "claimed": (col, t) in claimed} for t in SET_TIERS if t <= len(d["models"])]
         out[col] = {"have": own.get(col, 0), "n": len(d["models"]), "base": E.base(col), "tiers": tiers}
     return {"sets": out, "claimed": len(claimed)}
