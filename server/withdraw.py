@@ -29,7 +29,7 @@ MARKET = os.environ.get("MARKET_URL", "https://market.csgo.com/api/v2/")   # MAR
 KEY = os.environ.get("MARKET_KEY", "").strip()
 ON = conf("withdraw.on", True)
 XTR_USD = conf("withdraw.xtr_usd", 0.013)        # сколько долларов приносит 1 Telegram Star
-LIMIT_K = conf("withdraw.limit_k", 1.0)          # лимит выводов = оплачено × этот множитель
+LIMIT_K = conf("withdraw.limit_k", 0.7)          # лимит выводов = оплачено × этот множитель
 PRICE_CAP = conf("withdraw.price_cap", 3.0)      # цена на площадке не выше нашей × это число (как в оригинале)
 CHECK_EVERY = int(os.environ.get("MARKET_CHECK", "60"))
 LINK_RE = re.compile(r"^https://steamcommunity\.com/tradeoffer/new/?\?partner=(\d+)&token=([A-Za-z0-9_-]+)$")
@@ -61,7 +61,8 @@ def gift_usd(g):
 def budget(uid):
     """(лимит в $, уже выведено или в работе в $) — лимит считается от оплаченных Telegram Stars."""
     paid = q1("SELECT COALESCE(SUM(xtr),0) s FROM payments WHERE user=?", uid)["s"]
-    used = q1("SELECT COALESCE(SUM(usd),0) s FROM withdraws WHERE user=? AND stage IN ('0','1','2')", uid)["s"]
+    # в лимит идёт то, что реально уплачено площадке (если она дороже нашей цены скина)
+    used = q1("SELECT COALESCE(SUM(MAX(usd, market_usd)),0) s FROM withdraws WHERE user=? AND stage IN ('0','1','2')", uid)["s"]
     return round(paid * XTR_USD * LIMIT_K, 2), round(used, 2)
 
 
@@ -151,6 +152,8 @@ async def withdraw(gid: int, uid=Depends(auth)):
     price = items[0]["price"]   # в тысячных доллара
     if price / 1000 > usd * PRICE_CAP:
         fail("Скин сейчас слишком дорог на площадке — попробуй позже", f"market {price / 1000} > {usd}×{PRICE_CAP}")
+    if price / 1000 > usd and used + price / 1000 > limit + 1e-9:
+        fail(f"На площадке скин сейчас стоит ${price / 1000:.2f} — это больше остатка лимита ${max(0, limit - used):.2f}", "limit by market price")
     try:
         order = await _market("buy-for", hash_name=mh, price=price, partner=m.group(1), token=m.group(2), chance_to_transfer=40, custom_id=wid)
     except Exception as e:   # не знаем, принята ли заявка: оставляем в работе — проверка этапа разберётся
