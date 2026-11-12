@@ -7,7 +7,12 @@ const inTg = !!(tg && tg.initData);
 // мини-апп свёрнут: фоновые опросы сервера пропускаем (батарея, трафик, нагрузка), при возврате — сразу обновляем
 const bgOff = () => document.hidden || !!(tg && tg.isActive === false);
 if (!inTg) document.body.classList.add("no-tg");
-const DEV_USER = new URLSearchParams(location.search).get("dev");
+// демо без бота (сервер с DEV=1): ?dev=<id> — войти под этим id; без параметра вне Telegram — свой постоянный id на этом устройстве,
+// чтобы простая ссылка открывалась с телефона. Обычный сервер заголовок X-Dev-User не принимает — там по-прежнему нужен Telegram.
+const DEV_USER = new URLSearchParams(location.search).get("dev") || (inTg ? null : (() => {
+  try { let id = localStorage.getItem("np_dev_id"); if (!id) { id = String(100000 + Math.floor(Math.random() * 899999999)); localStorage.setItem("np_dev_id", id); } return id; }
+  catch (e) { return String(100000 + Math.floor(Math.random() * 899999999)); }
+})());
 
 const H = {
   imp: s => { if (window.NO_VIBRO) return; try { tg.HapticFeedback.impactOccurred(s) } catch (e) {} },

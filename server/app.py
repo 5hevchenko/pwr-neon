@@ -3009,4 +3009,8 @@ class CachedStatic(StaticFiles):
 
 
 if (DEV or SERVE_WEB) and os.path.isdir(WEB_DIR):
+    @app.get("/")
+    def root():   # голый домен ведёт в игру
+        return Response(status_code=302, headers={"Location": "/np/"})
+
     app.mount("/np", CachedStatic(directory=WEB_DIR, html=True), name="web")
