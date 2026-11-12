@@ -1,5 +1,6 @@
 """Экономика: цены коллекций, ценность конкретного подарка, кейсы."""
 from settings import conf
+import collections
 import json
 import re
 import math
@@ -61,11 +62,33 @@ for _c, _m in CUSTOM.items():
                    "backdrops": CATALOG[CUSTOM_DONOR]["backdrops"], "symbols": CATALOG[CUSTOM_DONOR]["symbols"]}
 
 
+# ---------------- слияние с PWR SKINBOX и RubUp Web (данные собирает tools/pwr_build.py → server/pwr/data.json) ----------------
+# Скины CS из SKINBOX — свои коллекции (одна степень износа = одна модель), картинки отдаёт Steam CDN (app.asset кэширует),
+# фоны и узоры — у коллекции-донора. Цена в ⭐ считается из долларовой цены SKINBOX: usd_stars().
+PWR_DIR = os.path.join(os.path.dirname(__file__), "pwr")
+PWR = json.load(open(os.path.join(PWR_DIR, "data.json"), encoding="utf-8"))
+PWR_A, PWR_B = conf("pwr.usd_a", 3420), conf("pwr.usd_b", 0.659)   # ⭐ = a × usd^b: сжимает разброс цен скинов под экономику игры
+PWR_COVERS = {f[:-9] for f in os.listdir(os.path.join(PWR_DIR, "assets")) if f.endswith("_512.webp")}   # обложки кейсов и значки пропуска
+REMOTE = {}   # коллекция → хэш картинки на Steam CDN
+
+
+def usd_stars(usd):
+    return max(1, round(PWR_A * usd ** PWR_B))
+
+
+for _c, _d in PWR["cols"].items():
+    CATALOG[_c] = {"released": 1794441600, "models": [[_d["m"], 10]],
+                   "backdrops": CATALOG[CUSTOM_DONOR]["backdrops"], "symbols": CATALOG[CUSTOM_DONOR]["symbols"]}
+    REMOTE[_c] = _d["img"]
+
+
 def custom_file(col, model=None):
     """Путь к своей картинке без суффикса размера (model или обложка коллекции) или None — это подарок Telegram."""
     if col.startswith("~"):   # загруженная в админке обложка кейса (admin.py → «Кейсы»): covers/<имя>_<размер>.png
         name = col[1:]
         return os.path.join(COVER_DIR, name) if re.fullmatch(r"[A-Za-z0-9_]{1,80}", name) else None
+    if col in PWR_COVERS:   # обложки кейсов SKINBOX / RubUp и значки пропуска
+        return os.path.join(PWR_DIR, "assets", col)
     m = CUSTOM_MAP.get(CUSTOM_COVERS.get(col, col))
     if not m:
         return None
@@ -107,6 +130,9 @@ BASE.update({"Деревянные инструменты": 1400, "Каменн�
 BASE.update({"Бравлеры редкие": 2320, "Бравлеры супер редкие": 3710, "Бравлеры эпические": 6490, "Бравлеры мифические": 13910, "Бравлеры легендарные": 37100})   # Brawl Stars: возврат ≈ 90% при 5 555 (симуляция 200к, 2026-11-11)
 BASE.update({"AWP Asiimov": 11500, "Desert Eagle Blaze": 18450, "Glock-18 Fade": 27700, "USP-S Kill Confirmed": 13850, "AK-47 Fire Serpent": 57700,
              "M4A4 Howl": 138400, "Sport Gloves": 115300, "Butterfly Knife": 207600, "AWP Dragon Lore": 461300})   # кейс «CS:GO Легенды»: при цене 33 333 возврат ≈ 90% (симуляция 200к открытий, 2026-11-11)
+
+
+BASE.update({_c: usd_stars(_d["usd"]) for _c, _d in PWR["cols"].items()})   # скины SKINBOX
 
 
 def base(col):
@@ -255,6 +281,8 @@ CASES_DEF = [
     ("csgo2", "CS:GO Легенды", "CS Case 2", 5, ["AWP Asiimov", "Desert Eagle Blaze", "Glock-18 Fade", "USP-S Kill Confirmed", "AK-47 Fire Serpent", "M4A4 Howl", "Sport Gloves", "Butterfly Knife", "AWP Dragon Lore"]),
     ("mega", "МЕГА", "Plush Pepe", 15, ["Plush Pepe", "Heart Locket", "Durov's Cap", "Precious Peach", "Mighty Arm", "Ion Gem", "Loot Bag"]),
 ]
+CASES_DEF += [(_d["id"], _d["title"], _d["cover"], 1, _d["cols"]) for _d in PWR["rubup"]]   # 39 кейсов RubUp Web (уровень — ниже, от цены)
+CASE_GROUP = {"csgo": "cs", "csgo2": "cs", **{_d["id"]: "ru" for _d in PWR["rubup"]}, **{_d["id"]: "cs" for _d in PWR["cases"]}}   # вкладка витрины: tg (по умолчанию) | ru | cs
 RTP = conf("economy.case_rtp", 0.9)  # возврат игроку
 FIXED_PRICE = {"csgo": 11111, "csgo2": 33333, "brawl": 5555, "mc": 3333}   # цена ровно такая (базовые цены коллекций подобраны под RTP)
 CASES = {}
@@ -375,7 +403,108 @@ def open_case(cid, rng=random):
     return _draw(c, c["floor"], rng)
 
 
+_PWR_MULT = None
+
+
+def pwr_ev(col):
+    """Точное ожидание ценности скина SKINBOX: модель одна, фон и узор — как у донора, поэтому распределение множителя общее."""
+    global _PWR_MULT
+    if _PWR_MULT is None:
+        d = CATALOG[CUSTOM_DONOR]
+        _, mb, ms = _MED[CUSTOM_DONOR]
+        wb, ws = [max(x[1], 0.1) for x in d["backdrops"]], [max(x[1], 0.1) for x in d["symbols"]]
+        tb, ts = sum(wb), sum(ws)
+        acc = collections.defaultdict(float)
+        for b, pb in zip(d["backdrops"], wb):
+            for s, ps in zip(d["symbols"], ws):
+                k = min(8.0, max(0.6, (mb / max(b[1], 1)) ** 0.25 * (ms / max(s[1], 1)) ** 0.2))
+                acc[round(k, 4)] += pb / tb * ps / ts
+        _PWR_MULT = sorted(acc.items())
+    b = base(col)
+    return sum(p * max(1, round(b * k)) for k, p in _PWR_MULT)
+
+
+PWR_MIN_P = 0.00005   # скин с шансом меньше 0,005% в кейс не кладём: в списке «Что внутри» не должно быть недостижимых призов
+
+
+def build_pwr_cases():
+    """Кейсы SKINBOX: список скинов кейса, вес = 1 / ценность^p (дешёвое часто, дорогое редко, планки нет).
+    Цена — долларовая цена SKINBOX в ⭐; p подбирается так, чтобы ожидание дропа = RTP × цена."""
+    for d in PWR["cases"]:
+        cols = [x for x in d["cols"] if x in CATALOG]
+        evs = {x: pwr_ev(x) for x in cols}
+        price = _nice(usd_stars(d["usd"]))
+        flat = sum(evs.values()) / len(cols)   # ожидание при равных шансах — больше из этого набора не выжать
+        if flat < RTP * price:                 # скины дешевле, чем обещает цена: снижаем цену, чтобы возврат остался честным
+            price = max(25, int(flat / RTP * 0.98 // 2500 * 2500) or int(flat / RTP * 0.98))
+        target = RTP * price
+
+        def mean(p):
+            w = [evs[x] ** -p for x in cols]
+            return sum(wi * evs[x] for wi, x in zip(w, cols)) / sum(w)
+        while True:
+            lo, hi = 0.0, 8.0
+            for _ in range(50):
+                mid = (lo + hi) / 2
+                lo, hi = (mid, hi) if mean(mid) > target else (lo, mid)
+            w = [evs[x] ** -hi for x in cols]
+            tw = sum(w)
+            rare = [x for x, wi in zip(cols, w) if wi / tw < PWR_MIN_P]
+            if not rare or len(cols) <= 5:
+                break
+            cols.remove(max(rare, key=evs.get))   # убираем самый дорогой из недостижимых и пересчитываем
+        cum, acc = [], 0.0
+        for x in w:
+            acc += x
+            cum.append(acc)
+        CASES[d["id"]] = {"id": d["id"], "title": d["title"], "cover": d["cover"], "level": d["level"], "cols": cols, "cum": cum, "floor": 0,
+                          "odds": {x: wi / tw for x, wi in zip(cols, w)}, "evs": {x: evs[x] for x in cols}, "price": price, "color": d["color"]}
+
+
+def _ru_levels():
+    """Уровень доступа кейсов RubUp — от цены (дорогие открываются позже)."""
+    for d in PWR["rubup"]:
+        c = CASES.get(d["id"])
+        if c:
+            c["level"] = next(l for lim, l in ((1500, 1), (4000, 2), (10000, 3), (25000, 5), (60000, 8), (150000, 11), (float("inf"), 14)) if c["price"] < lim)
+
+
+_COVER_K = {}
+
+
+def case_colors(cid):
+    """Два цвета подложки кейса для витрины: у SKINBOX — цвет из данных, у остальных своих обложек — средний цвет картинки."""
+    c = CASES.get(cid)
+    if not c or c["cover"] not in PWR_COVERS:
+        return None
+    if cid not in _COVER_K:
+        rgb = None
+        if c.get("color"):
+            h = c["color"].lstrip("#")
+            rgb = tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+        else:
+            try:
+                from PIL import Image
+                import colorsys as _cs
+                im = Image.open(os.path.join(PWR_DIR, "assets", c["cover"] + "_64.webp")).convert("RGBA")
+                px = [p for p in im.getdata() if p[3] > 200 and max(p[:3]) - min(p[:3]) > 60] or [p for p in im.getdata() if p[3] > 200]
+                hues = collections.defaultdict(list)   # самый частый оттенок среди насыщенных пикселей (а не среднее — оно всегда бурое)
+                for p in px:
+                    hues[int(_cs.rgb_to_hls(p[0] / 255, p[1] / 255, p[2] / 255)[0] * 12) % 12].append(p)
+                px = max(hues.values(), key=len)
+                rgb = tuple(sum(p[i] for p in px) // max(1, len(px)) for i in range(3))
+            except Exception:
+                rgb = (90, 80, 160)
+        import colorsys
+        hh, ll, ss = colorsys.rgb_to_hls(*(v / 255 for v in rgb))
+        f = lambda l, s_: "#%02x%02x%02x" % tuple(round(v * 255) for v in colorsys.hls_to_rgb(hh, l, s_))
+        _COVER_K[cid] = [f(0.55, max(ss, 0.75)), f(0.2, max(ss, 0.6))]
+    return _COVER_K[cid]
+
+
 build_cases()
+build_pwr_cases()
+_ru_levels()
 
 if __name__ == "__main__":
     for c in CASES.values():

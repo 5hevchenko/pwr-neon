@@ -966,6 +966,7 @@ def cases(uid=Depends(auth)):
         items.sort(key=lambda x: -x["ev"])
         out.append({"id": c["id"], "title": E.case_title(c["id"], uid), "price": case_price(c), "full": c["price"], "keys": keys.get(c["id"], 0),
                     "level": c["level"], "cover": E.case_cover(c["id"], uid), **_case_limit(c["id"]),
+                    "group": E.CASE_GROUP.get(c["id"], "tg"), "k": E.case_colors(c["id"]), "floor": bool(c["floor"]),
                     "top": top, "pat": look_of(E.case_cover(c["id"], uid), c["id"])["symbol"],
                     "previews": [x["col"] for x in items[:3]], "items": items})
     return out
@@ -2812,6 +2813,7 @@ import achrare  # noqa: E402,F401 — редкость достижений
 import idletax  # noqa: E402,F401 — сбор с брошенных больших балансов
 import legacy  # noqa: E402,F401 — наследие: итоги прошлых сезонов в профиле
 import share  # noqa: E402,F401 — карточка большого выигрыша
+import pwr  # noqa: E402,F401 — слияние с PWR SKINBOX: боевой пропуск и задания
 
 
 # ---------------- картинки подарков (api.changes.tg); на проде перед этим стоит кэш nginx ----------------
@@ -2842,7 +2844,15 @@ def _custom_asset(raw, request):
     """Картинка своего подарка → Response; узор своего подарка → путь у донора; обычный подарок → None."""
     parts = [urllib.parse.unquote(x) for x in raw.split("/")]
     kind, col = parts[0], parts[1].removesuffix(".png").removesuffix(".json") if len(parts) > 1 else ""
-    if col not in E.CUSTOM and col not in E.CUSTOM_COVERS and not col.startswith("~"):
+    if col in E.REMOTE:   # скины SKINBOX: картинка со Steam CDN (кэшируется ниже, как подарки Telegram), узор — у донора
+        if kind == "pattern":
+            return "pattern/" + urllib.parse.quote(E.CUSTOM_DONOR) + "/" + "/".join(raw.split("/")[2:])
+        if raw.endswith(".json"):
+            return Response(status_code=404)
+        size = request.query_params.get("size", "256")
+        size = size if size in ("64", "128", "256", "512") else "256"
+        return f"https://community.cloudflare.steamstatic.com/economy/image/{E.REMOTE[col]}/{size}fx{size}f"
+    if col not in E.CUSTOM and col not in E.CUSTOM_COVERS and col not in E.PWR_COVERS and not col.startswith("~"):
         return None
     if kind == "pattern":
         return "pattern/" + urllib.parse.quote(E.CUSTOM_DONOR) + "/" + "/".join(raw.split("/")[2:])
@@ -2853,6 +2863,8 @@ def _custom_asset(raw, request):
     size = size if size in ("64", "128", "256", "512") else "256"
     webp = "image/webp" in request.headers.get("accept", "").lower() or request.headers.get("x-webp") == "1"
     path = f and f"{f}_{size}.{'webp' if webp else 'png'}"
+    if path and not os.path.exists(path) and os.path.exists(f"{f}_{size}.webp"):   # обложки PWR лежат только в webp
+        path, webp = f"{f}_{size}.webp", True
     if not path or not os.path.exists(path):
         return Response(status_code=404)
     return FileResponse(path, media_type="image/webp" if webp else "image/png", headers={"Cache-Control": "public, max-age=2592000"})
@@ -2869,7 +2881,7 @@ async def asset(path: str, request: Request):
     if isinstance(custom, Response):
         return custom
     raw = custom or raw
-    url = (
+    url = raw if raw.startswith("https://") else (
         "https://api.changes.tg/"
         + raw
         + ("?" + request.url.query if request.url.query else "")
