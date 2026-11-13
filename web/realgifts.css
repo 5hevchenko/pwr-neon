@@ -117,6 +117,7 @@ button.rg-cell{border:0;color:var(--tx);font-family:var(--body)}
 @keyframes rgf0{0%,100%{transform:translateY(2%) rotate(-2deg)}50%{transform:translateY(-6%) rotate(2deg)}}
 @keyframes rgf1{0%,100%{transform:translateY(-3%) rotate(-15deg)}50%{transform:translateY(5%) rotate(-9deg)}}
 @keyframes rgf2{0%,100%{transform:translateY(3%) rotate(10deg)}50%{transform:translateY(-6%) rotate(17deg)}}
+.case[data-g=cs] .rg-cv .f0{left:8%;top:17%;width:84%}
 .rg-upto{font-size:11.5px;font-weight:500;color:var(--mu)}
 .rg-fan.big .rg-art{animation:6s ease-in-out infinite}
 .rg-fan.big .rg-art:nth-child(1){animation-name:rgf0;animation-duration:5.2s}

@@ -5,7 +5,7 @@
 // ============================================================
 let RG = null, RG_BUSY = false, RG_ADM = null, RG_WON = 0, RG_CASE = null;
 const rgUsd = v => "$" + (v < 100 ? v.toFixed(2) : Math.round(v));
-const rgArt = (x, cls = "") => `<span class="rg-art${cls ? " " + cls : ""}${x.kind === "star" ? " star" : ""}">${x.kind === "nft" ? `<img src="api/realgifts/art/${encodeURIComponent(x.ref)}" alt="" loading="lazy" decoding="async">`
+const rgArt = (x, cls = "") => `<span class="rg-art${cls ? " " + cls : ""}${x.kind === "star" ? " star" : ""}">${x.kind === "cover" ? `<img src="${x.src}" alt="" loading="lazy" decoding="async">` : x.kind === "nft" ? `<img src="api/realgifts/art/${encodeURIComponent(x.ref)}" alt="" loading="lazy" decoding="async">`
   : x.kind === "tg" && x.img ? `<img src="api/realgifts/img/${x.ref}" alt="" loading="lazy" decoding="async">` : `<i>${x.kind === "star" ? "⭐" : esc(x.emoji || "🎁")}</i>`}</span>`;
 const rgCost = x => x.usd || x.value * RG.usdK;
 const rgName = x => x.kind === "star" ? `${fmt(x.value)} звёзд` : x.title;
@@ -35,12 +35,16 @@ function rgCovers() {
   const v = $("#v-cases"); if (!v) return;
   if (!RG_IO && "IntersectionObserver" in window) RG_IO = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle("in", e.isIntersecting)), { rootMargin: "80px" });
   v.querySelectorAll(".case[data-id]").forEach(el => {
-    const c = CASES.find(x => x.id === el.dataset.id); if (!c || !c.real) return;
-    const tops = (RG && RG.cases[c.id] ? RG.cases[c.id].tops : c.tops) || [], art = el.querySelector(".gl-art");
+    const c = CASES.find(x => x.id === el.dataset.id); if (!c) return;
+    // кейс подарков — три лучших приза; кейс скинов — его родная обложка, парящая так же
+    const tops = c.real ? (RG && RG.cases[c.id] ? RG.cases[c.id].tops : c.tops) || []
+      : c.src === "cs" && c.items && c.items.length ? [{ kind: "cover", key: "cv:" + c.cover, src: A.orig(c.cover), value: c.items[0].ev }] : [];
+    const art = el.querySelector(".gl-art");
     if (!art || !tops.length) return;
     const key = tops.map(x => x.key).join("|"); if (art.dataset.rg === key) return;
     art.dataset.rg = key; art.classList.add("rg");
     art.innerHTML = `<span class="rg-cv">${tops.map((x, i) => rgArt(x, "f" + i)).join("")}</span>`;
+    art.querySelectorAll("img").forEach(im => im.addEventListener("error", () => im.parentElement.remove(), { once: true }));   // картинка не пришла — без дыры на обложке
     const m = el.querySelector(".minis"); if (m) m.outerHTML = `<span class="rg-upto">до ⭐ ${short(tops[0].value)}</span>`;
     else { const u = el.querySelector(".rg-upto"); if (u) u.innerHTML = `до ⭐ ${short(tops[0].value)}`; }
     if (RG_IO) RG_IO.observe(art); else art.classList.add("in");

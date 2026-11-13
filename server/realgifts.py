@@ -434,12 +434,15 @@ async def _art_fetch(name):
     f = _art_file(name)
     if os.path.exists(f):
         return f
-    if not A.GIFT_ASSETS:
-        return None
     try:
-        r = await A.http.get(f"{A.GIFT_ASSETS}/original/{urllib.parse.quote(name)}.png?size={ART_SIZE}", timeout=30, follow_redirects=True,
-                             headers={"User-Agent": f"PWRNeon/1.0 (+t.me/{A.BOT_NAME})"})
-        if r.status_code != 200:
+        if name in E.REMOTE:   # скин CS — картинка со Steam CDN
+            r = await A._steam_get(f"{E.REMOTE[name]}/{ART_SIZE}fx{ART_SIZE}f")
+        elif A.GIFT_ASSETS:
+            r = await A.http.get(f"{A.GIFT_ASSETS}/original/{urllib.parse.quote(name)}.png?size={ART_SIZE}", timeout=30, follow_redirects=True,
+                                 headers={"User-Agent": f"PWRNeon/1.0 (+t.me/{A.BOT_NAME})"})
+        else:
+            return None
+        if r is None or r.status_code != 200:
             return None
         body = await asyncio.to_thread(_art_make, r.content)
         os.makedirs(A.ASSET_CACHE, exist_ok=True)
