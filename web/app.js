@@ -146,7 +146,7 @@ function giftHTML(g, o = {}) {
   h += `<img src="${o.img || A.model(g.col, g.model, o.big ? 512 : 256)}"${o.eager ? "" : ' loading="lazy"'} alt="">`;
   if (o.big && !o.img) h += `<div class="lt" data-lottie="${A.lottie(g.col, g.model)}"></div>`;
   if (o.tag) h += `<div class="tag">${o.tag}</div>`;
-  if (!o.plain && (t === "gold" || t === "pink")) h += `<div class="rib t-${t}">${t === "gold" ? "LEGENDARY" : "EPIC"}</div>`;
+  if (!o.plain && (t === "gold" || t === "pink")) h += `<div class="rib t-${t}">${t === "gold" ? "Легенда" : "Эпик"}</div>`;
   return h + "</div>";
 }
 const CPAT = (() => {   // россыпь узора по карточке кейса

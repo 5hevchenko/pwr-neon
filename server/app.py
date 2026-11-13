@@ -2894,6 +2894,7 @@ import withdraw  # noqa: E402,F401 — вывод скинов CS в Steam че�
 import guess  # noqa: E402,F401 — «Угадай дроп» на тир-кейсах
 import realgifts  # noqa: E402,F401 — кейсы с настоящими подарками Telegram: продать игре или вывести на аккаунт
 import cryptopay  # noqa: E402,F401 — пополнение криптой через Crypto Pay (@CryptoBot)
+import heist  # noqa: E402,F401 — «ограбление сейфа»: не заходишь неделю — сгорают звёзды, кроме купленных
 
 
 # ---------------- картинки подарков (api.changes.tg); на проде перед этим стоит кэш nginx ----------------

@@ -125,3 +125,10 @@ button.rg-cell{border:0;color:var(--tx);font-family:var(--body)}
 .rg-fan.big .rg-art:nth-child(3){animation-name:rgf2;animation-duration:7.4s;animation-delay:-4.3s}
 @media (prefers-reduced-motion:reduce){.rg-case:active{transform:none}.rg-cv .rg-art,.rg-fan.big .rg-art{animation:none}}
 
+
+/* «ограбление сейфа» */
+.hs-box{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 6px 4px;text-align:center}
+.hs-box i{font-style:normal;font-size:64px;line-height:1.1}
+.hs-box b{font-family:var(--disp);font-size:17px;font-weight:600}
+.hs-box p{margin:0;font-size:13.5px;line-height:1.45;color:var(--mu)}
+.shop-note.hs-rule{margin-top:8px}

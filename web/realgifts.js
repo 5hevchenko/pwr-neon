@@ -269,5 +269,5 @@ ACT["cp-buy"] = async el => {
 if (typeof i18nAdd === "function" && typeof LANG === "string" && LANG === "en") i18nAdd({
   "Подарок можно продать, улучшить или выставить на маркет.": "You can sell this gift, upgrade it or list it on the market.",
   "Залетай открывать кейсы с подарками Telegram": "Come open cases with Telegram gifts",
-  "Вывод": "Withdraw", "подарки и скины": "gifts and skins",
+  "Вывод": "Withdraw", "Легенда": "Legend", "Эпик": "Epic", "подарки и скины": "gifts and skins",
 });
