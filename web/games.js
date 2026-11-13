@@ -371,7 +371,8 @@ function openUpgrade() {
       <button class="ufast${UP.fast ? " on" : ""}" data-act="upg-fast">${ic("trend")}Быстро</button></div>
     <div class="btns"><button class="btn cta gold" id="u-go" data-act="upg-go" disabled>Выбери подарки</button></div>
     <div id="u-pick" style="display:none">
-      <div class="sec-t">Цели — можно несколько <span id="u-cnt"></span></div>
+      <div class="sec-t">Выбери цель <span id="u-cnt"></span></div>
+      <p class="hint" style="margin:-4px 0 8px;font-size:12.5px">Нажми на подарок, чтобы выбрать его целью. Ещё раз — взять два таких же.</p>
       <label class="srch" style="margin-top:0">${ic("search")}<input id="u-q" placeholder="Поиск по коллекции или модели" enterkeyhint="search"></label>
       <div class="chips" style="margin-top:8px" id="u-k"></div>
       <div class="hist" id="u-cols" style="margin:8px -16px 10px"></div>
@@ -697,8 +698,9 @@ Object.assign(ACT, {
   "upg-target": el => {
     if (UP.busy) return;
     const x = REG.get(el.dataset.k), i = UP.ts.findIndex(t => upKey(t) === upKey(x));
-    if (UP.ts.length >= 10) return toast("Максимум 10 целей");   // повторное нажатие добавляет ещё такую же цель
-    UP.ts.push(x);
+    if (i < 0) UP.ts = [x];   // другая цель — выбираем её вместо прежней (а не добавляем к предложенной)
+    else if (UP.ts.length >= 10) return toast("Максимум 10 целей");
+    else UP.ts.push(x);       // повторное нажатие на выбранную — ещё одна такая же
     H.sel(); upgDraw(undefined, true);
   },
   "upg-minus": el => {

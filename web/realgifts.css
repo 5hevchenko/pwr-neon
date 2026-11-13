@@ -157,3 +157,20 @@ html.cur-usd :is(.amtf,.ca-in,.pay-ai,.pay-st,.lim-own,.cur-keep) .xtr::before{c
 /* открытое правило: шансы выше у игроков с пополнением */
 .rg-tier{display:flex;align-items:center;gap:10px;width:100%;margin:10px 0 2px;padding:10px 12px;border-radius:14px;text-align:left;color:var(--text);background:color-mix(in srgb,#3ce7ff 10%,var(--card));border:1px solid color-mix(in srgb,#3ce7ff 28%,transparent);font-size:12.5px;line-height:1.35}
 .rg-tier .ic{flex:none;width:18px;height:18px;color:#3ce7ff}
+
+/* апгрейд подарка из кейса */
+.rgu-pair{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;margin:8px 0 14px}
+.rgu-slot{display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 8px 12px;border-radius:20px;background:var(--sf);text-align:center;min-width:0}
+.rgu-slot .rg-art.big{width:92px;height:92px}.rgu-slot .rg-art.big i{font-size:58px}
+.rgu-slot b{max-width:100%;font-size:13.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rgu-slot small{font-size:12.5px;font-weight:600;color:var(--yl)}
+.rgu-mid{display:flex;flex-direction:column;align-items:center;gap:1px}
+.rgu-mid b{font-family:var(--disp);font-size:22px;font-weight:800;color:#7dffb8}.rgu-mid span{font-size:11.5px;color:var(--mu)}
+.rgu-bar{position:relative;height:14px;margin:0 3px 16px;border-radius:999px;background:rgba(255,255,255,.09)}
+.rgu-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#16c88d,#7dffb8);box-shadow:0 0 14px rgba(60,230,160,.45);transition:width .25s}
+.rgu-bar u{position:absolute;left:0;top:-7px;width:4px;height:28px;margin-left:-2px;border-radius:2px;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.85)}
+.rgu-bar.lose i{filter:grayscale(1);opacity:.45}.rgu-bar.lose u{background:#ff5470;box-shadow:0 0 10px rgba(255,84,112,.8)}
+.rg-upg-s .rg-cell.on{box-shadow:inset 0 0 0 2px #3ce7ff;background:color-mix(in srgb,#3ce7ff 10%,var(--sf))}
+.rg-upg-s .rg-cell{cursor:pointer}
+.rgu-lost .rg-art{filter:grayscale(1);opacity:.55}
+.btns.rg-col .btn .ic{width:16px;height:16px;margin-right:6px;vertical-align:-3px}

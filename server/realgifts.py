@@ -831,6 +831,64 @@ def realgifts_sell(iid: int, uid=Depends(auth)):
     return {"paid": it["value"], **state(uid)}
 
 
+# ---------------- апгрейд подарка из кейса ----------------
+UPG_EDGE = conf("realgifts.upg_edge", 0.90)             # возврат апгрейда: шанс = цена ставки / цена цели × upg_edge
+UPG_MAX = conf("realgifts.upg_max", 0.80)               # шанс не выше
+UPG_MIN_K = 1.2                                         # цель дороже ставки хотя бы во столько раз
+
+
+def _upg_edge(uid):
+    """Возврат апгрейда для игрока: у игроков без пополнений он ниже в той же пропорции, что и в кейсах."""
+    return UPG_EDGE if payer(uid) else UPG_EDGE * min(1.0, RTP_FREE / RTP)
+
+
+def _upg_targets(uid, sv):
+    edge = _upg_edge(uid)
+    seen, out = set(), []
+    for x in _real({"gifts": list(NAMES)}):
+        if x["key"] in seen or x["value"] < UPG_MIN_K * sv:
+            continue
+        seen.add(x["key"])
+        out.append((x, min(UPG_MAX, sv / x["value"] * edge)))
+    return sorted(out, key=lambda p: p[0]["value"])
+
+
+@app.get(R + "/realgifts/item/{iid}/upgrade")
+def realgifts_upgrade_targets(iid: int, uid=Depends(auth)):
+    it = q1("SELECT * FROM real_items WHERE id=? AND user=?", iid, uid) or err("Это не твой подарок")
+    if it["status"] != "bag":
+        err("Этот подарок уже продан или отправляется")
+    return {"item": _item(it), "targets": [{**_pub(x), "chance": round(p * 100, 2)} for x, p in _upg_targets(uid, it["value"])[:120]]}
+
+
+@app.post(R + "/realgifts/item/{iid}/upgrade")
+async def realgifts_upgrade(iid: int, req: Request, uid=Depends(auth)):
+    """Апгрейд: подарок из сумки — ставка, цель — подарок дороже. Не повезло — ставка сгорает."""
+    if not enabled():
+        err("Кейсы подарков пока выключены")
+    key = str((await req.json()).get("key", ""))
+    t = now()
+    with tx():
+        it = q1("SELECT * FROM real_items WHERE id=? AND user=?", iid, uid) or err("Это не твой подарок")
+        if it["status"] != "bag":
+            err("Этот подарок уже продан или отправляется")
+        hit = next(((x, p) for x, p in _upg_targets(uid, it["value"]) if x["key"] == key), None) or err("Эта цель сейчас недоступна — выбери другую")
+        tg, chance = hit
+        if A.SELF_GUARD:
+            A.SELF_GUARD(uid, 0)
+        rr, pf = fair.rolls(uid, "upgrade", ref=f"rg{iid}", n=1)
+        win = rr[0] < chance
+        db.execute("UPDATE real_items SET status='burned', upd=? WHERE id=?", (t, iid))
+        new = None
+        if win:
+            cur = db.execute("INSERT INTO real_items(user,kind,ref,title,xtr,value,usd,cid,paid,status,ts,upd) VALUES(?,?,?,?,?,?,?,?,?,'bag',?,?)",
+                             (uid, tg["kind"], tg["ref"], tg["title"], tg["xtr"], tg["value"], tg["usd"], "upgrade", it["value"], t, t))
+            new = _item(q1("SELECT * FROM real_items WHERE id=?", cur.lastrowid))
+        event(uid, "upgrade", (tg["value"] if win else 0) - it["value"], stake=it["value"], pf=pf, res={"p": round(chance, 6), "win": win})
+        lvl = A.add_xp(uid, max(5, it["value"] // 20))
+    return {"win": win, "chance": round(chance * 100, 2), "item": new, "target": _pub(tg), "levelup": lvl, "pf": pf, **state(uid)}
+
+
 # ---------------- вывод ----------------
 def _back(iid, note):
     with tx():

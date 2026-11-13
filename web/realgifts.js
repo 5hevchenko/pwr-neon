@@ -184,9 +184,67 @@ ACT["rg-item"] = el => {
   openSheet(`<h2 class="gtitle">Подарок</h2>
     <div class="rg-won">${rgArt(x, "big")}<b>${esc(x.title)}</b><small>⭐ ${fmt(x.value)} · ${rgUsd(usd)}</small>
       <p>${busy ? esc(x.text) : "Настоящий подарок Telegram. Выведи его на свой аккаунт или продай игре за полную цену."}</p></div>
-    ${busy ? "" : `<div class="btns rg-col"><button class="btn cta" data-act="rg-out" data-id="${x.id}">Вывести в Telegram</button><button class="btn ghost" data-act="rg-sell" data-id="${x.id}">Продать за ⭐ ${fmt(x.value)}</button></div>
+    ${busy ? "" : `<div class="btns rg-col"><button class="btn cta" data-act="rg-out" data-id="${x.id}">Вывести в Telegram</button><button class="btn ghost" data-act="rg-sell" data-id="${x.id}">Продать за ⭐ ${fmt(x.value)}</button><button class="btn ghost" data-act="rg-upg" data-id="${x.id}">${ic("trend")}Апгрейд — рискнуть ради подарка дороже</button></div>
     <p class="hint">${!RG.limit && !RG.held ? `Вывод откроется после первой покупки звёзд: вывести можно подарков на сумму до ${RG.limitK}% от покупок.`
       : can ? `Лимит вывода: осталось ${rgUsd(RG.left)}.` : `Лимит вывода: осталось ${rgUsd(RG.left)}, а подарок стоит ${rgUsd(usd)}. Лимит растёт с покупками.`}${x.kind === "nft" ? " Модель и фон будут как у самого доступного предложения на рынке." : ""}</p>`}`, "rg-s rg-item-s");
+};
+
+// ---------------- апгрейд подарка из кейса: ставка — подарок из сумки, цель — подарок дороже ----------------
+let RGU = null;
+const rguPct = c => (c < 10 ? c.toFixed(1) : Math.round(c)) + "%";
+function rgUpgHTML() {
+  const u = RGU, t = u.pick;
+  if (!t) return `<h2 class="gtitle">Апгрейд</h2>${emptyHTML("search", "Дороже этого подарка сейчас ничего нет")}`;
+  return `<h2 class="gtitle">Апгрейд</h2>
+    <div class="rgu-pair"><div class="rgu-slot">${rgArt(u.item, "big")}<b>${esc(u.item.title)}</b><small>⭐ ${fmt(u.item.value)}</small></div>
+      <div class="rgu-mid"><b>${rguPct(t.chance)}</b><span>шанс</span></div>
+      <div class="rgu-slot">${rgArt(t, "big")}<b>${esc(t.title)}</b><small>⭐ ${fmt(t.value)}</small></div></div>
+    <div class="rgu-bar" id="rgu-bar"><i style="width:${t.chance}%"></i><u id="rgu-ptr"></u></div>
+    <div class="btns"><button class="btn cta gold" data-act="rgu-go">Апгрейд · шанс ${rguPct(t.chance)}</button></div>
+    <p class="hint">Повезёт — получишь цель: её можно вывести или продать. Не повезёт — подарок сгорит.</p>
+    <div class="sec-t">Выбери цель</div>
+    <div class="rg-grid">${u.targets.map(x => `<button class="rg-cell k-${x.kind}${x.key === t.key ? " on" : ""}" data-act="rgu-pick" data-k="${esc(x.key)}">${rgArt(x)}<b>${esc(x.title)}</b><small>⭐ ${short(x.value)} · ${rguPct(x.chance)}</small></button>`).join("")}</div>`;
+}
+ACT["rg-upg"] = async el => {
+  if (RG_BUSY) return;
+  const id = +el.dataset.id; let d;
+  try { d = await api(`realgifts/item/${id}/upgrade`); } catch (e) { return; }
+  H.sel();
+  RGU = { id, item: d.item, targets: d.targets, busy: false, pick: d.targets.find(t => t.chance <= 50) || d.targets[0] || null };
+  if (el.closest(".rg-item-s")) closeSheet();
+  openSheet(rgUpgHTML(), "rg-s rg-upg-s");
+};
+ACT["rgu-pick"] = el => {
+  const u = RGU; if (!u || u.busy) return;
+  u.pick = u.targets.find(t => t.key === el.dataset.k) || u.pick; H.sel();
+  const sh = el.closest(".sheet"), top = sh.scrollTop; replaceSheet(sh, rgUpgHTML()); sh.scrollTop = Math.min(top, 0);
+};
+ACT["rgu-go"] = async el => {
+  const u = RGU; if (!u || u.busy || !u.pick) return;
+  if (!el.dataset.sure) { const was = el.textContent; el.dataset.sure = 1; el.textContent = "Точно? Подарок может сгореть"; setTimeout(() => { if (el.isConnected && el.dataset.sure) { delete el.dataset.sure; el.textContent = was; } }, 4000); return; }
+  u.busy = true; el.disabled = true; el.textContent = "Крутим…";
+  let r;
+  try { r = await post(`realgifts/item/${u.id}/upgrade`, { key: u.pick.key }); }
+  catch (e) { u.busy = false; el.disabled = false; delete el.dataset.sure; el.textContent = `Апгрейд · шанс ${rguPct(u.pick.chance)}`; return; }
+  RG = r;
+  const bar = document.getElementById("rgu-bar"), ptr = document.getElementById("rgu-ptr"), ch = r.chance, sh = el.closest(".sheet");
+  if (bar && ptr) {   // зелёная зона — ровно шанс с сервера; стрелка встаёт в неё при выигрыше и за неё при проигрыше
+    bar.querySelector("i").style.width = ch + "%";
+    const stop = r.win ? Math.min(ch - 1, 1.5 + Math.random() * Math.max(0, ch - 3)) : Math.min(98.5, ch + 2.5 + Math.random() * Math.max(0, 96 - ch));
+    ptr.style.transition = "left 3.2s cubic-bezier(.12,.8,.2,1)"; void ptr.offsetWidth; ptr.style.left = stop + "%";
+    H.imp("light");
+    await new Promise(z => setTimeout(z, 3400));
+    bar.classList.add(r.win ? "win" : "lose");
+  }
+  r.win ? H.ok() : H.err();
+  u.busy = false;
+  if (sh && sh.isConnected) replaceSheet(sh, r.win
+    ? `<h2 class="gtitle">Удалось!</h2><div class="rg-won">${rgArt(r.item, "big")}<b>${esc(r.item.title)}</b><small>⭐ ${fmt(r.item.value)}</small><p>Подарок в сумке. Выведи его в Telegram или продай игре.</p></div>
+       <div class="btns rg-col"><button class="btn cta" data-act="close">Отлично</button><button class="btn ghost" data-act="rg-upg" data-id="${r.item.id}">${ic("trend")}Апгрейд ещё раз</button></div>`
+    : `<h2 class="gtitle">Не повезло</h2><div class="rg-won rgu-lost">${rgArt(u.item, "big")}<b>${esc(u.item.title)}</b><small>сгорел</small><p>Шанс был ${rguPct(ch)}. Подарок ушёл игре.</p></div>
+       <div class="btns"><button class="btn cta" data-act="close">Понятно</button></div>`);
+  rgRepaint();
+  if (typeof drawInventory === "function" && typeof TAB !== "undefined" && TAB === "bag") { try { drawInventory(); } catch (e) {} }
 };
 
 // ---------------- админ ----------------
