@@ -22,6 +22,40 @@ ART = {   # имя → (файл на CDN, ширина webp в пикселях
     "game_slots": ("113210_72ac6b00-989a-448d-be46-bdb7498ae0fb.png", 256),
     "game_wheel": ("113209_bb648115-ab8e-46b1-a5ac-b77d41f21232.png", 256),
     "game_dice": ("113209_b5ef138a-edbc-46c6-a563-5b7354bb1a9d.png", 256),
+    # плитки остальных игр (13 ноября) — в том же виде, что и первые пять; имя файла целиком, с датой
+    "game_avia": ("hf_20261113_151326_2dd3f5d8-4bdd-4daf-a7f2-cbb20211b8c1.png", 256),
+    "game_battle": ("hf_20261113_151600_b821b446-7019-4a43-944d-7fae48748cac.png", 256),
+    "game_blackjack": ("hf_20261113_151325_4f1b150f-9d65-49d7-8991-86534cf119d4.png", 256),
+    "game_101": ("hf_20261113_151650_5d086dfd-ce92-4b90-b577-460c6acd7353.png", 256),
+    "game_chicken": ("hf_20261113_151652_df79a20f-053a-452f-9d84-3b659804f9d9.png", 256),
+    "game_claw": ("hf_20261113_151559_785cc1c7-af60-49f0-be4d-964ff7e2dba0.png", 256),
+    "game_darts": ("hf_20261113_151651_bfaa3a43-bffe-4359-b0fc-6d80b72a579c.png", 256),
+    "game_dogs": ("hf_20261113_151651_2779f7db-e22f-44fb-be61-3ac278d1225f.png", 256),
+    "game_drill": ("hf_20261113_151757_22bc0625-79fa-4b42-8a00-2567ce2b2f1a.png", 256),
+    "game_fish": ("hf_20261113_151559_4f29f72a-f25b-4beb-acd5-960bc710b9a8.png", 256),
+    "game_forecast": ("hf_20261113_151600_afac88ea-a710-4db1-af7e-2fab95f8bdc3.png", 256),
+    "game_duels": ("hf_20261113_151756_27f0d36d-6d17-4716-a72f-9c74ba85cc43.png", 256),
+    "game_upgrade": ("hf_20261113_151757_142321f8-9114-4e5b-a1be-9aa05bce3e4c.png", 256),
+    "game_swap": ("hf_20261113_151903_0c133162-734b-47ea-ae94-03ea300d4556.png", 256),
+    "game_tower": ("hf_20261113_151902_1f32633d-5409-43e7-bf43-356292fc7fb5.png", 256),
+    "game_limbo": ("hf_20261113_151903_d03ad459-a909-4546-839d-9e3e47f49ffb.png", 256),
+    "game_jroul": ("hf_20261113_151902_0ef35862-b5b4-4e84-89df-566c0bf787b4.png", 256),
+    "game_rlt": ("hf_20261113_152002_2b0fb386-0b48-4826-9a01-bc30296c9c74.png", 256),
+    "game_hilo": ("hf_20261113_152003_8b1cf54b-f4ea-4193-80d0-e54edf06f2a8.png", 256),
+    "game_craft": ("hf_20261113_152004_8cf76fbb-1923-46be-b394-e791b92794ff.png", 256),
+    "game_carousel": ("hf_20261113_152003_bf95b858-2c6f-4082-b9c4-9bf2ab86d3a9.png", 256),
+    "game_safe": ("hf_20261113_152106_e993ba94-a23b-407d-a02d-bb08ca8c7be7.png", 256),
+    "game_ladder": ("hf_20261113_152106_08936219-e499-4404-8ae8-72298a2b203a.png", 256),
+    "game_bankbet": ("hf_20261113_152106_a23e322a-7bf8-4c8c-a7bd-d3b82c1f1aeb.png", 256),
+    "game_auction": ("hf_20261113_152106_ccca4741-20d1-4611-9698-efab0b0591b9.png", 256),
+    "game_keno": ("hf_20261113_152150_545b240b-06b2-4134-b9bb-c92294c99d59.png", 256),
+    "game_penalty": ("hf_20261113_152150_881fefa8-210e-4faa-89d5-998d6842d758.png", 256),
+    "game_plinko": ("hf_20261113_152151_84369fec-1766-423a-8631-4a8c448abe08.png", 256),
+    "game_pump": ("hf_20261113_152150_b4ead708-ed97-44c5-8da8-5d8745aac6b0.png", 256),
+    "game_guess": ("hf_20261113_152248_86e5f4a7-63f3-451d-a706-f6144e9f9862.png", 256),
+    "game_scratch": ("hf_20261113_152248_007bdf60-0c65-44ea-808d-bea909839715.png", 256),
+    "game_stack": ("hf_20261113_152252_bf5f396f-bb06-4cf3-b74e-f9e7a3b13994.png", 256),
+    "game_starfall": ("hf_20261113_152249_e8c5fd0f-35ec-4ceb-ad7d-1d02c0f3cf87.png", 256),
     "pass_loop": ("113147_720e4dcb-174d-4b15-b075-23c134bea231.mp4", None),
     "case_burst": ("113150_4c15d707-a7ac-4564-be67-2fe7af47e760.mp4", None),
 }
@@ -88,7 +122,7 @@ def main():
         out = os.path.join(GEN, name + (".webp" if width else ".mp4"))
         if not os.path.exists(out):
             try:
-                data = urllib.request.urlopen(urllib.request.Request(CDN + src, headers={"User-Agent": "Mozilla/5.0"}), timeout=40).read()
+                data = urllib.request.urlopen(urllib.request.Request((CDN_USER if src.startswith("hf_") else CDN) + src, headers={"User-Agent": "Mozilla/5.0"}), timeout=40).read()
                 if width:
                     from PIL import Image
                     im = Image.open(io.BytesIO(data)).convert("RGB")

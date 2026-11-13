@@ -277,6 +277,7 @@ Object.assign(ACT, {
 
 /* ---------------- «Угадай дроп» на тир-кейсах ---------------- */
 GAMES.push({ id: "guess", t: "Угадай дроп", s: "Три подарка из кейса, один — настоящий дроп. Угадал — забираешь все три", img: "Crystal Ball", k: ["#22e9ff", "#0a1a3a"], chips: ["шанс 1 из 3", "приз ×3"] });
+if (GEN.game_guess) GAMES[GAMES.length - 1].imgUrl = GEN.game_guess;
 Object.assign(GAME_OPEN, { guess: () => openGuess() });
 GAME_SECTIONS.find(s => s[0] === "Подарки")[2].push("guess");
 GCAT.guess = "gifts";
