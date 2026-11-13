@@ -111,8 +111,9 @@
 .gd-tag svg{width:11px;height:11px}
 .gd-left{flex:none;font-style:normal;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;padding:4px 8px;border-radius:9px;background:rgba(0,0,0,.26)}
 .gd-bar>svg{flex:none;width:15px;height:15px;opacity:.7}
-.gl-dayb{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;font-size:9.5px;font-style:normal;font-weight:800;letter-spacing:.02em;vertical-align:2px;color:#031018;background:linear-gradient(180deg,#a8fbff,#7a6bff)}
-.ghub .gcard.gl.gl-day{box-shadow:inset 0 0 0 1.5px #ffbe3d,0 4px 16px rgba(255,180,50,.18)!important}
+.gl-dayb{position:absolute;top:8px;left:8px;z-index:3;display:flex;align-items:center;height:20px;padding:0 9px;border-radius:999px;font:800 10.5px/1 var(--body);font-style:normal;white-space:nowrap;color:#201300;background:linear-gradient(180deg,#ffd76a,#ffb22e);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.ghub .gcard.gl.gl-day{position:relative;box-shadow:0 4px 16px rgba(255,180,50,.18)!important}
+.ghub .gcard.gl.gl-day::after{content:"";position:absolute;inset:0;border-radius:inherit;border:1.5px solid #ffbe3d;pointer-events:none;z-index:2}
 .gd-hero{position:relative;margin:-4px -4px 12px;padding:22px 16px 18px;border-radius:22px;text-align:center;color:#fff;overflow:hidden;background:radial-gradient(120% 90% at 50% 18%,var(--k1),var(--k2) 78%)}
 .gd-rays{position:absolute;left:50%;top:70px;width:520px;height:520px;margin:-260px;background:repeating-conic-gradient(rgba(255,255,255,.1) 0 10deg,transparent 10deg 24deg);-webkit-mask-image:radial-gradient(closest-side,#000,transparent);mask-image:radial-gradient(closest-side,#000,transparent);animation:gdSpin 40s linear infinite;pointer-events:none}
 @keyframes gdSpin{to{transform:rotate(360deg)}}

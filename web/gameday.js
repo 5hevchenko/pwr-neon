@@ -10,8 +10,7 @@ function gdMark() {   // значок на строке игры: разделы
   if (!GD) return;
   document.querySelectorAll(`.gcard.gl[data-id="${GD.gid}"]`).forEach(c => {
     c.classList.add("gl-day");
-    const t = c.querySelector(".gc-t");
-    if (t && !t.querySelector(".gl-dayb")) t.insertAdjacentHTML("beforeend", `<i class="gl-dayb">ИГРА ДНЯ</i>`);
+    if (!c.querySelector(".gl-dayb")) c.insertAdjacentHTML("beforeend", `<i class="gl-dayb">Игра дня</i>`);   // плашка в углу картинки, а не в названии
   });
 }
 const _gdSec = gDrawSections;

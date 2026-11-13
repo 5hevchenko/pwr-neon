@@ -71,11 +71,11 @@ function rgCaseHTML(c) {
     <div class="rg-hero"><span class="rg-fan big">${gifts.slice(0, 3).map(x => rgArt(x)).join("")}</span></div>
     <div id="rg-roul"></div><div id="rg-won"></div>
     <div class="btns" id="rg-btns">${rgBtnHTML(c)}</div>
-    ${c.price && RG && RG.payer === false ? `<button class="rg-tier" data-act="rg-topup">${ic("trend")}<span>Шансы на дорогие призы выше у игроков с пополнением. Пополни баланс — и они вырастут.</span></button>` : ""}
     <div class="sec-t">Что внутри</div>
     <div class="rg-grid">${c.items.map(tile).join("")}</div>
-    <p class="hint">Подарки настоящие: выигранный можно вывести на свой аккаунт Telegram или продать игре за полную цену. Звёзды приходят сразу на баланс.
-      ${c.nft ? "Коллекционный подарок покупается на рынке в момент вывода: модель и фон будут как у самого доступного предложения. " : ""}Вывести можно подарков на сумму до ${RG.limitK}% от твоих покупок${RG.left ? ` — сейчас это ${rgUsd(RG.left)}` : ""}.</p>`;
+    <p class="hint">Подарки настоящие: выигранный можно вывести на свой аккаунт Telegram или продать игре за полную цену.${c.items.some(x => x.kind === "star") ? " Звёзды приходят сразу на баланс." : ""}
+      ${c.nft ? "Коллекционный подарок покупается на рынке в момент вывода: модель и фон будут как у самого доступного предложения. " : ""}${RG.freeUsd ? `Без пополнений можно вывести подарков на ${rgUsd(RG.freeUsd)}, дальше лимит растёт с покупками: ${RG.limitK}% от них` : `Вывести можно подарков на сумму до ${RG.limitK}% от твоих покупок`}${RG.left ? ` — сейчас доступно ${rgUsd(RG.left)}` : ""}.</p>
+    ${c.price && RG && RG.payer === false ? `<button class="rg-tier" data-act="rg-topup">${ic("trend")}<span>Шансы на дорогие призы выше у игроков с пополнением. Пополни баланс — и они вырастут.</span></button>` : ""}`;
 }
 async function rgOpenCase(id) {
   H.imp("light");

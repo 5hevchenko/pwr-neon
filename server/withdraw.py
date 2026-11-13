@@ -132,6 +132,38 @@ def gift_usd(g):
     return round(g["value"] / E.USD_COINS, 3)
 
 
+FREE_USER = conf("withdraw.free_user_usd", 1.0)   # столько $ игрок может вывести вообще без пополнений (за всё время)
+FREE_DAY = conf("withdraw.free_day_usd", 10.0)    # общий бюджет таких выводов на всех игроков за сутки: больше игра бесплатно не отдаст
+db.execute("CREATE TABLE IF NOT EXISTS free_out(day INTEGER PRIMARY KEY, usd REAL)")
+
+
+def paid_limit(uid):
+    """Лимит от оплаченного, без бесплатной части."""
+    paid = q1("SELECT COALESCE(SUM(xtr),0) s FROM payments WHERE user=? AND ts<=?", uid, now() - int(HOLD_H * 3600))["s"]
+    return paid * XTR_USD * LIMIT_K
+
+
+def free_take(uid, used, need):
+    """Часть вывода сверх лимита от пополнений идёт из общего суточного бюджета бесплатных выводов (звать внутри tx()).
+    Бюджет на сегодня выбран — ошибка: так фермы пустых аккаунтов не вынесут больше FREE_DAY в сутки."""
+    pl = paid_limit(uid)
+    part = max(0.0, used + need - pl) - max(0.0, used - pl)
+    if part <= 1e-9:
+        return 0.0
+    day = A.day_start()
+    cur = q1("SELECT usd FROM free_out WHERE day=?", day)
+    if (cur["usd"] if cur else 0) + part > FREE_DAY + 1e-9:
+        err("Выводы без пополнения на сегодня закончились — попробуй завтра. У игроков с пополнением свой лимит, он от этого не зависит")
+    db.execute("INSERT INTO free_out(day,usd) VALUES(?,?) ON CONFLICT(day) DO UPDATE SET usd=usd+excluded.usd", (day, part))
+    return part
+
+
+def free_return(part):
+    if part > 0:
+        with A.LOCK:
+            db.execute("UPDATE free_out SET usd=MAX(0, usd-?) WHERE day=?", (part, A.day_start()))
+
+
 def budget(uid):
     """(лимит в $, уже выведено или в работе в $) — лимит считается от оплаченного (Telegram Stars и крипта в пересчёте на Stars).
     Оплаты моложе HOLD_H часов в лимит пока не идут. В «выведено» входят и скины, и настоящие подарки."""
@@ -139,7 +171,7 @@ def budget(uid):
     # в лимит идёт то, что реально уплачено площадке (если она дороже нашей цены скина)
     used = q1("SELECT COALESCE(SUM(MAX(usd, market_usd)),0) s FROM withdraws WHERE user=? AND stage IN ('0','1','2')", uid)["s"]
     used += sum(f(uid) for f in EXTRA_USED)
-    return round(paid * XTR_USD * LIMIT_K, 2), round(used, 2)
+    return round(paid * XTR_USD * LIMIT_K + FREE_USER, 2), round(used, 2)
 
 
 def held(uid):
@@ -237,6 +269,7 @@ async def withdraw(gid: int, uid=Depends(auth)):
             err(f"Свежее пополнение станет доступно для вывода через {HOLD_H} ч после оплаты" if held(uid) else "Вывод открывается после первой покупки звёзд")
         if used + usd > limit + 1e-9:
             err(f"Лимит вывода: осталось ${max(0, limit - used):.2f}, а скин стоит ${usd:.2f}. Лимит растёт с покупками")
+        free_take(uid, used, usd)
         wid = secrets.token_hex(16)
         mh = E.PWR["cols"][g["col"]]["mh"]
         db.execute("DELETE FROM gifts WHERE id=?", (gid,))

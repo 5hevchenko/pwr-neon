@@ -549,7 +549,7 @@ def state(uid):
     hist = [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status IN ('sent','sold') ORDER BY upd DESC LIMIT 15", uid)]
     return {"on": enabled(), "cases": cases, "ids": sorted(IDS), "bag": bag, "history": hist, "stars": bal(uid), "limit": limit, "used": used,
             "left": round(max(0, limit - used), 2), "held": W.held(uid), "holdHours": W.HOLD_H,
-            "rtp": int(RTP * 100), "limitK": int(W.LIMIT_K * 100), "usdK": W.XTR_USD / shop.RATE / MARKUP,
+            "rtp": int(RTP * 100), "limitK": int(W.LIMIT_K * 100), "freeUsd": W.FREE_USER, "usdK": W.XTR_USD / shop.RATE / MARKUP,
             "payer": payer(uid)}
 
 
@@ -931,6 +931,7 @@ async def realgifts_withdraw(iid: int, uid=Depends(auth)):
         need = max(it["usd"], _now_usd(it)) if it["kind"] == "tg" else it["usd"]
         if used + need > limit + 1e-9:
             err(f"Лимит вывода: осталось ${max(0, limit - used):.2f}, а подарок стоит ${need:.2f}. Лимит растёт с покупками")
+        free = W.free_take(uid, used, need)
         db.execute("UPDATE real_items SET status='sending', upd=? WHERE id=?", (now(), iid))
     try:
         if it["kind"] == "tg":
@@ -941,6 +942,9 @@ async def realgifts_withdraw(iid: int, uid=Depends(auth)):
         r = q1("SELECT status FROM real_items WHERE id=?", iid)
         if r and r["status"] == "sending":
             _back(iid, "")
+            r = {"status": "bag"}
+        if r and r["status"] == "bag":   # не отправили — бесплатный бюджет дня возвращаем
+            W.free_return(free)
     return state(uid)
 
 
