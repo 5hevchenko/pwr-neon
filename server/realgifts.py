@@ -21,10 +21,12 @@
   · не получилось купить или подарить — приз возвращается в сумку; ответа нет и исход неизвестен — заявку разбирает админ.
 Ключи: TONNEL_AUTH (и TONNEL_PROXY) — переменные окружения, см. tonnel.py. Без них коллекционные подарки выдаёт админ вручную."""
 import asyncio
+import hashlib
 import os
 import random
 import statistics
 import time
+import urllib.parse
 
 from fastapi import Depends, Request
 from fastapi.responses import FileResponse, Response
@@ -396,7 +398,7 @@ def state(uid):
     for c in CASES:
         b = _BUILT.get(c["id"])
         if b and not b["paused"]:
-            cases[b["id"]] = {"price": b["price"], "gift": round(b["gift"] * 100, 4), "tops": tops(b["id"])}
+            cases[b["id"]] = {"price": b["price"], "tops": tops(b["id"])}
     bag = [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status IN ('bag','sending','pending') ORDER BY id DESC LIMIT 200", uid)]
     hist = [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status IN ('sent','sold') ORDER BY upd DESC LIMIT 15", uid)]
     return {"on": enabled(), "cases": cases, "ids": sorted(IDS), "bag": bag, "history": hist, "stars": bal(uid), "limit": limit, "used": used,
@@ -409,27 +411,97 @@ def realgifts_state(uid=Depends(auth)):
     return state(uid)
 
 
+IMMUTABLE = {"Cache-Control": "public, max-age=31536000, immutable"}
+ART_SIZE = 256
+
+
+def _art_file(name):
+    return os.path.join(A.ASSET_CACHE, "rgart_" + hashlib.md5(name.encode()).hexdigest() + ".webp")
+
+
+def _art_make(data):
+    import io
+    from PIL import Image
+    im = Image.open(io.BytesIO(data)).convert("RGBA")
+    im.thumbnail((ART_SIZE, ART_SIZE))
+    out = io.BytesIO()
+    im.save(out, "WEBP", quality=82, method=4)
+    return out.getvalue()
+
+
+async def _art_fetch(name):
+    """Картинка коллекционного подарка: один раз скачать у источника, ужать в WebP 256 px и положить на свой диск."""
+    f = _art_file(name)
+    if os.path.exists(f):
+        return f
+    if not A.GIFT_ASSETS:
+        return None
+    try:
+        r = await A.http.get(f"{A.GIFT_ASSETS}/original/{urllib.parse.quote(name)}.png?size={ART_SIZE}", timeout=30, follow_redirects=True,
+                             headers={"User-Agent": f"PWRNeon/1.0 (+t.me/{A.BOT_NAME})"})
+        if r.status_code != 200:
+            return None
+        body = await asyncio.to_thread(_art_make, r.content)
+        os.makedirs(A.ASSET_CACHE, exist_ok=True)
+        tmp = f + ".tmp"
+        with open(tmp, "wb") as fh:
+            fh.write(body)
+        os.replace(tmp, f)
+        return f
+    except Exception as e:
+        print("realgifts art:", name, type(e).__name__, flush=True)
+        return None
+
+
+async def _thumb_fetch(gid):
+    """Картинка обычного подарка — с серверов Telegram на свой диск."""
+    f = os.path.join(A.ASSET_CACHE, f"tggift_{gid}.webp")
+    if os.path.exists(f):
+        return f
+    g = next((x for x in _CAT["items"] if x["id"] == gid and x["thumb"]), None)
+    if not g:
+        return None
+    try:
+        r = await _tg("getFile", file_id=g["thumb"])
+        d = await A.http.get(f"{TG_API}/file/bot{TOKEN}/{r['result']['file_path']}", timeout=30)
+        if d.status_code != 200:
+            return None
+        os.makedirs(A.ASSET_CACHE, exist_ok=True)
+        with open(f + ".tmp", "wb") as fh:
+            fh.write(d.content)
+        os.replace(f + ".tmp", f)
+        return f
+    except Exception:
+        return None
+
+
+async def warm_art():
+    """Заранее сложить на диск картинки всех подарков из кейсов, чтобы игроки не ждали скачивания у источника."""
+    names = [n for n in NAMES if n in _NFT and not os.path.exists(_art_file(n))]
+    got = 0
+    for n in names:
+        got += bool(await _art_fetch(n))
+        await asyncio.sleep(0.15)
+    for g in _CAT["items"]:
+        await _thumb_fetch(g["id"])
+    if names:
+        print(f"realgifts: картинки подарков на диске — скачано {got} из {len(names)} недостающих", flush=True)
+
+
+@app.get(R + "/realgifts/art/{name:path}")
+async def realgifts_art(name: str):
+    if name not in E.CATALOG:
+        return Response(status_code=404)
+    f = await _art_fetch(name)
+    return FileResponse(f, media_type="image/webp", headers=IMMUTABLE) if f else Response(status_code=404, headers={"Cache-Control": "no-store"})
+
+
 @app.get(R + "/realgifts/img/{gid}")
 async def realgifts_img(gid: str):
-    """Картинка обычного подарка: один раз скачиваем у Telegram и кладём в свой кэш."""
     if not gid.isdigit():
         return Response(status_code=404)
-    os.makedirs(A.ASSET_CACHE, exist_ok=True)
-    f = os.path.join(A.ASSET_CACHE, f"tggift_{gid}.webp")
-    if not os.path.exists(f):
-        g = next((x for x in _CAT["items"] if x["id"] == gid and x["thumb"]), None)
-        if not g:
-            return Response(status_code=404)
-        try:
-            r = await _tg("getFile", file_id=g["thumb"])
-            d = await A.http.get(f"{TG_API}/file/bot{TOKEN}/{r['result']['file_path']}", timeout=30)
-            if d.status_code != 200:
-                return Response(status_code=502)
-            with open(f, "wb") as fh:
-                fh.write(d.content)
-        except Exception:
-            return Response(status_code=502)
-    return FileResponse(f, media_type="image/webp", headers={"Cache-Control": "public, max-age=604800"})
+    f = await _thumb_fetch(gid)
+    return FileResponse(f, media_type="image/webp", headers=IMMUTABLE) if f else Response(status_code=404, headers={"Cache-Control": "no-store"})
 
 
 # ---------------- открыть / продать ----------------
@@ -442,8 +514,8 @@ def realgifts_case(cid: str, uid=Depends(auth)):
     u = q1("SELECT * FROM users WHERE id=?", uid)
     kr = q1("SELECT n FROM case_keys WHERE user=? AND cid=?", uid, cid)
     return {"id": cid, "title": E.case_title(cid, uid), "price": b["price"], "level": b["level"], "locked": A.level(u["xp"]) < b["level"],
-            "keys": kr["n"] if kr else 0, "freeIn": _free_in(b, u), "gift": round(b["gift"] * 100, 4), "nft": b["nft"],
-            "items": [dict(_pub(x), p=round(x["p"] * 100, 6)) for x in sorted(b["items"], key=lambda x: -x["value"])]}
+            "keys": kr["n"] if kr else 0, "freeIn": _free_in(b, u), "nft": b["nft"],
+            "items": [_pub(x) for x in sorted(b["items"], key=lambda x: (x["kind"] == "star", -x["value"]))]}   # шансы наружу не отдаём
 
 
 @app.post(R + "/realgifts/case/{cid}/open")
@@ -683,6 +755,10 @@ async def loop():
             await refresh()
         except Exception as e:
             print("realgifts loop:", type(e).__name__, e, flush=True)
+        try:
+            await warm_art()
+        except Exception as e:
+            print("realgifts warm:", type(e).__name__, e, flush=True)
         await asyncio.sleep(REFRESH)
 
 

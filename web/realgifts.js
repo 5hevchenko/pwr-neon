@@ -5,46 +5,27 @@
 // ============================================================
 let RG = null, RG_BUSY = false, RG_ADM = null, RG_WON = 0, RG_CASE = null;
 const rgUsd = v => "$" + (v < 100 ? v.toFixed(2) : Math.round(v));
-const rgPct = p => p >= 10 ? p.toFixed(0) + "%" : p >= 1 ? p.toFixed(1).replace(".", ",") + "%" : p >= 0.01 ? p.toFixed(2).replace(".", ",") + "%" : "1 из " + fmt(Math.round(100 / p));
-const rgArt = (x, cls = "") => `<span class="rg-art${cls ? " " + cls : ""}${x.kind === "star" ? " star" : ""}">${x.kind === "nft" ? `<img src="${A.orig(x.ref, 256)}" alt="" loading="lazy">`
-  : x.kind === "tg" && x.img ? `<img src="api/realgifts/img/${x.ref}" alt="" loading="lazy">` : `<i>${x.kind === "star" ? "⭐" : esc(x.emoji || "🎁")}</i>`}</span>`;
+const rgArt = (x, cls = "") => `<span class="rg-art${cls ? " " + cls : ""}${x.kind === "star" ? " star" : ""}">${x.kind === "nft" ? `<img src="api/realgifts/art/${encodeURIComponent(x.ref)}" alt="" loading="lazy" decoding="async">`
+  : x.kind === "tg" && x.img ? `<img src="api/realgifts/img/${x.ref}" alt="" loading="lazy" decoding="async">` : `<i>${x.kind === "star" ? "⭐" : esc(x.emoji || "🎁")}</i>`}</span>`;
 const rgCost = x => x.usd || x.value * RG.usdK;
 const rgName = x => x.kind === "star" ? `${fmt(x.value)} звёзд` : x.title;
 async function rgLoad() { RG = await api("realgifts"); return RG; }
 
-// ---------------- сумка призов ----------------
-function rgLimitHTML() {
-  const d = RG;
-  if (!d.limit && !d.held) return `<div class="rg-lim"><b>Вывод откроется после первой покупки звёзд</b><span>Вывести можно подарков на сумму до ${d.limitK}% от твоих покупок. До этого любой приз можно продать игре за полную цену.</span></div>`;
-  return `<div class="rg-lim"><b>Можно вывести на ${rgUsd(d.left)}</b><span>Лимит — ${d.limitK}% от покупок: ${rgUsd(d.limit)}, уже выведено ${rgUsd(d.used)}.${d.held ? ` Ещё ${rgUsd(d.held)} добавится через ${d.holdHours} ч после оплаты.` : ""}</span></div>`;
-}
-function rgBagHTML() {
-  if (!RG.bag.length) return `<div class="rg-empty">Здесь будут подарки, выигранные в кейсах. Приз лежит у тебя, пока ты сам не решишь — вывести его в Telegram или продать игре.</div>`;
-  return `<div class="rg-bag">${RG.bag.map(x => {
-    const busy = x.status !== "bag";
-    return `<div class="rg-it${busy ? " busy" : ""}">${rgArt(x)}<div class="rg-in"><b>${esc(x.title)}</b><small>${busy ? esc(x.text) : `⭐ ${fmt(x.value)} · ${rgUsd(rgCost(x))}`}</small></div>
-      ${busy ? "" : `<div class="rg-acts"><button class="btn ghost" data-act="rg-sell" data-id="${x.id}">Продать</button><button class="btn cta" data-act="rg-out" data-id="${x.id}">Вывести</button></div>`}</div>`;
-  }).join("")}</div>`;
-}
+// ---------------- окно состояния (админ) ----------------
 function rgHubHTML() {
   const d = RG;
-  if (!d.on) return `<div class="rg-empty">Кейсы с подарками пока выключены.</div>`;
-  const hist = d.history.length ? `<div class="sec-t">История</div><div class="rg-hist">${d.history.map(x => `<div class="rg-row">${rgArt(x)}<div class="grow"><b>${esc(x.title)}</b><small>${esc(x.text)}</small></div><em>⭐ ${short(x.value)}</em></div>`).join("")}</div>` : "";
-  return `<p class="rg-lead">В кейсах лежат настоящие подарки Telegram. Выигранный подарок можно вывести на свой аккаунт или продать игре за полную цену.</p>
-    ${rgLimitHTML()}${rgBagHTML()}${hist}
-    ${ME && ME.admin ? `<div class="sec-t">Для админа</div><div id="rg-adm" class="rg-adm">${RG_ADM ? rgAdmHTML() : `<button class="btn ghost" data-act="rg-adm">Показать состояние</button>`}</div>` : ""}`;
+  const hist = d.history.length ? `<div class="sec-t">Мои последние призы</div><div class="rg-hist">${d.history.map(x => `<div class="rg-row">${rgArt(x)}<div class="grow"><b>${esc(x.title)}</b><small>${esc(x.text)}</small></div><em>⭐ ${short(x.value)}</em></div>`).join("")}</div>` : "";
+  return `<div id="rg-adm" class="rg-adm">${RG_ADM ? rgAdmHTML() : `<div class="hint" style="padding:18px;text-align:center">Загрузка…</div>`}</div>${hist}`;
 }
 function rgRepaint() {
   const b = document.getElementById("rg-body"); if (b) b.innerHTML = rgHubHTML();
   rgStrip();
+  if (typeof MYP !== "undefined" && MYP && $("#v-inv") && $("#v-inv").innerHTML) drawInventory();
 }
-// вкладка «Кейсы»: кнопка сумки и пометка кейсов, которые ждут цен
+// вкладка «Кейсы»: пометка кейсов, которые ждут цен, и обложки
 function rgStrip() {
   const v = $("#v-cases"); if (!v || !RG || !RG.on) return;
-  const html = `<div class="rg-strip"><button class="rg-more" data-act="rg-open">${ic("gift")}Мои подарки${RG.bag.length ? ` · ${RG.bag.length}` : ""}</button><span>Подарки из кейсов настоящие: выводи в Telegram или продавай</span></div>`;
-  const old = v.querySelector(".rg-strip");
-  if (old) { if (old.outerHTML !== html) old.outerHTML = html; }
-  else { const at = v.querySelector(".pp-banner") || v.querySelector(".ctabs") || v.querySelector(".cases"); if (at) at.insertAdjacentHTML("beforebegin", html); }
+  const old = v.querySelector(".rg-strip"); if (old) old.remove();
   v.querySelectorAll(".case[data-id]").forEach(e => e.classList.toggle("rg-wait", RG.ids.includes(e.dataset.id) && !RG.cases[e.dataset.id]));
   rgCovers();
 }
@@ -80,16 +61,15 @@ function rgBtnHTML(c) {
   return `<button class="btn cta" data-act="rg-spin" data-id="${c.id}">Открыть за ⭐ ${fmt(c.price)}</button>`;
 }
 function rgCaseHTML(c) {
-  const gifts = c.items.filter(x => x.kind !== "star"), stars = c.items.filter(x => x.kind === "star");
-  const row = x => `<div class="rg-row">${rgArt(x)}<div class="grow"><b>${esc(rgName(x))}</b><small>${x.kind === "star" ? "сразу на баланс" : `⭐ ${fmt(x.value)} · ${rgUsd(x.value * RG.usdK)}`}</small></div><em>${rgPct(x.p)}</em></div>`;
+  const gifts = c.items.filter(x => x.kind !== "star");
+  const tile = x => `<div class="rg-cell k-${x.kind}">${rgArt(x)}<b>${esc(x.kind === "star" ? "Звёзды" : x.title)}</b><small>⭐ ${short(x.value)}</small></div>`;
   return `<h2 class="gtitle">${esc(c.title)}</h2>
     <div class="rg-hero"><span class="rg-fan big">${gifts.slice(0, 3).map(x => rgArt(x)).join("")}</span></div>
     <div id="rg-roul"></div><div id="rg-won"></div>
     <div class="btns" id="rg-btns">${rgBtnHTML(c)}</div>
-    <div class="sec-t">Подарки<span class="rg-sum">шанс на подарок ${rgPct(c.gift)}</span></div>
-    <div class="rg-list">${gifts.map(row).join("")}</div>
-    ${stars.length ? `<div class="sec-t">Звёзды</div><div class="rg-list">${stars.map(row).join("")}</div>` : ""}
-    <p class="hint">Подарки настоящие: выигранный можно вывести на свой аккаунт Telegram или продать игре за полную цену. Шансы считаются от текущих цен подарков; в среднем кейс возвращает призами ${RG.rtp}% своей цены.
+    <div class="sec-t">Что внутри</div>
+    <div class="rg-grid">${c.items.map(tile).join("")}</div>
+    <p class="hint">Подарки настоящие: выигранный можно вывести на свой аккаунт Telegram или продать игре за полную цену. Звёзды приходят сразу на баланс.
       ${c.nft ? "Коллекционный подарок покупается на рынке в момент вывода: модель и фон будут как у самого доступного предложения. " : ""}Вывести можно подарков на сумму до ${RG.limitK}% от твоих покупок${RG.left ? ` — сейчас это ${rgUsd(RG.left)}` : ""}.</p>`;
 }
 async function rgOpenCase(id) {
@@ -163,6 +143,43 @@ function rgAfter(id, text) {
   rgRepaint();
 }
 
+// ---------------- сумка: фильтр Telegram / CS и подарки из кейсов ----------------
+let INVK = "all";
+const rgIsCs = g => g.src === "cs";
+const _diRg = drawInventory;
+drawInventory = function () {
+  const p = MYP; if (!p) return _diRg();
+  const all = p.gifts, real = RG && RG.on ? RG.bag : [];
+  if (INVK !== "all") p.gifts = all.filter(g => rgIsCs(g) === (INVK === "cs"));
+  try { _diRg(); } finally { p.gifts = all; }
+  const v = $("#v-inv"); if (!v) return;
+  const cs = all.filter(rgIsCs).length, n = { all: all.length + real.length, tg: all.length - cs + real.length, cs };
+  const tabs = `<div class="ctabs rg-kind">${[["all", "Все"], ["tg", "Telegram"], ["cs", "CS"]].map(([k, t]) => `<button data-act="rg-kind" data-v="${k}" class="${INVK === k ? "on" : ""}">${t}<em>${n[k]}</em></button>`).join("")}</div>`;
+  const mine = INVK !== "cs" && real.length ? `<div class="rg-inv"><div class="sec-t">Из кейсов<span class="rg-sum">${RG.limit || RG.held ? "можно вывести на " + rgUsd(RG.left) : "вывод после первой покупки"}</span></div>
+    <div class="rg-grid">${real.map(x => `<button class="rg-cell k-${x.kind}${x.status !== "bag" ? " busy" : ""}" data-act="rg-item" data-id="${x.id}">${rgArt(x)}<b>${esc(x.title)}</b><small>${x.status !== "bag" ? "отправляется" : "⭐ " + short(x.value)}</small></button>`).join("")}</div></div>` : "";
+  const adm = ME && ME.admin && RG && RG.on ? `<button class="rg-more rg-admbtn" data-act="rg-open">Админ: цены, балансы и заявки на вывод</button>` : "";
+  const seg = v.querySelector(".seg"), tool = v.querySelector(".itool");
+  if (seg) seg.insertAdjacentHTML("afterend", tabs + (tool ? mine + adm : "")); else v.insertAdjacentHTML("afterbegin", tabs + mine + adm);
+};
+const _riRg = renderInventory;
+renderInventory = async function () {
+  if (!RG) await rgLoad().catch(() => {});
+  return _riRg.apply(this, arguments);
+};
+ACT["rg-kind"] = el => { INVK = el.dataset.v; H.sel(); drawInventory(); };
+// карточка подарка из кейса: вывести в Telegram или продать — как у скина CS
+ACT["rg-item"] = el => {
+  const x = RG && RG.bag.find(i => i.id === +el.dataset.id); if (!x) return;
+  H.imp("light");
+  const busy = x.status !== "bag", usd = rgCost(x), can = RG.left + 1e-9 >= usd;
+  openSheet(`<h2 class="gtitle">Подарок</h2>
+    <div class="rg-won">${rgArt(x, "big")}<b>${esc(x.title)}</b><small>⭐ ${fmt(x.value)} · ${rgUsd(usd)}</small>
+      <p>${busy ? esc(x.text) : "Настоящий подарок Telegram. Выведи его на свой аккаунт или продай игре за полную цену."}</p></div>
+    ${busy ? "" : `<div class="btns rg-col"><button class="btn cta" data-act="rg-out" data-id="${x.id}">Вывести в Telegram</button><button class="btn ghost" data-act="rg-sell" data-id="${x.id}">Продать за ⭐ ${fmt(x.value)}</button></div>
+    <p class="hint">${!RG.limit && !RG.held ? `Вывод откроется после первой покупки звёзд: вывести можно подарков на сумму до ${RG.limitK}% от покупок.`
+      : can ? `Лимит вывода: осталось ${rgUsd(RG.left)}.` : `Лимит вывода: осталось ${rgUsd(RG.left)}, а подарок стоит ${rgUsd(usd)}. Лимит растёт с покупками.`}${x.kind === "nft" ? " Модель и фон будут как у самого доступного предложения на рынке." : ""}</p>`}`, "rg-s rg-item-s");
+};
+
 // ---------------- админ ----------------
 const rgAge = s => s == null ? "нет данных" : s < 90 ? "только что" : s < 5400 ? Math.round(s / 60) + " мин назад" : Math.round(s / 3600) + " ч назад";
 function rgAdmHTML() {
@@ -184,28 +201,31 @@ function rgAdmHTML() {
 function rgAdmPaint() { const e = document.getElementById("rg-adm"); if (e) e.innerHTML = rgAdmHTML(); }
 
 Object.assign(ACT, {
-  "rg-open": async () => {
+  "rg-bag": () => { INVK = "all"; closeSheet(); setTab("inv"); },
+  "rg-open": async () => {   // состояние цен, балансы и заявки — для админа
+    if (!ME || !ME.admin) return ACT["rg-bag"]();
     H.imp("light");
-    openSheet(`<h2 class="gtitle">Мои подарки</h2><div id="rg-body"><div class="hint" style="padding:18px;text-align:center">Загрузка…</div></div>`, "rg-s");
-    await rgLoad(); rgRepaint();
+    openSheet(`<h2 class="gtitle">Подарки: состояние</h2><div id="rg-body"><div class="hint" style="padding:18px;text-align:center">Загрузка…</div></div>`, "rg-s");
+    [RG, RG_ADM] = await Promise.all([api("realgifts"), api("admin/realgifts")]); rgRepaint();
   },
   "rg-spin": el => rgSpin(el),
   "rg-sell": async el => {
     if (RG_BUSY) return; RG_BUSY = true; el.disabled = true;
-    try { const id = +el.dataset.id, r = await post(`realgifts/item/${id}/sell`); RG = r; setStars(r.stars); H.ok(); toast(`Продано за ⭐ ${fmt(r.paid)}`, "ok"); rgAfter(id, "Продан игре — звёзды уже на балансе."); }
+    try { const id = +el.dataset.id, r = await post(`realgifts/item/${id}/sell`); RG = r; setStars(r.stars); H.ok(); toast(`Продано за ⭐ ${fmt(r.paid)}`, "ok"); if (el.closest(".rg-item-s")) closeSheet(); rgAfter(id, "Продан игре — звёзды уже на балансе."); }
     catch (e) { el.disabled = false; } finally { RG_BUSY = false; }
   },
   "rg-out": async el => {
     if (RG_BUSY) return;
-    if (!el.dataset.sure) { el.dataset.sure = 1; el.textContent = "Точно вывести?"; setTimeout(() => { if (el.isConnected && el.dataset.sure) { delete el.dataset.sure; el.textContent = "Вывести"; } }, 4000); return; }
+    if (!el.dataset.sure) { const was = el.textContent; el.dataset.sure = 1; el.textContent = "Точно вывести?"; setTimeout(() => { if (el.isConnected && el.dataset.sure) { delete el.dataset.sure; el.textContent = was; } }, 4000); return; }
     RG_BUSY = true; el.disabled = true; el.textContent = "Отправляем…";
     const id = +el.dataset.id;
     try {
       RG = await post(`realgifts/item/${id}/withdraw`, {}, { timeout: 90000 });
       const x = RG.bag.find(i => i.id === id);
       H.ok(); toast(x ? "Заявка принята — проверим и отправим" : "Подарок отправлен — смотри в профиле Telegram", "ok");
+      if (el.closest(".rg-item-s")) closeSheet();
       rgAfter(id, x ? "Отправка проверяется вручную — обычно до суток." : "Отправлен на твой аккаунт Telegram.");
-    } catch (e) { delete el.dataset.sure; el.disabled = false; el.textContent = "Вывести"; rgLoad().then(rgRepaint).catch(() => {}); }
+    } catch (e) { delete el.dataset.sure; el.disabled = false; el.textContent = el.closest(".rg-item-s") ? "Вывести в Telegram" : "Вывести"; rgLoad().then(rgRepaint).catch(() => {}); }
     finally { RG_BUSY = false; }
   },
   "rg-adm": async () => { RG_ADM = await api("admin/realgifts"); rgAdmPaint(); },
@@ -245,5 +265,5 @@ ACT["cp-buy"] = async el => {
 if (typeof i18nAdd === "function" && typeof LANG === "string" && LANG === "en") i18nAdd({
   "Подарок можно продать, улучшить или выставить на маркет.": "You can sell this gift, upgrade it or list it on the market.",
   "Залетай открывать кейсы с подарками Telegram": "Come open cases with Telegram gifts",
-  "Мои подарки": "My gifts", "вывод и продажа": "withdraw and sell",
+  "Вывод": "Withdraw", "подарки и скины": "gifts and skins",
 });

@@ -102,7 +102,7 @@ openCase = function (id) {
     if (grid) {
       grid.insertAdjacentHTML("beforebegin", `<div class="ru-tiers">${tiers.map((t, i) => `<span class="rt-${i}"><b>${String(Math.round(share(t) * 10) / 10).replace(".", ",")}%</b>${esc(t)}</span>`).join("")}</div>`);
       grid.innerHTML = [...c.gifts].sort((a, b) => b.ev - a.ev).map(g => `<div class="gcell item rt-${tiers.indexOf(g.tier)}">${giftHTML(g, { plain: true, lite: true })}
-        <span class="chance">${g.p < 1 ? g.p.toFixed(2) : g.p.toFixed(1)}%</span><div class="rbar"></div>
+        <div class="rbar"></div>
         <div class="cap">${esc(g.col)}<br><small>${esc(g.model)} · ⭐ ${short(g.ev)}</small></div></div>`).join("");
     }
     if (!c.price) { const cp = el.querySelector(".cprice"); if (cp) cp.textContent = "Бесплатно · раз в " + (c.freeEvery >= 3600 ? Math.round(c.freeEvery / 3600) + " ч" : Math.max(1, Math.round((c.freeEvery || 60) / 60)) + " мин"); }

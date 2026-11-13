@@ -417,7 +417,7 @@ async function renderCases() {
     <div class="promo">
       <button data-act="case" data-id="free" class="${ME.freeIn ? "" : "ready"}"><span class="pic g">${ic("gift")}</span><div><b>Бесплатный</b><span id="free-t">${ME.freeIn ? "через " + clock(ME.freeIn) : "можно открыть!"}</span></div></button>
       <button data-act="daily" class="${ME.dailyIn ? "" : "ready"}"><span class="pic y">${ic("calendar")}</span><div><b>Бонус дня</b><span>${ME.dailyIn ? "через " + clock(ME.dailyIn) : "забери звёзды"}</span></div></button>
-      <button data-act="rg-open"><span class="pic b">${ic("gift")}</span><div><b>Мои подарки</b><span>вывод и продажа</span></div></button>
+      <button data-act="rg-bag"><span class="pic b">${ic("send")}</span><div><b>Вывод</b><span>подарки и скины</span></div></button>
     </div>
     <div class="sec-t">Кейсы</div>
     <div class="cases">${CASES.filter(c => c.id !== "free").sort((a, b) => a.price - b.price).map((c, ci) => {
@@ -460,9 +460,9 @@ function openCase(id) {
     <div class="sec-t">Что внутри</div>
     <div class="ggrid">${c.items.map(it => { const t = valTier({ value: it.ev }, ref);
       return `<div class="gcell item r-${t}">${giftHTML({ col: it.col, symbol: it.symbol, c: it.c, mp: 99 }, { img: A.orig(it.col), plain: true })}
-      <span class="chance">${it.p < 1 ? it.p.toFixed(2) : it.p.toFixed(1)}%</span><div class="rbar b-${t}"></div>
+      <div class="rbar b-${t}"></div>
       <div class="cap">${esc(it.col)}<br><small>~⭐ ${short(it.ev)}</small></div></div>`; }).join("")}</div>
-    <div class="disc">Шансы честные и считаются на сервере. Из платного кейса не выпадает подарок дешевле ~40% его цены. ${esc(ME.disclaimer)}</div>`);
+    <div class="disc">${esc(ME.disclaimer)}</div>`);
   el._case = c; el._ref = ref;
 }
 const openBtn = (c, again) => c.keys ? `<button class="btn cta gold" data-act="open-case" data-id="${c.id}">${ic("lock")}Открыть ключом · ${c.keys} шт.</button>` : `<button class="btn cta gold" data-act="open-case" data-id="${c.id}">${!c.price ? "Открыть бесплатно" : again ? `Ещё${OPEN.n > 1 ? " x" + OPEN.n : ""} · ⭐ ${short(c.price * OPEN.n)}` : `Открыть${OPEN.n > 1 ? " x" + OPEN.n : ""} за ⭐ ${fmt(c.price * OPEN.n)}`}</button>`;

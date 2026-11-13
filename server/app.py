@@ -1000,7 +1000,7 @@ def _ru_gifts(cid):
         for x in E.ru_items(cid):
             bl = LOOK[x["col"]][1]
             b = bl.get(x["backdrop"]) or BACKDROPS.get(x["backdrop"])
-            out.append({**x, "p": round(x["p"], 4), "c": b[2:6], "mp": LOOK[x["col"]][0].get(x["model"], 0)})
+            out.append({**{k: v for k, v in x.items() if k != "p"}, "c": b[2:6], "mp": LOOK[x["col"]][0].get(x["model"], 0)})
         _RU_GIFTS[cid] = out
     return _RU_GIFTS[cid]
 
@@ -1026,7 +1026,7 @@ def cases(uid=Depends(auth)):
         top = max(odds, key=lambda x: E.base(x))
         items = []
         for k, v in odds.items():
-            items.append({"col": k, "p": round(v * 100, 3 if v >= 0.00001 else 8), "base": E.base(k), "ev": round(c["evs"][k]), **look_of(k, "shop")})
+            items.append({"col": k, "base": E.base(k), "ev": round(c["evs"][k]), **look_of(k, "shop")})   # шансы наружу не отдаём
         items.sort(key=lambda x: -x["ev"])
         out.append({"id": c["id"], "title": E.case_title(c["id"], uid), "price": case_price(c), "full": c["price"], "keys": keys.get(c["id"], 0),
                     "level": c["level"], "cover": E.case_cover(c["id"], uid), **_case_limit(c["id"]), "real": c["id"] in real,

@@ -63,6 +63,23 @@
 .rg-row small{font-size:12px;color:var(--mu)}
 .rg-row em{flex:none;font-style:normal;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
 
+.rg-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rg-cell{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 6px 10px;border-radius:18px;background:var(--sf);text-align:center;min-width:0}
+.rg-cell .rg-art{width:72%;height:auto;aspect-ratio:1;margin-bottom:4px}
+.rg-cell .rg-art i{font-size:44px}
+.rg-cell b{width:100%;font-size:11.5px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em}
+.rg-cell small{font-size:11.5px;font-weight:600;color:var(--yl);white-space:nowrap}
+button.rg-cell{border:0;color:var(--tx);font-family:var(--body)}
+.rg-cell.busy{opacity:.6}
+.rg-kind{margin:12px 0!important}
+.btns.rg-col{flex-direction:column}
+.btns.rg-col .btn{width:100%;white-space:nowrap}
+.rg-admbtn{display:block;width:100%;margin:0 0 14px;padding:11px 14px;text-align:center}
+.rg-inv .rg-sum{margin-left:auto}
+.rg-inv{margin-bottom:14px}
+.rg-inv .sec-t{justify-content:space-between}
+.rg-cell.k-nft{background:radial-gradient(90% 70% at 50% 28%,rgba(124,107,255,.30),transparent 75%),var(--sf)}
+.rg-cell.k-star{background:radial-gradient(90% 70% at 50% 28%,rgba(255,200,60,.14),transparent 75%),var(--sf)}
 .rg-tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0 8px;border-radius:16px;background:var(--sf)}
 .rg-tile .rg-art{width:72px;height:72px}.rg-tile .rg-art i{font-size:48px}
 .rg-tile small{font-size:11.5px;font-weight:600;color:var(--yl)}
