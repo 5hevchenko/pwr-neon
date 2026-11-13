@@ -166,7 +166,7 @@ function valTier(g, ref) {
 }
 function giftHTML(g, o = {}) {
   const [c1, c2, c3, c4] = g.c, pat = A.pat(g.col, g.symbol), t = tier(g);
-  let h = `<div class="gift${o.big ? " big" : ""}${t === "gold" && !o.plain ? " shine" : ""}" style="--c1:${c1};--c2:${c2};--c3:${c3};--c4:${c4}">`;
+  let h = `<div class="gift${o.big ? " big" : ""}${t === "gold" && !o.plain ? " shine" : ""}${!o.plain && (t === "gold" || t === "pink") ? " rb" : ""}" style="--c1:${c1};--c2:${c2};--c3:${c3};--c4:${c4}">`;
   for (const [x, y, s, a] of (o.lite ? PAT.slice(0, 16) : PAT))
     h += `<i style="left:${x}%;top:${y}%;width:${s}%;height:${s}%;opacity:${a};-webkit-mask-image:url('${pat}');mask-image:url('${pat}')"></i>`;
   h += `<img src="${o.img || A.model(g.col, g.model, o.big ? 512 : 256)}"${o.eager ? "" : ' loading="lazy"'} alt="">`;

@@ -168,6 +168,9 @@ html .ghub .gcard .gfav,html .ghub .gcard.gl .gfav{inset:8px 8px auto auto!impor
   font:700 8.5px/1 var(--body)!important;color:#fff!important;white-space:nowrap;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:2}
 .gift .rib.t-gold{background:#c98a12!important}
 .gift .rib.t-pink{background:#d83a8c!important}
+/* под плашкой редкости картинка чуть ниже и меньше, чтобы плашка её не закрывала */
+.gift.rb>img{top:calc(46% + 8px)!important;width:56%!important;height:56%!important}
+.gift.rb .lt{top:calc(46% + 8px)!important;width:60%!important;height:60%!important}
 
 /* ряды-баннеры в «Играх»: текст растягивается, таймер и стрелка всегда у правого края, стрелки одного размера и на одной линии */
 .gd-bar .grow{flex:1 1 0!important;min-width:0}
