@@ -32,7 +32,7 @@ Telegram Mini App: кейсы подарков, скины CS и тир-кейс
 | `PWR_CHANNEL` | `@канал` для задания «Подпишись»; бот должен быть админом канала | нет |
 | `ADSGRAM_BLOCK` | ID блока Rewarded в Adsgram | нет |
 | `ADS_SECRET` | любая длинная случайная строка; в Adsgram в Reward URL: `https://<домен>/np/api/pwr/ads/reward?userid=[userId]&secret=<ADS_SECRET>` | нет |
-| `MARKET_KEY` | API-ключ market.csgo.com (аккаунт площадки в USD, на балансе деньги; бот пишет админам, когда баланс ниже `withdraw.low_usd`) | нет, без него вывод выключен |
+| `MARKET_KEY` | API-ключ market.csgo.com (аккаунт площадки в USD или RUB, на балансе деньги; бот пишет админам, когда баланс ниже `withdraw.low_usd`) | нет, без него вывод выключен |
 | `TONNEL_AUTH` | сессия площадки Tonnel для покупки коллекционных подарков: строка `web-initData` из хранилища сайта market.tonnel.network (на балансе площадки должен быть TON) | нет, без неё в кейсах только обычные подарки |
 | `TONNEL_PROXY` | прокси для запросов к Tonnel, `http://логин:пароль@адрес:порт`. С адреса Railway площадка не отвечает (блокировка Cloudflare), поэтому для коллекционных подарков прокси обязателен | нет |
 | `CRYPTOPAY_TOKEN` | токен приложения Crypto Pay: @CryptoBot → Crypto Pay → Create App | нет, без него пополнение криптой скрыто |

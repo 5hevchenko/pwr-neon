@@ -2,8 +2,9 @@
 
 Как в оригинале:
   · игрок сохраняет трейд-ссылку Steam (…/tradeoffer/new/?partner=…&token=…);
-  · заявка: ищем предмет на площадке по торговому имени (search-item-by-hash-name), берём самую низкую цену (в тысячных доллара:
-    аккаунт площадки должен быть в USD, иначе вывод останавливается);
+  · заявка: ищем предмет на площадке по торговому имени (search-item-by-hash-name), берём самую низкую цену. Площадка отдаёт её
+    в валюте своего аккаунта: в долларах $1 = 1000, в рублях 1 ₽ = 100. Игра считает в долларах, рубли пересчитываются
+    по курсу ЦБ (_rub_rate; без свежего курса рублёвый вывод встаёт на паузу). Другая валюта аккаунта — вывод остановлен;
     если она выше нашей цены скина в PRICE_CAP раз (в оригинале ×3) — отказ, скин остаётся у игрока;
   · покупаем предмет сразу на трейд-ссылку игрока (buy-for, chance_to_transfer=40, custom_id — номер заявки);
   · раз в минуту спрашиваем этап (get-buy-info-by-custom-id): 1 — куплен, обмен отправляется игроку (как только площадка
@@ -41,7 +42,14 @@ HOLD_H = conf("withdraw.hold_hours", 24)         # свежая оплата и�
 EXTRA_USED = []                                  # другие виды вывода в том же лимите: функции uid → $ (настоящие подарки — realgifts.py)
 PRICE_CAP = conf("withdraw.price_cap", 3.0)      # цена на площадке не выше нашей × это число (как в оригинале)
 RECHECK_H = conf("withdraw.recheck_hours", 6)     # как часто перепроверять уже переданные скины, пока обмен можно откатить
-LOW_USD = conf("withdraw.low_usd", 10.0)         # баланс площадки ниже этого — сообщение админам
+LOW_USD = conf("withdraw.low_usd", 10.0)         # баланс площадки ниже этого (в пересчёте на $) — сообщение админам
+RUB_FIX = conf("withdraw.rub_per_usd", 0)        # курс ₽ за $ вручную; 0 — брать сам (ЦБ, запасные источники)
+FX_AGE = 48 * 3600                               # курс старше этого не годится: рублёвый вывод на паузе
+# источники курса ₽ за $ и где в ответе лежит число. FX_URL — только для тестов
+FX = [(os.environ["FX_URL"], ("Valute", "USD", "Value"))] if os.environ.get("FX_URL") else [
+    ("https://www.cbr-xml-daily.ru/daily_json.js", ("Valute", "USD", "Value")),
+    ("https://open.er-api.com/v6/latest/USD", ("rates", "RUB")),
+    ("https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=rub", ("tether", "rub"))]
 CHECK_EVERY = int(os.environ.get("MARKET_CHECK", "60"))
 RECHECK = int(os.environ.get("MARKET_RECHECK", str(int(RECHECK_H * 3600))))   # MARKET_RECHECK — только для тестов
 LINK_RE = re.compile(r"^https://steamcommunity\.com/tradeoffer/new/?\?partner=(\d+)&token=([A-Za-z0-9_-]+)$")
@@ -68,6 +76,54 @@ for _sql in ("ALTER TABLE users ADD COLUMN trade_link TEXT", "ALTER TABLE withdr
 
 def enabled():
     return bool(ON and KEY)
+
+
+_FX = {"rate": 0.0, "ts": 0, "try": 0}
+try:
+    _FX["rate"], _FX["ts"] = [float(x) for x in (A.kv_get("rub_usd") or "0 0").split()]
+except Exception:
+    pass
+
+
+def _rate():
+    """Курс ₽ за $ из памяти; 0 — годного курса нет."""
+    if RUB_FIX:
+        return float(RUB_FIX)
+    return _FX["rate"] if now() - _FX["ts"] < FX_AGE else 0.0
+
+
+async def _rub_rate():
+    """Курс ₽ за $: обновляется раз в час, хранится в базе (переживает перезапуск)."""
+    if RUB_FIX:
+        return float(RUB_FIX)
+    if now() - _FX["ts"] < 3600 or now() - _FX["try"] < 60:
+        return _rate()
+    _FX["try"] = now()
+    for url, path in FX:
+        try:
+            v = (await A.http.get(url, timeout=15)).json()
+            for k in path:
+                v = v[k]
+            v = float(v)
+        except Exception:
+            continue
+        old = _FX["rate"]
+        if not 20 < v < 500 or (old and not 0.7 < v / old < 1.4 and now() - _FX["ts"] < FX_AGE):
+            continue   # не похоже на курс рубля или скачок на десятки процентов за час — такому источнику не верим
+        _FX["rate"], _FX["ts"] = v, now()
+        with tx():
+            db.execute("INSERT OR REPLACE INTO kv(k,v) VALUES('rub_usd',?)", (f"{v} {now()}",))
+        break
+    return _rate()
+
+
+async def _units(cur):
+    """Сколько единиц цены площадки в одном долларе для валюты аккаунта; 0 — в этой валюте работать нельзя."""
+    if cur == "USD":
+        return 1000.0
+    if cur == "RUB":
+        return 100.0 * await _rub_rate()
+    return 0.0
 
 
 def gift_usd(g):
@@ -201,24 +257,30 @@ async def withdraw(gid: int, uid=Depends(auth)):
     except Exception as e:
         fail("Площадка не отвечает — попробуй позже", type(e).__name__)
     cur = str((found or {}).get("currency") or "USD").upper()
-    if cur != "USD":   # цены считаем в тысячных доллара; у аккаунта в рублях или евро единицы другие — покупать нельзя
-        _alert("cur", f"Вывод скинов остановлен: аккаунт площадки в валюте {A.esc(cur)}, а игра считает в долларах. Переключи валюту аккаунта market.csgo.com на USD.")
+    try:
+        unit = await _units(cur)   # единиц цены площадки в одном долларе
+    except Exception:
+        unit = 0.0
+    if not unit:
+        _alert("cur", "Вывод скинов остановлен: не удалось получить курс рубля." if cur == "RUB" else
+               f"Вывод скинов остановлен: аккаунт площадки в валюте {A.esc(cur)}, игра умеет работать с USD и RUB.")
         fail("Вывод скинов временно недоступен — попробуй позже", f"currency {cur}")
     items = [x for x in (found or {}).get("data") or [] if int(x.get("count", 1) or 0) > 0 and x.get("price")]
     if not items:
         fail("Этого скина сейчас нет на площадке — попробуй позже", "no item")
-    price = min(int(x["price"]) for x in items)   # в тысячных доллара; список площадка не обязана отдавать по возрастанию
-    if price / 1000 > usd * PRICE_CAP:
-        fail("Скин сейчас слишком дорог на площадке — попробуй позже", f"market {price / 1000} > {usd}×{PRICE_CAP}")
-    if price / 1000 > usd and used + price / 1000 > limit + 1e-9:
-        fail(f"На площадке скин сейчас стоит ${price / 1000:.2f} — это больше остатка лимита ${max(0, limit - used):.2f}", "limit by market price")
+    price = min(int(x["price"]) for x in items)   # в единицах площадки; список она не обязана отдавать по возрастанию
+    cost = round(price / unit, 3)                 # то же в долларах
+    if cost > usd * PRICE_CAP:
+        fail("Скин сейчас слишком дорог на площадке — попробуй позже", f"market {cost} > {usd}×{PRICE_CAP}")
+    if cost > usd and used + cost > limit + 1e-9:
+        fail(f"На площадке скин сейчас стоит ${cost:.2f} — это больше остатка лимита ${max(0, limit - used):.2f}", "limit by market price")
     try:
         order = await _market("buy-for", hash_name=mh, price=price, partner=m.group(1), token=m.group(2), chance_to_transfer=40, custom_id=wid)
     except Exception:
         order = None
     if order is None:   # ответа нет — не знаем, прошла ли покупка: скин не возвращаем, заявка ждёт проверки этапа
         with tx():
-            db.execute("UPDATE withdraws SET market_usd=?, upd=? WHERE id=?", (price / 1000, now(), wid))
+            db.execute("UPDATE withdraws SET market_usd=?, upd=? WHERE id=?", (cost, now(), wid))
         return state(uid)
     if not order.get("success") or order.get("error"):
         code = order.get("code")
@@ -227,7 +289,7 @@ async def withdraw(gid: int, uid=Depends(auth)):
             _alert("buy", f"Площадка отказала в покупке скина {A.esc(mh)}: {A.esc(why[:200])}")
         fail(CODES.get(code, "Не удалось отправить скин — попробуй позже"), why)
     with tx():
-        db.execute("UPDATE withdraws SET stage='1', market_usd=?, upd=? WHERE id=?", (price / 1000, now(), wid))
+        db.execute("UPDATE withdraws SET stage='1', market_usd=?, upd=? WHERE id=?", (cost, now(), wid))
     return state(uid)
 
 
@@ -237,7 +299,8 @@ def _paid(d, w):
         paid = float(d.get("paid") or 0)
     except (TypeError, ValueError):
         return w["market_usd"]
-    return round(paid, 3) if paid > 0 and str(d.get("currency") or "USD").upper() == "USD" else w["market_usd"]
+    k = {"USD": 1.0, "RUB": _rate()}.get(str(d.get("currency") or "USD").upper(), 0)   # paid — в валюте аккаунта, не в единицах цены
+    return round(paid / k, 3) if paid > 0 and k else w["market_usd"]
 
 
 async def check_once():
@@ -304,10 +367,15 @@ async def balance_check():
     if not r or not r.get("success"):
         return
     cur = str(r.get("currency") or "").upper()
-    if cur != "USD":
-        _alert("cur", f"Вывод скинов остановлен: аккаунт площадки в валюте {A.esc(cur)}, а игра считает в долларах. Переключи валюту аккаунта market.csgo.com на USD.", 12 * 3600)
-    elif float(r.get("money") or 0) < LOW_USD:
-        _alert("low", f"На площадке скинов осталось ${float(r.get('money') or 0):.2f}. Пополни баланс market.csgo.com, иначе выводы скинов начнут срываться.", 12 * 3600)
+    money = float(r.get("money") or 0)
+    k = 1.0 if cur == "USD" else await _rub_rate() if cur == "RUB" else 0
+    if cur not in ("USD", "RUB"):
+        _alert("cur", f"Вывод скинов остановлен: аккаунт площадки в валюте {A.esc(cur)}, игра умеет работать с USD и RUB.", 12 * 3600)
+    elif not k:
+        _alert("cur", "Вывод скинов остановлен: не удалось получить курс рубля.", 3 * 3600)
+    elif money / k < LOW_USD:
+        have = f"{money:.0f} ₽ (≈ ${money / k:.2f})" if cur == "RUB" else f"${money:.2f}"
+        _alert("low", f"На площадке скинов осталось {have}. Пополни баланс market.csgo.com, иначе выводы скинов начнут срываться.", 12 * 3600)
 
 
 async def loop():
