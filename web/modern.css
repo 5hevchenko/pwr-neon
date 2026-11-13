@@ -168,3 +168,14 @@ html .ghub .gcard .gfav,html .ghub .gcard.gl .gfav{inset:8px 8px auto auto!impor
   font:700 8.5px/1 var(--body)!important;color:#fff!important;white-space:nowrap;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:2}
 .gift .rib.t-gold{background:#c98a12!important}
 .gift .rib.t-pink{background:#d83a8c!important}
+
+/* ряды-баннеры в «Играх»: текст растягивается, таймер и стрелка всегда у правого края, стрелки одного размера и на одной линии */
+.gd-bar .grow{flex:1 1 0!important;min-width:0}
+.gd-bar,.bankbar,.fbanner{padding-right:14px!important}
+.gd-bar>svg,.gd-bar>.ic,.bankbar>.ic,.fbanner>.ic{flex:none!important;width:18px!important;height:18px!important;margin:0 0 0 auto!important;opacity:.6}
+/* арт игры нарисован значком на чёрном поле: чуть увеличиваем, чтобы чёрные углы ушли под скругление плитки */
+.gd-art{overflow:hidden}
+.gd-art img[src*="gen/"]{width:100%!important;height:100%!important;object-fit:cover!important;filter:none!important;transform:scale(1.14)}
+.gcard .gl-art img[src*="gen/"]{transform:scale(1.14)!important}
+/* витрина банка: кнопка покупки — ровная плашка с ценой одной ширины, название подарка не обрезается */
+html .mk2-info .btn,html .mk2-info .btn.gold{background:linear-gradient(135deg,#3ce7ff,#7c6bff)!important;clip-path:none!important;width:104px!important;height:36px;padding:0 8px!important;font-size:13.5px!important;justify-content:center;gap:5px;border-radius:12px!important;box-shadow:none!important;filter:none!important}

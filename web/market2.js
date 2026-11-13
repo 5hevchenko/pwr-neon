@@ -37,7 +37,7 @@ function mkShopPaint() {
       <div class="mk2-g">${giftHTML(g, { lite: true })}${g.sold ? `<span class="mk2-sold">Продано</span>` : ""}</div>
       <div class="mk2-info"><b>${esc(g.col)}</b><span>${esc(g.model)} · ${pct(g.mp)}</span>
         <div class="mk2-meta"><span>ценность ⭐ ${short(g.value)}</span><span class="tw">+⭐ ${short(Math.round(giftPerHour(g) * 24))}/день</span></div>
-        <button class="btn sm gold" data-act="mk2-buy" data-id="${g.id}" ${g.sold ? "disabled" : ""}>${g.sold ? "Продано" : `Купить · ⭐ ${short(g.price)}`}</button></div></div>`;
+        <button class="btn sm gold" data-act="mk2-buy" data-id="${g.id}" ${g.sold ? "disabled" : ""}>${g.sold ? "Продано" : `⭐ ${short(g.price)}`}</button></div></div>`;
   box.innerHTML = `<div class="mk2-hero shop"><div><b>Витрина банка</b><span>Конкретные подарки — без рулетки. Бери нужную модель для сета, витрины или дохода.</span></div>
       <div class="mk2-timer"><span>обновится через</span><b id="mk2-left">${mkLeft(MKS.refresh - MKS.now)}</b></div></div>
     ${jack ? card(jack, true) : ""}
