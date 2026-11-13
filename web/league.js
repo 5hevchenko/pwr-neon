@@ -45,7 +45,7 @@ renderTop = async function () {
   } else {
     const row = (r, i) => `<div class="row tap lg-row${r.id === ME.id ? " me" : ""}${i < d.up ? " up" : ""}${d.down && i >= n - d.down ? " down" : ""}" data-act="profile" data-id="${r.id}">
       <span class="lg-pl${i < 3 ? " m" + (i + 1) : ""}">${i + 1}</span>${avaHTML(r, 34)}<div class="grow"><div class="t">${nameHTML(r)}${r.id === ME.id ? " <span class='pill'>ты</span>" : ""}</div></div>
-      <b class="num">${fmt(r.pts)}<small> очк.</small></b></div>`;
+      <b class="num">${num(r.pts)}<small> очк.</small></b></div>`;
     let rows = "";
     d.rows.forEach((r, i) => {
       if (i === 0 && d.up) rows += `<div class="lg-zone up">${ic("trend")}Зона повышения · топ-${d.up} → ${d.tiers[Math.min(t + 1, 5)]}</div>`;
@@ -56,7 +56,7 @@ renderTop = async function () {
     h += `<div class="box lg-list">${rows}</div>`;
   }
   h += `<details class="rules" style="margin-top:12px"><summary>${ic("award")}Как работают лиги</summary><div>Лиг шесть: ${d.tiers.join(" → ")}. Каждую неделю игроки одной лиги делятся на группы до 30 человек — попадаешь в группу, как только сыграл в любую игру.
-    Очки — как в сезоне: оборот в играх, но с одной ставки засчитывается не больше ⭐ 10 000 (1 очко за ⭐ 100), так что решает активность, а не одна огромная ставка.
+    Очки — как в сезоне: оборот в играх, но с одной ставки засчитывается не больше ⭐ 10 (1 очко за ⭐ 0,1), так что решает активность, а не одна огромная ставка.
     В понедельник в 03:00 по Москве итоги: верх группы поднимается в лигу выше, низ опускается, топ-3 получают звёзды — в старших лигах больше, а все призы умножаются на курс банка (банк растёт — призы больше). Не играл неделю — остаёшься в своей лиге.</div></details>`;
   $("#lg-body").innerHTML = h;
   starify($("#lg-body"));
@@ -69,7 +69,7 @@ function lgResult(r, tiers) {
       <span class="lg-rk">Итоги недели</span>
       <div class="lg-rem">${up || down ? `<div class="old">${lgEmblem(r.tier, "ro")}</div>${ic(up ? "trend" : "chev")}` : ""}<div class="new">${lgEmblem(r.newtier, "rn")}</div></div>
       <b class="lg-rt">${up ? `Повышение: ${tiers[r.newtier]}!` : down ? `Вылет: ${tiers[r.newtier]}` : `Остаёшься: ${tiers[r.newtier]}`}</b>
-      <p>${r.place} место из ${r.size} в лиге «${tiers[r.tier]}» · ${fmt(r.pts)} очк.</p>
+      <p>${r.place} место из ${r.size} в лиге «${tiers[r.tier]}» · ${num(r.pts)} очк.</p>
       ${r.reward ? `<div class="lg-rw">+⭐ ${fmt(r.reward)}</div>` : ""}
       <button class="btn gold" data-act="lg-ok">${up ? "Вперёд" : "Понятно"}</button></div>`, "lg-rs");
   starify(el);

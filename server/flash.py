@@ -7,6 +7,7 @@
   забирали бы раздачу каждые 2 часа).
 Все числа — в админке («Ивенты»), kv 'flashcfg'. Бот предупреждает о начале не чаще раза в notify_gap часов одному игроку.
 """
+from settings import S
 import asyncio
 import json
 import random
@@ -95,9 +96,9 @@ def _plan_next(after):
 
 def describe(kind):
     if kind == "drop":
-        return f"Забери {nf(cfg('drop_amount'))} ⭐ — успеют первые {cfg('drop_max')} игроков (с {cfg('drop_level')} уровня)"
+        return f"Забери {S(cfg('drop_amount'))} ⭐ — успеют первые {cfg('drop_max')} игроков (с {cfg('drop_level')} уровня)"
     m = 3 if kind == "luck3" else 5
-    return f"Шанс «удачного момента» после раунда ×{m} — до 2 500 ⭐ сюрпризом. Можно поймать, даже если сегодня уже был"
+    return f"Шанс «удачного момента» после раунда ×{m} — до 2,5 ⭐ сюрпризом. Можно поймать, даже если сегодня уже был"
 
 
 def start(kind, by=0):

@@ -94,7 +94,7 @@ function offerCard() {
   if (!PREM || PREM.offer.bought || !inTg) return "";
   const o = PREM.offer;
   return `<button class="stc st-offer" data-act="qb-all"><span class="stc-i"><img src="${A.orig(o.case.cover, 64)}" alt=""></span><span class="stc-t"><b>Набор дня: ${short(o.stars)} ⭐ + ключ «${esc(o.case.title)}»</b>
-    <small>${fmt(o.xtr)} Telegram Stars · исчезнет через ${premLeft(o.ends)}</small></span>${ic("chev")}</button>`;
+    <small>${num(o.xtr)} Telegram Stars · исчезнет через ${premLeft(o.ends)}</small></span>${ic("chev")}</button>`;
 }
 // VIP: значок в профиле
 const _phPrem = profileHTML;

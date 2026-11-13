@@ -3,6 +3,7 @@
 Очки = сумма исходов раундов с потолком на раунд, поэтому богач не забирает всё одной ставкой, а кэшаут на x1,01 очков не даёт.
 Фонд растёт вместе с игрой и составляет 2,5% суммы исходов. При возврате 94% потеря игрока не меньше 3,1% исходов (на больших иксах),
 поэтому даже весь фонд, собранный твинками, дешевле самой игры: накрутка убыточна, банк в плюсе."""
+from settings import S
 import asyncio
 import hashlib
 import json
@@ -103,7 +104,7 @@ def _settle():
                 db.execute("UPDATE users SET stars=stars+? WHERE id=?", (prizes[i], s["user"]))
                 event(s["user"], "gameday", prizes[i])
                 res.append({"place": i + 1, "user": s["user"], "pts": pts, "prize": prizes[i]})
-                msgs.append((s["user"], f"Игра дня «{esc(r['title'])}»: ты на {i + 1} месте! Приз +{prizes[i]:,} ⭐".replace(",", " ")))
+                msgs.append((s["user"], f"Игра дня «{esc(r['title'])}»: ты на {i + 1} месте! Приз +{S(prizes[i])} ⭐"))
                 if i == 0:
                     db.execute("INSERT INTO gd_win(user,n) VALUES(?,1) ON CONFLICT(user) DO UPDATE SET n=n+1", (s["user"],))
                     u = q1("SELECT frame, frame_until FROM users WHERE id=?", s["user"])

@@ -189,13 +189,13 @@ const rgAge = s => s == null ? "нет данных" : s < 90 ? "только ч
 function rgAdmHTML() {
   const a = RG_ADM, row = (k, v) => `<div class="rg-kv"><span>${k}</span><b>${v}</b></div>`;
   return `<div class="rg-list">
-      ${row("Баланс бота", a.botStars == null ? "нет данных" : fmt(a.botStars) + " Telegram Stars")}
+      ${row("Баланс бота", a.botStars == null ? "нет данных" : num(a.botStars) + " Telegram Stars")}
       ${row("Обычные подарки в продаже", `${a.catalog} · ${rgAge(a.catalogAge)}`)}
       ${row("Цены коллекционных", a.feed.portals ? `Portals: ${a.feed.portals} · ${a.prices.length} в кейсах` : a.prices.length ? `${a.prices.length} (Tonnel)` : "нет: " + esc(a.feed.portals_err || a.feed.tonnel_err || "ждём первое обновление"))}
       ${row("Курс TON", a.ton ? `$${a.ton.toFixed(3)} · ${rgAge(a.tonAge)}` : "нет данных")}
       ${row("Выдача коллекционных", a.nftMode === "off" ? "выключена" : a.nftAuto ? `сервер покупает на Tonnel · баланс ${a.tonnelBal == null ? "?" : a.tonnelBal.toFixed(2)} TON` : "вручную: заявки приходят тебе" + (a.tonnelSession ? " (сессия Tonnel не принята)" : " (нет TONNEL_AUTH)"))}
       ${row("Кейсы", `${a.cases} работают` + (a.paused.length ? ` · на паузе: ${a.paused.map(p => esc(p.title) + " (" + esc(p.why) + ")").join(", ")}` : ""))}
-      ${row("Открыто кейсов", `${fmt(a.opened.n)} · оплачено ⭐ ${short(a.opened.paid)} · выпало ⭐ ${short(a.opened.value)}`)}
+      ${row("Открыто кейсов", `${num(a.opened.n)} · оплачено ⭐ ${short(a.opened.paid)} · выпало ⭐ ${short(a.opened.value)}`)}
       ${row("Выведено подарков", `${a.sent.n} на ${rgUsd(a.sent.usd)}`)}
     </div>
     ${a.pending.length ? `<div class="sec-t">Заявки на ручной проверке</div>${a.pending.map(p => `<div class="rg-it"><div class="rg-in"><b>№${p.id} · ${esc(p.title)} · ${rgUsd(p.usd)}</b><small>игрок ${p.user} · ${esc(p.note)}</small></div>

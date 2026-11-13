@@ -1,4 +1,5 @@
 """Розыгрыш банка: раз в сутки часть прибыли казино + купленные билеты разыгрываются между игроками."""
+from settings import S
 from settings import conf
 import asyncio
 import json
@@ -58,7 +59,7 @@ def _draw(day):
             winners.append({"user": u, "amount": amount, "tickets": t[u]})
         db.execute("INSERT INTO jp_draws VALUES(?,?,?,?)", (day, pool, json.dumps(winners), now()))
     for i, w in enumerate(winners):
-        notify(w["user"], f"🎉 Ты выиграл <b>{i + 1} место</b> в розыгрыше банка — +{w['amount']} ⭐ (игровых)!")
+        notify(w["user"], f"🎉 Ты выиграл <b>{i + 1} место</b> в розыгрыше банка — +{S(w['amount'])} ⭐ (игровых)!")
     return winners
 
 

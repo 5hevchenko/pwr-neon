@@ -1,6 +1,7 @@
 """Турниры: два турнира по разным играм, каждые PERIOD дней (с 2026-10-12 — раз в 3 дня, до этого были недельные).
 Счёт — чистый выигрыш в игре за турнир. Призовой фонд от банка казино, топ-5 делят по долям; итоги — автоматически
 в начале следующего. Ключ турнира (колонка week) — время его начала."""
+from settings import S
 from settings import conf
 import asyncio
 import json
@@ -74,7 +75,7 @@ def _settle():
                 event(r["user"], "tourn", prize)
                 u = q1("SELECT name FROM users WHERE id=?", r["user"])
                 res.append({"place": i + 1, "user": r["user"], "name": u["name"] if u else "?", "score": r["s"], "prize": prize})
-                msgs.append((r["user"], f"🏆 Турнир «{esc(NAMES[g])}»: ты на {i + 1} месте! Приз ⭐ {prize:,}".replace(",", " ")))
+                msgs.append((r["user"], f"🏆 Турнир «{esc(NAMES[g])}»: ты на {i + 1} месте! Приз ⭐ {S(prize)}"))
             db.execute("INSERT INTO tourn_results(week,game,result,ts) VALUES(?,?,?,?)", (prev, g, json.dumps(res, ensure_ascii=False), now()))
     for u, t in msgs:
         notify(u, t)

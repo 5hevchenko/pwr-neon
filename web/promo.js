@@ -27,7 +27,7 @@ renderCases = async function () {
     if ((c.id.endsWith("hunt") || c.id === "coin") && !el.querySelector(".hunttag")) {   // кейсы-охоты: шанс на топ-подарок прямо на карточке
       const top = c.items.find(x => x.col === c.cover);
       el.classList.add("hunt");
-      if (top) el.insertAdjacentHTML("beforeend", `<span class="hunttag">${ic("target")}${top.p < .1 ? "1 к " + fmt(Math.round(100 / top.p)) : String(top.p).replace(".", ",") + "%"}</span>`);
+      if (top) el.insertAdjacentHTML("beforeend", `<span class="hunttag">${ic("target")}${top.p < .1 ? "1 к " + num(Math.round(100 / top.p)) : String(top.p).replace(".", ",") + "%"}</span>`);
     }
     if (c.keys && !el.querySelector(".keytag")) el.insertAdjacentHTML("beforeend", `<span class="keytag">${ic("lock")}${c.keys}</span>`);
   });

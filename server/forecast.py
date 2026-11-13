@@ -8,6 +8,7 @@
 Линия фиксируется до приёма ставок: медиана прошлых полных суток, поэтому шансы сторон близки. Ставки закрываются до начала суток.
 Совпало с линией, нет соперника или сутки неполные из-за простоя: ставка возвращается без комиссии.
 """
+from settings import S
 import asyncio
 import statistics
 import time
@@ -146,10 +147,10 @@ def _settle(day):
         parts = [f"Прогноз дня за {_label(day)}:"]
         if r["n"]:
             total = f"{abs(r['delta']):,}".replace(",", " ")
-            parts.append(f"угадано {r['won']} из {r['n']}, итог {'+' if r['delta'] >= 0 else '−'}⭐ {total}.")
+            parts.append(f"угадано {r['won']} из {r['n']}, итог {'+' if r['delta'] >= 0 else '−'}⭐ {S(total)}.")
         if r["back"]:
             back = f"{r['back']:,}".replace(",", " ")
-            parts.append(f"Возврат ⭐ {back}: не нашлось соперника или итог совпал с линией.")
+            parts.append(f"Возврат ⭐ {S(back)}: не нашлось соперника или итог совпал с линией.")
         parts.append("Прогноз на новые сутки уже открыт.")
         notify(u, " ".join(parts))
 
@@ -215,7 +216,7 @@ async def fc_bet(req: Request, uid=Depends(auth)):
             err("на этот рынок ты уже поставил другой исход")
         mine = q1("SELECT COALESCE(SUM(amount),0) s FROM fc_bet WHERE day=? AND key=? AND user=?", day, key, uid)["s"]
         if mine + amount > MAX_BET:
-            err(f"на один рынок не больше ⭐ {MAX_BET:,}".replace(",", " "))
+            err(f"на один рынок не больше ⭐ {S(MAX_BET)}")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (amount, uid))
         db.execute("INSERT INTO fc_bet(day,key,user,side,amount,ts) VALUES(?,?,?,?,?,?)", (day, key, uid, side, amount, now()))
     return {**fc_state(uid), "stars": bal(uid)}

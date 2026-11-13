@@ -2,6 +2,7 @@
 Очки — как в сезоне: оборот в играх с потолком 10 000 с одной ставки / 100 (богач не забирает всё одной ставкой).
 В группу игрок попадает, как только сыграл на этой неделе. В понедельник (00:00 UTC) итоги: топ-3 группы — звёзды
 (больше в старших лигах), верхние поднимаются на лигу выше, нижние опускаются. Кто не играл неделю — остаётся где был."""
+from settings import S
 import asyncio
 
 from fastapi import Depends
@@ -113,7 +114,7 @@ def _settle():
                 db.execute("INSERT OR REPLACE INTO league_res(week,user,tier,newtier,place,size,pts,reward,seen) VALUES(?,?,?,?,?,?,?,?,0)",
                            (pw, uid, t, nt, place, n, r["pts"], reward))
                 move = f"Переход в лигу «{TIERS[nt]}»!" if nt > t else f"Вылет в лигу «{TIERS[nt]}»." if nt < t else f"Остаёшься в лиге «{TIERS[t]}»."
-                msgs.append((uid, f"🏅 Итоги недели в лиге «{esc(TIERS[t])}»: {place} место из {n}." + (f" Приз ⭐ {reward:,}.".replace(",", " ") if reward else "") + f"\n{move}"))
+                msgs.append((uid, f"🏅 Итоги недели в лиге «{esc(TIERS[t])}»: {place} место из {n}." + (f" Приз ⭐ {S(reward)}." if reward else "") + f"\n{move}"))
         db.execute("INSERT INTO kv(k,v) VALUES('league_done',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v", (str(pw),))
     for u, t in msgs:
         notify(u, t)

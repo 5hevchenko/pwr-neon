@@ -13,7 +13,7 @@ const pfAct = { stars: "Изменение баланса", gift: "Выдача 
   flashcfg: "Настройка ивентов", refcfg: "Настройка рефералки", paycfg: "Настройка переводов", frcfg: "Настройка франшизы", wipecfg: "Настройка вайпа", db_import: "Загрузка базы", shop: "Настройка магазина",
   adminlog_clear: "Очистка служебного журнала", actlog_clear: "Очистка журнала действий" };
 
-const pfNum = n => fmt(Math.round(n || 0));
+const pfNum = n => num(Math.round(n || 0));
 const pfPct = v => v == null ? "—" : (v * 100).toFixed(v * 100 % 1 ? 1 : 0) + "%";
 const pfDate = ts => new Date(ts * 1000).toLocaleString(undefined, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 const pfShort = (s, n = 10) => !s ? "—" : s.length <= n * 2 + 1 ? s : s.slice(0, n) + "…" + s.slice(-6);
@@ -73,7 +73,7 @@ function pfOver(el) {
     </div>
     <div class="fstats">
       <div><span>Звёзд у игроков</span><b>${short(b ? b.supply : 0)}</b></div>
-      <div><span>Блоков в журнале</span><b>${fmt(p.ledger.blocks)}</b></div>
+      <div><span>Блоков в журнале</span><b>${num(p.ledger.blocks)}</b></div>
       <div><span>Выдано админом за 7 дн</span><b class="${p.emission.week.s ? "warn" : ""}">${short(p.emission.week.s)}</b></div>
       <div><span>Игр с проверкой</span><b>${seeded} из ${p.games.length}</b></div>
     </div>
@@ -104,7 +104,7 @@ const PF_WK = "pf_witness3";
 function pfWitnessText(p) {
   const w = PF.witness, st = (w && w.stats) || p.witness;
   if (w && w.bad && w.bad.length) return `<span class="bad">Сервер отдал другой хэш для блоков: ${w.bad.slice(0, 5).join(", ")}. История менялась.</span>`;
-  return `${w ? `Сверено блоков на твоём телефоне: ${fmt(w.checked)}. Расхождений нет. ` : ""}Игроков, сверявших журнал за сутки: ${fmt(st.day)}. Сигналов о расхождении: ${fmt(st.bad)}.`;
+  return `${w ? `Сверено блоков на твоём телефоне: ${num(w.checked)}. Расхождений нет. ` : ""}Игроков, сверявших журнал за сутки: ${num(st.day)}. Сигналов о расхождении: ${num(st.bad)}.`;
 }
 async function pfWitness() {
   let saved = [];
@@ -143,14 +143,14 @@ function pfReport() {
 function pfGifts(el) {
   const g = PF.gifts; if (!g) return;
   el.innerHTML = `<div class="fstats">
-      <div><span>Сейчас у игроков</span><b>${short(g.alive)}</b></div><div><span>В хранилище банка</span><b>${short(g.vault)}</b></div>
-      <div><span>Выпущено</span><b>${short(g.minted)}</b></div><div><span>Сгорело</span><b>${short(g.burned)}</b></div></div>
+      <div><span>Сейчас у игроков</span><b>${numS(g.alive)}</b></div><div><span>В хранилище банка</span><b>${numS(g.vault)}</b></div>
+      <div><span>Выпущено</span><b>${numS(g.minted)}</b></div><div><span>Сгорело</span><b>${numS(g.burned)}</b></div></div>
     <div class="sec-t">Найти подарок по номеру</div>
     <div class="fsearch"><input id="pf-gnum" inputmode="numeric" placeholder="Номер подарка"><button class="btn sm cta" data-act="pf-gfind">Найти</button></div>
     <div id="pf-gres"></div>
     <div class="sec-t">По коллекциям</div>
     <p class="hint fintro">Выпуск и сжигание считаются с момента запуска истории подарков.</p>
-    <div class="box"><div class="fgc head"><span>Коллекция</span><em>есть</em><em>вып.</em><em>сгор.</em></div>${g.items.map(x => `<div class="fgc"><span>${esc(x.col)}</span><em>${short(x.alive)}</em><em>${short(x.minted)}</em><em>${short(x.burned)}</em></div>`).join("") || emptyHTML("gift", "Подарков пока нет")}</div>`;
+    <div class="box"><div class="fgc head"><span>Коллекция</span><em>есть</em><em>вып.</em><em>сгор.</em></div>${g.items.map(x => `<div class="fgc"><span>${esc(x.col)}</span><em>${numS(x.alive)}</em><em>${numS(x.minted)}</em><em>${numS(x.burned)}</em></div>`).join("") || emptyHTML("gift", "Подарков пока нет")}</div>`;
 }
 
 async function openGiftPage(x) {
@@ -165,7 +165,7 @@ async function openGiftPage(x) {
 function pfPopular(p) {
   const rows = p.games.filter(g => g.n7 > 0).sort((a, b) => b.n7 - a.n7).slice(0, 10), top = rows.length ? rows[0].n7 : 1, all = rows.reduce((t, g) => t + g.n7, 0);
   if (!rows.length) return emptyHTML("games", "За неделю ещё не играли");
-  return rows.map(g => `<div class="fpop"><span>${esc(g.title)}</span><em>${fmt(g.n7)} · ${Math.round(g.n7 / all * 100)}%</em><i><b style="width:${Math.max(3, g.n7 / top * 100)}%"></b></i></div>`).join("");
+  return rows.map(g => `<div class="fpop"><span>${esc(g.title)}</span><em>${num(g.n7)} · ${Math.round(g.n7 / all * 100)}%</em><i><b style="width:${Math.max(3, g.n7 / top * 100)}%"></b></i></div>`).join("");
 }
 
 function pfSources(p) {
@@ -173,7 +173,7 @@ function pfSources(p) {
   if (!rows.length) return emptyHTML("receipt", "Пока нет движений");
   return rows.map(r => {
     const net = r.plus - r.minus;
-    return `<div class="fsrc"><span>${esc(p.names[r.kind] || r.kind)}</span><em>${fmt(r.n)}</em><b class="${net >= 0 ? "good" : "bad"}">${net >= 0 ? "+" : "−"}${short(Math.abs(net))}</b></div>`;
+    return `<div class="fsrc"><span>${esc(p.names[r.kind] || r.kind)}</span><em>${num(r.n)}</em><b class="${net >= 0 ? "good" : "bad"}">${net >= 0 ? "+" : "−"}${short(Math.abs(net))}</b></div>`;
   }).join("");
 }
 
@@ -230,10 +230,10 @@ function pfGameRow(g) {
       <span class="frtp"><small>факт</small>${fact == null ? "—" : pfPct(fact)}</span>${ic("chev")}</div>
     ${open ? `<div class="fitem-b">
       ${pfRules(g.id)}<div class="sec-t">Как считается результат</div><span class="fbadge">${pfKind[g.kind]}</span><p class="fhow">${esc(g.how)}</p>
-      <div class="frow"><span>Ставок всего</span><b>${fmt(g.n)}</b></div>
+      <div class="frow"><span>Ставок всего</span><b>${num(g.n)}</b></div>
       <div class="frow"><span>Поставлено</span><b>${pfNum(g.stake)}</b></div>
       <div class="frow"><span>Выплачено</span><b>${pfNum(g.pay)}</b></div>
-      <div class="frow"><span>За 7 дней</span><b>${g.stake7 ? pfPct(g.pay7 / g.stake7) + " · " + fmt(g.n7) + " ставок" : "—"}</b></div>
+      <div class="frow"><span>За 7 дней</span><b>${g.stake7 ? pfPct(g.pay7 / g.stake7) + " · " + num(g.n7) + " ставок" : "—"}</b></div>
       ${g.id === "case" ? `<div class="sec-t">Шансы в кейсах</div><div class="fcases">${(CASES || []).map(c => `<button class="btn sm ghost" data-act="pf-case" data-v="${esc(c.id)}">${esc(c.title)}</button>`).join("")}</div><div id="pf-case">${co.html || ""}</div>` : ""}
     </div>` : ""}</div>`;
 }
@@ -245,11 +245,11 @@ function pfBets(el) {
     <div class="box">
       <div class="frow"><span>Твой сид</span><code>${esc(s.client_seed)}</code><button class="btn sm ghost" data-act="pf-cs">Сменить</button></div>
       ${pfHashRow("Хэш сида сервера", s.hash)}
-      <div class="frow"><span>Ставок на сиде</span><b>${fmt(s.bets || 0)}</b></div>
+      <div class="frow"><span>Ставок на сиде</span><b>${num(s.bets || 0)}</b></div>
       <button class="btn ghost fwide" data-act="pf-rotate" ${s.busy ? "disabled" : ""}>${ic("refresh")} Раскрыть сид и проверить ставки</button>
       ${s.busy ? `<p class="hint">Сначала доиграй партию: её результат уже зафиксирован этим сидом.</p>` : ""}
     </div>
-    ${PF.old ? `<div class="box fok">${ic("check")}<div>Сид раскрыт, ставок на нём: ${fmt(PF.old.bets)}. Теперь их можно проверить ниже.</div></div>` : ""}
+    ${PF.old ? `<div class="box fok">${ic("check")}<div>Сид раскрыт, ставок на нём: ${num(PF.old.bets)}. Теперь их можно проверить ниже.</div></div>` : ""}
     <div class="sec-t">Последние ставки</div>
     <div class="box" id="pf-hist">${PF.hist && PF.hist.length ? PF.hist.map(pfBetRow).join("") : emptyHTML("shield", "Ставок пока не было")}</div>
     <details class="fapi"><summary>Как считается</summary>
@@ -336,15 +336,15 @@ function pfCrash(el) {
   el.innerHTML = `
     <div class="box">
       ${pfHashRow("Вершина цепочки", c.commit)}
-      <div class="frow"><span>Раундов сыграно</span><b>${fmt(c.pos)} из ${fmt(c.size)}</b></div>
+      <div class="frow"><span>Раундов сыграно</span><b>${num(c.pos)} из ${num(c.size)}</b></div>
       <p class="hint">Все сиды посчитаны заранее одной цепочкой, и её вершина опубликована до первого раунда. Каждый новый сид — хэш-прообраз предыдущего, поэтому подобрать «удобный» раунд невозможно.</p>
     </div>
     <div class="sec-t">Последние раунды</div>
     <div class="box">${c.items.length ? c.items.map(pfCrashRow).join("") : emptyHTML("rocket", "Раундов ещё не было")}</div>
     <div class="sec-t">Карусель: последние раунды</div>
-    <div class="box">${PF.car && PF.car.items.length ? PF.car.items.map(x => `<div class="fitem"><div class="fitem-h"><b>Раунд ${fmt(x.pos)}</b><span>${esc(x.sector)}</span><button class="btn sm ghost" data-act="pf-car" data-pos="${x.pos}">Проверить</button></div><div class="fres" id="pf-car-${x.pos}"></div></div>`).join("") : emptyHTML("games", "Раундов ещё не было")}</div>
+    <div class="box">${PF.car && PF.car.items.length ? PF.car.items.map(x => `<div class="fitem"><div class="fitem-h"><b>Раунд ${num(x.pos)}</b><span>${esc(x.sector)}</span><button class="btn sm ghost" data-act="pf-car" data-pos="${x.pos}">Проверить</button></div><div class="fres" id="pf-car-${x.pos}"></div></div>`).join("") : emptyHTML("games", "Раундов ещё не было")}</div>
     <div class="sec-t">Общий сид дня: дуэли, столы, розыгрыши</div>
-    <div class="box">${(PF.days || []).length ? PF.days.map(d => `<div class="fday"><b>${new Date(d.day * 86400000).toLocaleDateString(undefined, { day: "2-digit", month: "2-digit" })}</b><em>${fmt(d.draws)} розыгр.</em>
+    <div class="box">${(PF.days || []).length ? PF.days.map(d => `<div class="fday"><b>${new Date(d.day * 86400000).toLocaleDateString(undefined, { day: "2-digit", month: "2-digit" })}</b><em>${num(d.draws)} розыгр.</em>
       <code>${pfShort(d.seed || d.hash, 10)}</code><span class="${d.seed ? "good" : ""}">${d.seed ? "раскрыт" : "хэш"}</span>
       <button class="fcopy" data-act="pf-copy" data-v="${esc(d.seed || d.hash)}" aria-label="Копировать">${ic("copy")}</button></div>`).join("") : emptyHTML("shield", "Пока пусто")}
       <p class="hint">Хэш публикуется заранее, сам сид — через двое суток, когда партии того дня точно закончены.</p></div>`;
@@ -353,7 +353,7 @@ function pfCrash(el) {
 function pfCrashRow(x) {
   const open = PF.exp === "c" + x.pos;
   return `<div class="fitem${open ? " open" : ""}"><div class="fitem-h" data-act="pf-exp" data-k="c${x.pos}">
-      <b>Раунд ${fmt(x.pos)}</b><span class="${x.crash < 2 ? "bad" : "good"}">x${(+x.crash).toFixed(2)}</span><span>${pfDate(x.ts)}</span>${ic("chev")}</div>
+      <b>Раунд ${num(x.pos)}</b><span class="${x.crash < 2 ? "bad" : "good"}">x${(+x.crash).toFixed(2)}</span><span>${pfDate(x.ts)}</span>${ic("chev")}</div>
     ${open ? `<div class="fitem-b">
       ${pfHashRow("Сид раунда", x.seed)}
       <div class="frow"><span>Возврат раунда</span><b>${pfPct(x.edge)}</b></div>
@@ -367,7 +367,7 @@ async function pfVerifyCrash(x, res) {
   let cur = x.seed;
   for (let i = 1; i <= x.pos; i++) {
     cur = await pfShaHex(cur);
-    if (i % 2000 === 0) { res.textContent = `Проверяем цепочку: ${fmt(i)} из ${fmt(x.pos)}…`; await new Promise(f => setTimeout(f)); }
+    if (i % 2000 === 0) { res.textContent = `Проверяем цепочку: ${num(i)} из ${num(x.pos)}…`; await new Promise(f => setTimeout(f)); }
   }
   return { crash, crash_ok: Math.abs(crash - x.crash) < 0.011, chain_ok: cur === PF.crash.commit };
 }
@@ -394,12 +394,12 @@ function pfChain(el) {
 function pfBlockRow(x) {
   const open = PF.exp === "k" + x.id, d = PF.block && PF.block.block.id === x.id ? PF.block : null;
   return `<div class="fitem${open ? " open" : ""}"><div class="fitem-h" data-act="pf-block" data-id="${x.id}">
-      <b>#${fmt(x.id)}</b><span>${fmt(x.n)} зап.</span><span class="${x.net > 0 ? "warn" : x.net < 0 ? "good" : ""}">${x.net > 0 ? "+" : x.net < 0 ? "−" : ""}${short(Math.abs(x.net))}</span>${x.ok ? "" : `<span class="bad">расхождение</span>`}${ic("chev")}</div>
+      <b>#${num(x.id)}</b><span>${num(x.n)} зап.</span><span class="${x.net > 0 ? "warn" : x.net < 0 ? "good" : ""}">${x.net > 0 ? "+" : x.net < 0 ? "−" : ""}${short(Math.abs(x.net))}</span>${x.ok ? "" : `<span class="bad">расхождение</span>`}${ic("chev")}</div>
     ${open ? `<div class="fitem-b">
       ${pfHashRow("Хэш блока", x.hash)}${pfHashRow("Предыдущий", x.prev)}
       <div class="frow"><span>Время</span><b>${pfDate(x.ts)}</b></div>
       <div class="frow"><span>Звёзд у игроков</span><b>${fmt(x.supply)}</b></div>
-      <div class="frow"><span>Подарков</span><b>${fmt(x.gifts)} · ${short(x.gifts_value)}</b></div>
+      <div class="frow"><span>Подарков</span><b>${num(x.gifts)} · ${short(x.gifts_value)}</b></div>
       ${d ? `<div class="sec-t">Записи блока</div>${d.items.map(r => `<div class="ftx"><code>${esc(r.who)}</code><span>${pfDate(r.ts)}</span><b class="${r.delta >= 0 ? "good" : "bad"}">${r.delta >= 0 ? "+" : "−"}${fmt(Math.abs(r.delta))}</b></div>`).join("") || `<p class="hint">Записи старше 90 дней убраны, блок остаётся в цепочке.</p>`}` : `<p class="hint">Загружаем записи…</p>`}
     </div>` : ""}</div>`;
 }
@@ -414,8 +414,8 @@ function pfAdmin(el) {
   const p = PF.pub, j = PF.journal; if (!p || !j) return;
   el.innerHTML = `
     <div class="fstats two">
-      <div><span>Выдано за 7 дней</span><b class="${p.emission.week.s ? "warn" : ""}">${short(p.emission.week.s)}</b><em>${fmt(p.emission.week.n)} операций</em></div>
-      <div><span>Выдано за всё время</span><b>${short(p.emission.total.s)}</b><em>${fmt(p.emission.total.n)} операций</em></div>
+      <div><span>Выдано за 7 дней</span><b class="${p.emission.week.s ? "warn" : ""}">${short(p.emission.week.s)}</b><em>${num(p.emission.week.n)} операций</em></div>
+      <div><span>Выдано за всё время</span><b>${short(p.emission.total.s)}</b><em>${num(p.emission.total.n)} операций</em></div>
     </div>
     <p class="hint fintro">Сюда автоматически попадает каждое действие администрации, влияющее на звёзды, подарки и шансы. Удалить запись из админки нельзя.</p>
     <div class="box">${j.length ? j.map(r => `<div class="fj"><div><b>${esc(pfAct[r.action] || r.action)}</b><span>${pfDate(r.ts)}</span></div>

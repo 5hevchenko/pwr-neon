@@ -6,6 +6,7 @@
 3) Тебя вытеснили из призовой тройки Игры дня — раз в сутки на игрока, пока до конца дня больше 20 минут.
 Все письма — только с включёнными уведомлениями, с 9 до 21 по Москве (кроме п. 3) и не чаще раза в 3 часа
 на игрока вместе с напоминаниями из app.py (общая отметка users.rem_last). Кто вернулся за 3 дня — отмечаем в nudge_log."""
+from settings import S
 import asyncio
 import time
 
@@ -82,11 +83,11 @@ def _newcomers(out):
         played = rounds > 0
         bits = []
         if steps:
-            bits.append(f"{nf(stars)} ⭐ за шаги «Старта новичка» (осталось {steps})")
+            bits.append(f"{S(stars)} ⭐ за шаги «Старта новичка» (осталось {steps})")
         if free:
             bits.append("бесплатный кейс")
         if not bits and not played:
-            bits.append(f"{nf(u['stars'])} ⭐ на балансе")
+            bits.append(f"{S(u['stars'])} ⭐ на балансе")
         if not bits:
             continue
         if not first:
@@ -119,7 +120,7 @@ def _gd_start(out):
             return
         if not _ok(u, t):
             continue
-        prize = f" Фонд уже {nf(pool)} ⭐ и растёт с каждой ставкой." if pool >= 1000 else " Фонд растёт с каждой ставкой."
+        prize = f" Фонд уже {S(pool)} ⭐ и растёт с каждой ставкой." if pool >= 1000 else " Фонд растёт с каждой ставкой."
         text = f"Игра дня сегодня — «{title}», твоя игра. Трое лучших за сутки делят фонд.{prize}"
         with tx():
             _mark(u["id"], "gd", d)
@@ -146,7 +147,7 @@ def _gd_overtake(out):
         if not u or u["banned"] or ("notif" in u.keys() and not u["notif"]) or t - u["seen"] < 600 or _sent(uid, "gdout", d):
             continue
         when = f"{hours} ч" if hours else "меньше часа"
-        third = f" Приз за 3 место сейчас {nf(prizes[2])} ⭐." if prizes[2] >= 500 else ""
+        third = f" Приз за 3 место сейчас {S(prizes[2])} ⭐." if prizes[2] >= 500 else ""
         with tx():
             _mark(uid, "gdout", d)
         out.append((uid, f"Тебя вытеснили из призовой тройки Игры дня «{esc(r['title'])}». До конца дня {when}.{third}"))

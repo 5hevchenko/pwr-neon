@@ -1,6 +1,7 @@
 """Оформление профиля: акцентный цвет, статус, значки, узор обложки (бесплатно)
 и магазин за игровые звёзды — рамки аватара и эффекты ника на 30 дней (повторная покупка продлевает срок).
 Надетая рамка/ник копируются в users (p_frame/p_frame_until, p_nick/p_nick_until), чтобы user_brief не делал лишних запросов."""
+from settings import S
 import json
 import re
 
@@ -119,7 +120,7 @@ def style_buy(item: str, uid=Depends(auth)):
         price = price_for(uid, price)
         u = q1("SELECT stars, p_frame, p_nick FROM users WHERE id=?", uid)
         if u["stars"] < price:
-            err(f"Не хватает звёзд — нужно ⭐ {price}")
+            err(f"Не хватает звёзд — нужно ⭐ {S(price)}")
         t = now()
         cur = q1("SELECT until FROM cosm WHERE user=? AND item=?", uid, item)
         until = max(t, cur["until"] if cur else 0) + DAYS * 86400

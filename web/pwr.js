@@ -117,7 +117,7 @@ function pwrTierHTML(t, p) {
   }).join("");
   const inside = [...(t.stars ? [`<span class="pp-in st"><b>⭐</b><small>${fmt(t.stars.min)}–${fmt(t.stars.max)}</small></span>`] : []),
     ...t.skins.slice(0, t.stars ? 4 : 5).map(s => `<span class="pp-in"><img src="${A.orig(s.col, 128)}" alt="" loading="lazy"><small>⭐ ${short(s.ev)}</small></span>`)].join("");
-  const cta = !t.owned ? `<button class="btn cta gold" data-act="pwr-buy" data-id="${t.id}">Купить за ${fmt(t.xtr)} Telegram Stars · ${t.days} дней</button>`
+  const cta = !t.owned ? `<button class="btn cta gold" data-act="pwr-buy" data-id="${t.id}">Купить за ${num(t.xtr)} Telegram Stars · ${t.days} дней</button>`
     : t.done ? `<button class="btn cta ghost" disabled>Открыт · новый через ${clock(p.resetIn)}</button>`
       : `<button class="btn cta gold" data-act="pwr-open" data-id="${t.id}">${t.improved ? "Открыть улучшенный кейс" : "Открыть кейс дня"}</button>`;
   return `<div class="pp-tier${t.owned ? " owned" : ""}${t.improved ? " imp" : ""}" style="--pc:${t.color}">

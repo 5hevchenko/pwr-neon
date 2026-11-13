@@ -90,10 +90,10 @@ function gamesResume() {
 // ------------------------------------------------------------ общий блок ставки
 const betHTML = (id, val = 100, qs = [100, 500, 1000, 5000, "max"]) => `
   <div class="amt"><button data-act="gamt" data-for="${id}" data-v="half">½</button>
-    <label class="amtf"><span>⭐</span><input id="${id}" inputmode="numeric" value="${val}"></label>
+    <label class="amtf"><span>⭐</span><input id="${id}" inputmode="decimal" value="${starOut(val)}"></label>
     <button data-act="gamt" data-for="${id}" data-v="dbl">×2</button></div>
   <div class="quick">${qs.map(x => `<button data-act="gamt" data-for="${id}" data-v="${x}">${x === "max" ? "MAX" : short(+x)}</button>`).join("")}</div>`;
-const betVal = id => Math.floor(+document.getElementById(id).value || 0);
+const betVal = id => starIn(document.getElementById(id).value);
 
 // ============================================================ КРАШ
 let cVisHook = false, CRASH_ALLIN = -1, CS = null, cOff = 0, cPoll = null, cRaf = null, cBoomRound = 0, autoOn = false, CRASH_ON = false;
@@ -425,7 +425,7 @@ function upgDraw(result, marks) {
   document.querySelectorAll("#u-quick [data-act=upg-x]").forEach(b => b.classList.toggle("on", !!(UP.ts.length && UP.gs.length && Math.abs(upTV() / upSV() - +b.dataset.v) / +b.dataset.v < .2)));
   if (!UP.gs.length) return;
   if (marks && $("#u-targets").children.length) return upgMarks();
-  $("#u-cnt").textContent = UP.total ? `найдено ${fmt(UP.total)}` : "";
+  $("#u-cnt").textContent = UP.total ? `найдено ${num(UP.total)}` : "";
   $("#u-k").innerHTML = Object.entries(UPK).map(([k, [, , l]]) => `<button data-act="upg-k" data-v="${k}" class="${UP.f.k === k ? "on" : ""}">${l}</button>`).join("");
   $("#u-cols").innerHTML = [["", "Все коллекции"], ...UP.cols.map(c => [c, c])].map(([k, l]) => `<span data-act="upg-col" data-v="${esc(k)}" class="${UP.f.col === k ? "on" : ""}">${k ? `<img src="${A.orig(k, 64)}" alt="">` : ""}${esc(l)}</span>`).join("");
   const sel = new Set(UP.ts.map(upKey));
@@ -453,7 +453,7 @@ function upgPick() { if (!UP.busy) pickGifts("Что ставим?", { pre: UP.g
 async function upgGo() {
   if (UP.busy || !UP.gs.length || !UP.ts.length) return;
   const ch = upgChance();
-  if (!UP.fast && !await confirmM("Апгрейд?", `Шанс ${ch.toFixed(1)}%. Если не повезёт, ${UP.gs.length > 1 ? `все ${UP.gs.length} подарков ставки сгорят` : `${esc(UP.gs[0].col)} #${fmt(UP.gs[0].num)} сгорит`}.`, "Крутим")) return;
+  if (!UP.fast && !await confirmM("Апгрейд?", `Шанс ${ch.toFixed(1)}%. Если не повезёт, ${UP.gs.length > 1 ? `все ${UP.gs.length} подарков ставки сгорят` : `${esc(UP.gs[0].col)} #${num(UP.gs[0].num)} сгорит`}.`, "Крутим")) return;
   UP.busy = true; upgDraw(undefined, true);
   let r;
   try { r = await post("upgrade", { gids: UP.gs.map(g => g.id), targets: UP.ts.map(t => ({ col: t.col, model: t.model })) }); }
@@ -686,8 +686,8 @@ Object.assign(ACT, {
     gSave("gfav", [...GFAV]); H.sel(); gDrawSections();
   },
   gamt: el => {
-    const i = document.getElementById(el.dataset.for), v = el.dataset.v, cur = +i.value || 0;
-    i.value = v === "half" ? Math.max(10, Math.floor(cur / 2)) : v === "dbl" ? Math.min(ME.stars, cur * 2) : v === "max" ? ME.stars : v;
+    const i = document.getElementById(el.dataset.for), v = el.dataset.v, cur = starIn(i.value);
+    i.value = starOut(v === "half" ? Math.max(10, Math.floor(cur / 2)) : v === "dbl" ? Math.min(ME.stars, cur * 2) : v === "max" ? ME.stars : +v);
     i.dispatchEvent(new Event("input", { bubbles: true }));   // чтобы подписи с итогом обновлялись и от кнопок
     H.sel();
   },

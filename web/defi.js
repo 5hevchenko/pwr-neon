@@ -89,7 +89,7 @@ function fillFut(v) {
       <div class="fx-lbl">Плечо</div>
       <div class="fx-levs">${FX.levs.map(l => `<button data-act="fx-lev" data-v="${l}" class="${l === fxLev ? "on" : ""}${l >= 25 ? " hot" : ""}">x${l}</button>`).join("")}</div>
       <div class="fx-lbl">Маржа</div>
-      <div class="ca-in fx-in"><span>⭐</span><input id="fx-m" type="number" inputmode="numeric" value="${fxMargin}"><small id="fx-sz"></small></div>
+      <div class="ca-in fx-in"><span>⭐</span><input id="fx-m" inputmode="decimal" value="${starOut(fxMargin)}"><small id="fx-sz"></small></div>
       <div class="quick">${[100, 500, 1000, 5000].map(n => `<button data-act="fx-m" data-v="${n}">${short(n)}</button>`).join("")}<button data-act="fx-m" data-v="max">MAX</button></div>
       <div class="fx-info" id="fx-info"></div>
       <div class="fx-btns"><button class="btn fx-long" data-act="fx-open" data-v="long">${ic("up")}<span><b>Лонг</b><small>на рост</small></span></button>
@@ -107,7 +107,7 @@ function fillFut(v) {
     <div class="disc">Фьючерс — ставка на движение цены с плечом: при x10 цена +1% даёт +10% к марже, −1% — минус 10%. Когда убыток съест 90% маржи, позицию ликвидируют, маржа сгорает. Комиссия ${String(FX.fee * 100).replace(".", ",")}% от объёма при открытии и закрытии. Курсы реальные (OKX), всё на игровых звёздах.</div>`;
   scrollTo(0, keepY);
   const inp = $("#fx-m");
-  inp.oninput = () => { fxMargin = Math.max(0, Math.floor(+inp.value || 0)); fxInfo(); };
+  inp.oninput = () => { fxMargin = Math.max(0, starIn(inp.value)); fxInfo(); };
   fxInfo();
 }
 function fxInfo() {
@@ -187,7 +187,7 @@ Object.assign(ACT, {
   "sw-go": async el => { el.disabled = true; try { const r = await post(`crypto/${CA.id}/swap`, { to: CA._to, pct: +el.dataset.v }); H.ok(); toast(`Получено ${qtyFmt(r.got)} ${r.to}`, "ok"); } finally { el.disabled = false; } refreshAll(); },
   "fx-coin": el => { fxAsset = el.dataset.v; H.sel(); fillFut($("#v-crypto")); },
   "fx-lev": el => { fxLev = +el.dataset.v; H.sel(); document.querySelectorAll(".fx-levs button").forEach(b => b.classList.toggle("on", b === el)); fxInfo(); },
-  "fx-m": el => { fxMargin = el.dataset.v === "max" ? Math.max(0, Math.floor(ME.stars / (1 + fxLev * FX.fee)) - 1) : +el.dataset.v; H.sel(); $("#fx-m").value = fxMargin; fxInfo(); },
+  "fx-m": el => { fxMargin = el.dataset.v === "max" ? Math.max(0, Math.floor(ME.stars / (1 + fxLev * FX.fee)) - 1) : +el.dataset.v; H.sel(); $("#fx-m").value = starOut(fxMargin); fxInfo(); },
   "fx-open": async el => {
     if (fxMargin > ME.stars) return toast("Не хватает звёзд ⭐");
     el.disabled = true;

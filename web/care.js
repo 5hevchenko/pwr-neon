@@ -55,7 +55,7 @@ function limHTML(d) {
       ${d.next ? `<div class="lim-next">${ic("hourglass")}<span>${d.next.loss ? `<span>Новый лимит</span> ⭐ ${fmt(d.next.loss)}` : "Лимит снимется"} <span>с</span> ${limMsk(d.next.at)}</span></div>` : ""}
       <div class="chips lim-chips">${LIM_PRESETS.map(v => `<button data-act="lim-set" data-v="${v}" class="${d.dayLoss === v ? "on" : ""}">${short(v)}</button>`).join("")}
         ${d.dayLoss ? `<button data-act="lim-set" data-v="0">Снять</button>` : ""}</div>
-      <div class="lim-own"><input type="number" inputmode="numeric" id="lim-v" min="100" placeholder="Своя сумма"><button class="btn sm" data-act="lim-own">Сохранить</button></div>
+      <div class="lim-own"><input inputmode="decimal" id="lim-v" placeholder="Своя сумма"><button class="btn sm" data-act="lim-own">Сохранить</button></div>
     </div>
     <div class="sec-t">Перерыв</div>
     <div class="box"><div class="hint lim-ph">На время перерыва ставки во всех играх закрыты. Отменить его нельзя.</div>
@@ -80,8 +80,8 @@ Object.assign(ACT, {
   limits: () => openLimits(),
   "lim-set": el => limSave({ dayLoss: +el.dataset.v }, el).then(d => d && toast(d.next ? "Изменится через сутки" : "Лимит сохранён", "ok")),
   "lim-own": el => {
-    const v = Math.floor(+($("#lim-v") || {}).value || 0);
-    if (v < 100) return toast("Лимит от 100 ⭐");
+    const v = starIn(($("#lim-v") || {}).value);
+    if (v < 100) return toast(`Лимит от ${fmt(100)} ⭐`);
     limSave({ dayLoss: v }, el).then(d => d && toast(d.next ? "Изменится через сутки" : "Лимит сохранён", "ok"));
   },
   "lim-pause": async el => {

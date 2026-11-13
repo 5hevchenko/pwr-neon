@@ -71,7 +71,7 @@ async function admDbImport(f) {
   try { r = await fetch("api/admin/db/import", { method: "POST", headers, body: f }); d = await r.json().catch(() => null); }
   catch (e) { return toast("Нет связи с сервером", "err"); }
   if (!r.ok) { H.err(); return toast(d && d.detail || (r.status === 413 ? "Файл слишком большой" : "Ошибка импорта"), "err"); }
-  H.ok(); toast(`Импортировано: ${fmt(d.users)} игроков. Перезапуск…`, "ok");
+  H.ok(); toast(`Импортировано: ${num(d.users)} игроков. Перезапуск…`, "ok");
   setTimeout(() => location.reload(), 8000);   // сервис поднимается за ~5–7 с
 }
 function openAdmin() {
@@ -94,13 +94,13 @@ async function admRender(el = topSheet()) {
       <div class="seg">${[["auto", "Авто (сб–вс)"], ["on", "Включить"], ["off", "Выключить"]].map(([k, t]) => `<button data-act="adm-promo" data-v="${k}" class="${pr.mode === k ? "on" : ""}">${t}</button>`).join("")}</div>
       <div class="sec-t">Сезонный ивент ${ev.active ? `<span class="tw">· ${esc(ev.active.title)} идёт</span>` : ""}</div>
       <div class="seg">${[["auto", "Авто (по датам)"], ...ev.events.map(e => [e.id, "Вкл: " + e.title]), ["off", "Выключить"]].map(([k, t]) => `<button data-act="adm-event" data-v="${k}" class="${ev.mode === k ? "on" : ""}">${esc(t)}</button>`).join("")}</div>
-      <div class="box">${admKv("Игроков всего", `<b>${fmt(s.users)}</b>`)}${admKv("Онлайн (5 мин)", `<b>${fmt(s.online)}</b>`)}
-        ${admKv("Активных за 24 ч / 7 дн", `<b>${fmt(s.active24)} / ${fmt(s.active7)}</b>`)}${admKv("Новых за 24 ч", `<b>${fmt(s.new24)}</b>`)}
-        ${admKv("Заблокировано", `<b>${fmt(s.banned)}</b>`)}</div>
+      <div class="box">${admKv("Игроков всего", `<b>${num(s.users)}</b>`)}${admKv("Онлайн (5 мин)", `<b>${num(s.online)}</b>`)}
+        ${admKv("Активных за 24 ч / 7 дн", `<b>${num(s.active24)} / ${num(s.active7)}</b>`)}${admKv("Новых за 24 ч", `<b>${num(s.new24)}</b>`)}
+        ${admKv("Заблокировано", `<b>${num(s.banned)}</b>`)}</div>
       <div class="sec-t">Экономика</div>
       <div class="box">${admKv("Банк игры", `<b>⭐ ${fmt(s.bank)}</b>`)}${admKv("Прибыль банка 24 ч", admSgn(s.house24))}
         ${admKv("Прибыль банка 7 дн", admSgn(s.house7))}${admKv("Комиссии в банк 24 ч", `<b class="tw">+⭐ ${fmt(s.fees24)}</b>`)}
-        ${admKv("Звёзд у игроков", `<b>⭐ ${fmt(s.stars)}</b>`)}${admKv("Подарков у игроков", `<b>${fmt(s.gifts)}</b>`)}</div>
+        ${admKv("Звёзд у игроков", `<b>⭐ ${fmt(s.stars)}</b>`)}${admKv("Подарков у игроков", `<b>${num(s.gifts)}</b>`)}</div>
       <div class="sec-t">Сервер</div>
       <div class="box">${admKv("Нагрузка (1/5/15 мин)", `<b>${v.load.map(x => x.toFixed(2)).join(" / ")} · ${v.cpus} CPU</b>`)}
         ${admKv("Память свободно", `<b>${admBytes(v.memAvail)} из ${admBytes(v.memTotal)}</b>`)}
@@ -113,10 +113,10 @@ async function admRender(el = topSheet()) {
         <div class="s">${u.owner ? "владелец" : "админ"} · id ${u.id}</div></div>${ic("chev")}</div>`).join("")}</div>
       ${adm.canGrant ? `<div class="hint" style="font-size:12px;margin:6px 4px 0">Выдать админку: вкладка «Игроки» → игрок → «Сделать админом»</div>` : ""}
       <div class="sec-t">Операции за 24 ч</div>
-      <div class="box">${kinds.map(([k, x]) => admKv(`${esc(k)} · ${fmt(x.n)}`, admSgn(x.sum))).join("") || `<div class="hint" style="padding:14px">Пусто</div>`}</div>`;
+      <div class="box">${kinds.map(([k, x]) => admKv(`${esc(k)} · ${num(x.n)}`, admSgn(x.sum))).join("") || `<div class="hint" style="padding:14px">Пусто</div>`}</div>`;
   } else if (ADM.tab === "sales") {
     const s = await api("admin/sales");
-    const card = (t, x) => `<div><span>${t}</span><b>${fmt(x.xtr)} <i class="adm-tg">${ic("tgplane")}</i></b><small>${x.n} покупок · ${x.buyers} чел.</small></div>`;
+    const card = (t, x) => `<div><span>${t}</span><b>${num(x.xtr)} <i class="adm-tg">${ic("tgplane")}</i></b><small>${x.n} покупок · ${x.buyers} чел.</small></div>`;
     const mx = Math.max(1, ...s.days.map(d => d.xtr));
     const sw = (k, t, d) => `<div class="row kv"><div class="grow"><div class="t">${t}</div><div class="s" style="white-space:normal">${d}</div></div>
         ${s.canEdit ? `<button class="sw${s.sale[k] ? " on" : ""}" data-act="adm-shop" data-k="${k}" data-v="${s.sale[k] ? 0 : 1}"></button>` : `<b>${s.sale[k] ? "вкл" : "выкл"}</b>`}</div>`;
@@ -128,7 +128,7 @@ async function admRender(el = topSheet()) {
       <div class="sec-t">${ic("trend")}По дням (14 дней), Telegram Stars</div>
       <div class="adm-bars">${s.days.length ? s.days.map(d => `<div title="${d.xtr}"><i style="height:${Math.max(4, d.xtr / mx * 100)}%"></i><span>${new Date(d.day * 1000).getDate()}</span></div>`).join("") : `<div class="hint" style="padding:14px">Покупок пока нет</div>`}</div>
       <div class="sec-t">${ic("crown")}Топ покупателей</div>
-      <div class="box">${s.top.map(u => `<div class="row tap" data-act="adm-user" data-id="${u.id}">${avaHTML(u, 32)}<div class="grow"><div class="t">${esc(u.name)}</div><div class="s">${u.n} покупок</div></div><b>${fmt(u.xtr)} <i class="adm-tg">${ic("tgplane")}</i></b></div>`).join("") || `<div class="hint" style="padding:14px">Пусто</div>`}</div>
+      <div class="box">${s.top.map(u => `<div class="row tap" data-act="adm-user" data-id="${u.id}">${avaHTML(u, 32)}<div class="grow"><div class="t">${esc(u.name)}</div><div class="s">${u.n} покупок</div></div><b>${num(u.xtr)} <i class="adm-tg">${ic("tgplane")}</i></b></div>`).join("") || `<div class="hint" style="padding:14px">Пусто</div>`}</div>
       <div class="sec-t">${ic("clock")}Последние покупки</div>
       <div class="box">${s.last.map(p => `<div class="row kv"><div class="grow"><div class="t">${esc(p.user.name)}</div><div class="s">+⭐ ${fmt(p.stars)} · ${admDate(p.ts)}</div></div><b>${p.xtr} <i class="adm-tg">${ic("tgplane")}</i></b></div>`).join("") || `<div class="hint" style="padding:14px">Пусто</div>`}</div>
       <div class="disc">Telegram Stars копятся на балансе бота — смотреть и выводить в @BotFather → бот → Payments / Stars.</div>`;
@@ -159,7 +159,7 @@ async function admRender(el = topSheet()) {
           <button class="btn sm ghost" data-act="adm-odds-all-rs">${ic("refresh")}</button></div></div>`; })() : ""}
       <div class="box">${d.list.map(g => `<div class="adm-odd${g.value > 1 ? " plus" : ""}">
         <div class="adm-oh"><b>${esc(g.title)}</b>${g.value > 1 ? `<span class="adm-tag red">игроки в плюсе</span>` : g.changed ? `<span class="adm-tag">изменено</span>` : ""}</div>
-        <div class="adm-os">по умолчанию ${pc(g.default)}% · банк за 7 дн: <span class="${g.house7 >= 0 ? "tw" : "tl"}">${g.house7 >= 0 ? "+" : "−"}⭐ ${short(Math.abs(g.house7))}</span> · ${fmt(g.rounds7)} игр${g.max && g.max !== d.hi ? ` · можно до ${pc(g.max)}%` : ""}</div>
+        <div class="adm-os">по умолчанию ${pc(g.default)}% · банк за 7 дн: <span class="${g.house7 >= 0 ? "tw" : "tl"}">${g.house7 >= 0 ? "+" : "−"}⭐ ${short(Math.abs(g.house7))}</span> · ${num(g.rounds7)} игр${g.max && g.max !== d.hi ? ` · можно до ${pc(g.max)}%` : ""}</div>
         ${g.effective !== g.value ? `<div class="adm-os tl">сейчас действует ${pc(g.effective)}% — из-за акции</div>` : ""}
         ${d.canEdit ? `<div class="adm-oc"><input class="adm-oi" inputmode="decimal" data-k="${g.key}" value="${pc(g.value)}"><span class="adm-op">%</span>
           <button class="btn sm gold" data-act="adm-odds" data-k="${g.key}">${ic("check")}Сохранить</button>
@@ -198,7 +198,7 @@ async function admRender(el = topSheet()) {
   } else if (ADM.tab === "pay") {
     const d = await api("admin/pay"), c = d.cfg, ed = d.canEdit, w = d.week;
     const pair = x => `<div class="row tap" data-act="adm-user" data-id="${x.a.id}">${avaHTML(x.a, 28)}<span class="adm-arr">${ic("chev")}</span>${avaHTML(x.b, 28)}
-      <div class="grow" style="min-width:0"><div class="t">${esc(x.a.name)} → ${esc(x.b.name)}</div><div class="s">${x.n != null ? fmt(x.n) + " переводов за 7 дн" : admDate(x.ts) + (x.note ? " · «" + esc(x.note) + "»" : "")}</div></div>
+      <div class="grow" style="min-width:0"><div class="t">${esc(x.a.name)} → ${esc(x.b.name)}</div><div class="s">${x.n != null ? num(x.n) + " переводов за 7 дн" : admDate(x.ts) + (x.note ? " · «" + esc(x.note) + "»" : "")}</div></div>
       <b>⭐ ${short(x.sum != null ? x.sum : x.amount)}</b></div>`;
     const field = (k, title, hint, val, unit) => `<div class="adm-odd"><div class="adm-oh"><b>${title}</b>${d.changed.includes(k) ? `<span class="adm-tag">изменено</span>` : ""}</div>
       <div class="adm-os">${hint}</div>
@@ -218,7 +218,7 @@ async function admRender(el = topSheet()) {
         ${field("inline_ttl_h", "Срок жизни инлайн-чека", `через сколько часов невостребованный чек вернётся отправителю · по умолчанию ${d.defaults.inline_ttl_h}`, c.inline_ttl_h, "ч")}</div>
       ${ed ? "" : `<div class="hint" style="font-size:12px;text-align:center;margin-top:8px">Менять настройки может только владелец</div>`}
       <div class="sec-t">За 7 дней</div>
-      <div class="box">${admKv("Переводов", `<b>${fmt(w.n)}</b>`)}${admKv("Переведено", `<b>⭐ ${fmt(w.sum)}</b>`)}${admKv("Комиссия в банк", `<b class="tw">⭐ ${fmt(w.fee)}</b>`)}${admKv("Отправителей", `<b>${fmt(w.users)}</b>`)}</div>
+      <div class="box">${admKv("Переводов", `<b>${num(w.n)}</b>`)}${admKv("Переведено", `<b>⭐ ${fmt(w.sum)}</b>`)}${admKv("Комиссия в банк", `<b class="tw">⭐ ${fmt(w.fee)}</b>`)}${admKv("Отправителей", `<b>${num(w.users)}</b>`)}</div>
       <div class="sec-t">Крупнейшие пары за 7 дней</div>
       <div class="box">${d.top.map(pair).join("") || `<div class="hint" style="padding:14px">Пусто</div>`}</div>
       <div class="sec-t">Последние переводы</div>
@@ -248,10 +248,10 @@ async function admRender(el = topSheet()) {
     const sw = (k, title, hint) => `<div class="row kv"><div class="grow"><div class="t">${title}</div><div class="s" style="white-space:normal">${hint}</div></div>
       ${ed ? `<button class="sw${c[k] ? " on" : ""}" data-act="adm-ev-sw" data-k="${k}" data-v="${c[k] ? 0 : 1}"></button>` : `<b>${c[k] ? "да" : "нет"}</b>`}</div>`;
     const field = (k, title, hint, unit) => `<div class="adm-odd"><div class="adm-oh"><b>${title}</b>${d.changed.includes(k) ? `<span class="adm-tag">изменено</span>` : ""}</div>
-      <div class="adm-os">${hint}${hint ? " · " : ""}по умолчанию ${fmt(d.defaults[k])}</div>
+      <div class="adm-os">${hint}${hint ? " · " : ""}по умолчанию ${num(d.defaults[k])}</div>
       ${ed ? `<div class="adm-oc"><input class="adm-oi" inputmode="numeric" data-k="${k}" value="${c[k]}"><span class="adm-op">${unit}</span>
         <button class="btn sm gold" data-act="adm-ev" data-k="${k}">${ic("check")}</button>
-        ${d.changed.includes(k) ? `<button class="btn sm ghost" data-act="adm-ev-rs" data-k="${k}">${ic("refresh")}</button>` : ""}</div>` : `<div class="adm-oc"><b>${fmt(c[k])} ${unit}</b></div>`}</div>`;
+        ${d.changed.includes(k) ? `<button class="btn sm ghost" data-act="adm-ev-rs" data-k="${k}">${ic("refresh")}</button>` : ""}</div>` : `<div class="adm-oc"><b>${num(c[k])} ${unit}</b></div>`}</div>`;
     const cur = d.current;
     body.innerHTML = `<div class="box">${cur ? admKv("Сейчас идёт", `<b>${esc(d.kinds[cur.kind])}</b> · ещё ${Math.max(0, Math.ceil((cur.end - now) / 60))} мин`)
         : admKv("Следующий ивент", d.next ? `<b>через ${Math.max(0, Math.ceil((d.next - now) / 60))} мин</b>` : "—")}</div>
@@ -275,21 +275,21 @@ async function admRender(el = topSheet()) {
       <div class="sec-t">Последние ивенты</div>
       <div class="box">${d.history.map(h => `<div class="row kv"><div class="grow"><div class="t">${esc(h.title)}${h.manual ? " · вручную" : ""}</div>
         <div class="s">${admDate(h.start)} · ${h.kind === "drop" ? `забрали ${h.claims}` : `удачных моментов ${h.lucky}`}</div></div><b>⭐ ${fmt(h.paid)}</b></div>`).join("") || `<div class="hint" style="padding:14px">Ещё не было</div>`}</div>
-      <div class="disc">«Удача ×N» умножает шанс «удачного момента» (сюрприз до 2 500 ⭐ после раунда) и даёт поймать его ещё раз за ивент. Выигрыши в играх не меняются — иначе ивент стал бы «станком».</div>`;
+      <div class="disc">«Удача ×N» умножает шанс «удачного момента» (сюрприз до 2,5 ⭐ после раунда) и даёт поймать его ещё раз за ивент. Выигрыши в играх не меняются — иначе ивент стал бы «станком».</div>`;
     starify(body);
   } else if (ADM.tab === "ref") {   // реферальная программа (refs.py)
     const [d, gw] = await Promise.all([api("admin/refs"), api("admin/gw").catch(() => null)]), c = d.cfg, ed = d.canEdit, s = d.stats, p = s.paid7;
     const sw = (k, title, hint) => `<div class="row kv"><div class="grow"><div class="t">${title}</div><div class="s" style="white-space:normal">${hint}</div></div>
       ${ed ? `<button class="sw${c[k] ? " on" : ""}" data-act="adm-ref-sw" data-k="${k}" data-v="${c[k] ? 0 : 1}"></button>` : `<b>${c[k] ? "да" : "нет"}</b>`}</div>`;
     const field = (k, title, hint, unit, text) => `<div class="adm-odd"><div class="adm-oh"><b>${title}</b>${d.changed.includes(k) ? `<span class="adm-tag">изменено</span>` : ""}</div>
-      <div class="adm-os">${hint} · по умолчанию ${text ? esc(d.defaults[k]) : fmt(d.defaults[k])}</div>
+      <div class="adm-os">${hint} · по умолчанию ${text ? esc(d.defaults[k]) : num(d.defaults[k])}</div>
       ${ed ? `<div class="adm-oc"><input class="adm-oi"${text ? ` style="flex:1"` : ` inputmode="numeric"`} data-k="${k}" value="${esc(String(c[k]))}">${unit ? `<span class="adm-op">${unit}</span>` : ""}
         <button class="btn sm gold" data-act="adm-ref" data-k="${k}">${ic("check")}</button>
         ${d.changed.includes(k) ? `<button class="btn sm ghost" data-act="adm-ref-rs" data-k="${k}">${ic("refresh")}</button>` : ""}</div>` : `<div class="adm-oc"><b>${esc(String(c[k]))} ${unit}</b></div>`}</div>`;
     const sum = Object.values(p).reduce((a, b) => a + b, 0);
     body.innerHTML = `<div class="sec-t">За 7 дней</div>
-      <div class="box">${admKv("Пришли по ссылкам", `<b>${fmt(s.new7)}</b>`)}${admKv("Всего по ссылкам", `<b>${fmt(s.all)}</b> из ${fmt(s.users)} (${Math.round(s.all / Math.max(1, s.users) * 100)}%)`)}
-        ${admKv(`Активных (${c.l1_level}+ ур.)`, `<b>${fmt(s.active)}</b> (${Math.round(s.active / Math.max(1, s.all) * 100)}% приглашённых)`)}
+      <div class="box">${admKv("Пришли по ссылкам", `<b>${num(s.new7)}</b>`)}${admKv("Всего по ссылкам", `<b>${num(s.all)}</b> из ${num(s.users)} (${Math.round(s.all / Math.max(1, s.users) * 100)}%)`)}
+        ${admKv(`Активных (${c.l1_level}+ ур.)`, `<b>${num(s.active)}</b> (${Math.round(s.active / Math.max(1, s.all) * 100)}% приглашённых)`)}
         ${admKv("Выплачено за 7 дн", `<b>⭐ ${fmt(sum)}</b>`)}
         <div class="hint" style="font-size:12px;padding:0 14px 10px">сразу ${fmt(p.ref || 0)} · за уровни ${fmt(p.ref_lvl || 0)} · рубежи ${fmt(p.ref_ms || 0)} · с покупок ${fmt(p.ref_buy || 0)} · топ ${fmt(p.ref_top || 0)}</div></div>
       <div class="sec-t">Лучшие за 7 дней</div>
@@ -322,7 +322,7 @@ async function admRender(el = topSheet()) {
         ${gw.canEdit && gw.channel ? `<div class="adm-odd"><div class="adm-oh"><b>Новый розыгрыш</b></div>
           <div class="adm-os" style="white-space:normal">Приз из банка, сейчас до ⭐ ${fmt(gw.cap)}. Бот опубликует пост с кнопкой «Участвовать»</div>
           <div class="adm-gwf"><input class="adm-oi" data-gw="title" placeholder="Название" maxlength="60">
-            <label><span>Приз, ⭐</span><input class="adm-oi" data-gw="prize" inputmode="numeric" value="10000"></label>
+            <label><span>Приз, ⭐</span><input class="adm-oi" data-gw="prize" inputmode="decimal" value="10"></label>
             <label><span>Победителей</span><input class="adm-oi" data-gw="winners" inputmode="numeric" value="5"></label>
             <label><span>Часов</span><input class="adm-oi" data-gw="hours" inputmode="numeric" value="24"></label>
             <label><span>С уровня</span><input class="adm-oi" data-gw="minLevel" inputmode="numeric" value="2"></label>
@@ -354,7 +354,7 @@ async function admRender(el = topSheet()) {
       <div class="adm-os">${hint} · по умолчанию ${String(d.defaults[k]).replace(".", ",")}</div>
       ${ed ? `<div class="adm-oc"><input class="adm-oi" inputmode="${Number.isInteger(d.defaults[k]) ? "numeric" : "decimal"}" data-k="${k}" value="${String(c[k]).replace(".", ",")}"><span class="adm-op">${unit}</span>
         <button class="btn sm gold" data-act="adm-frc" data-k="${k}">${ic("check")}Сохранить</button>
-        ${d.changed.includes(k) ? `<button class="btn sm ghost" data-act="adm-frc-rs" data-k="${k}">${ic("refresh")}</button>` : ""}</div>` : `<div class="adm-oc"><b>${fmt(c[k])} ${unit}</b></div>`}</div>`;
+        ${d.changed.includes(k) ? `<button class="btn sm ghost" data-act="adm-frc-rs" data-k="${k}">${ic("refresh")}</button>` : ""}</div>` : `<div class="adm-oc"><b>${num(c[k])} ${unit}</b></div>`}</div>`;
     body.innerHTML = `${d.manager ? "" : `<div class="disc" style="margin-top:0">⚠️ Главный бот ещё не может создавать ботов: @BotFather → Mini App → бот → включить управление ботами (Bot Management). Пока не включено, игроки франшизу не видят.</div>`}
       ${mainHTML}
       <div class="sec-t">Франшиза</div>
@@ -375,17 +375,17 @@ async function admRender(el = topSheet()) {
         ${field("promo_days", "Предложение от бота — не чаще", "одному игроку раз в столько дней", "дн")}
         ${field("promo_level", "Предлагать с уровня", "новичкам рано", "ур.")}
       </div>
-      <div class="box" style="margin-top:10px">${admKv("Предложений отправлено", `<b>${fmt(d.promo.total)}</b> · за 7 дн ${fmt(d.promo.week)}`)}</div>
+      <div class="box" style="margin-top:10px">${admKv("Предложений отправлено", `<b>${num(d.promo.total)}</b> · за 7 дн ${num(d.promo.week)}`)}</div>
       ${an ? `<div class="sec-t">Рассылка о франшизе</div>
       <div class="box" style="padding:12px 14px;font-size:13.5px;line-height:1.45;white-space:normal">${an.text.replace(/\n/g, "<br>")}
         <div class="hint" style="font-size:12px;margin-top:8px">Кнопки под сообщением: «🤖 Создать бота» и «Открыть игру»</div></div>
-      <div class="btns"><button class="btn gold" data-act="adm-frc-ann" data-n="${an.total}"${d.promo.running || !ed ? " disabled" : ""}>${ic("send")}Разослать всем · ${fmt(an.total)}</button></div>
+      <div class="btns"><button class="btn gold" data-act="adm-frc-ann" data-n="${an.total}"${d.promo.running || !ed ? " disabled" : ""}>${ic("send")}Разослать всем · ${num(an.total)}</button></div>
       <div class="hint" style="font-size:12px;text-align:center;margin:4px 0 10px">Всем игрокам с включёнными сообщениями от бота, кроме владельцев ботов. Текст меняется вместе с настройками выше</div>` : ""}
       <div class="btns"><button class="btn ghost" data-act="adm-frc-promo"${d.promo.running ? " disabled" : ""}>${ic("send")}${d.promo.running ? "Рассылка идёт…" : "Разослать предложение сейчас"}</button></div>
       <div class="sec-t">Боты игроков · ${d.bots.length}</div>
       <div class="box">${d.bots.map(b => `<div class="row kv">
         <div class="grow" style="min-width:0"><div class="t">@${esc(b.username || "?")}</div>
-          <div class="s" style="white-space:normal">${esc(b.oname || "id " + b.owner)} · ${admDate(b.created)} · ${st[b.status] || b.status}<br>пришло ${fmt(b.came)} · играют сейчас ${fmt(b.now)} · ${b.paid ? "награда выплачена" : `к награде ${b.progress}/${d.need}`}<br>пассивный доход владельца: всего ${fmt(b.cut)} ⭐ · за сегодня пока ≈ ${fmt(b.today)} ⭐</div></div>
+          <div class="s" style="white-space:normal">${esc(b.oname || "id " + b.owner)} · ${admDate(b.created)} · ${st[b.status] || b.status}<br>пришло ${num(b.came)} · играют сейчас ${num(b.now)} · ${b.paid ? "награда выплачена" : `к награде ${b.progress}/${d.need}`}<br>пассивный доход владельца: всего ${fmt(b.cut)} ⭐ · за сегодня пока ≈ ${fmt(b.today)} ⭐</div></div>
         ${b.status === "limit" ? "" : `<button class="sw${b.status === "on" ? " on" : ""}" data-act="adm-fr" data-id="${b.id}" data-v="${b.status === "on" ? 0 : 1}"></button>`}</div>`).join("")
         || `<div class="hint" style="padding:14px">Ботов пока нет</div>`}</div>
       <div class="disc">Игрок создаёт бота кнопкой в игре или командой /franchise в главном боте. База общая. Награды — ⭐ ${fmt(c.create_reward)} за создание (с ${c.create_level} ур.) и ⭐ ${fmt(d.reward)}, когда бот приведёт ${d.need} игроков ${d.level}+ уровня; каждая один раз на аккаунт. Если владелец сменит вебхук или кнопку «Играть», бот отключится сам.</div>`;
@@ -403,7 +403,7 @@ async function admRender(el = topSheet()) {
         ${sc.list.length ? `<div class="box">${sc.list.map(x => `<div class="adm-odd bcs${x.on ? "" : " off"}">
           <div class="adm-oh"><b>${per(x.every)} в ${x.time}</b><span class="adm-tag${x.on ? "" : " red"}">${x.on ? `через ${left(x)}` : "на паузе"}</span></div>
           <div class="adm-os bcs-t">${esc(x.text)}</div>
-          ${x.last ? `<div class="adm-os">последняя: ${new Date(x.last * 1000).toLocaleString("ru", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${fmt(x.lastSent)} игрокам</div>` : ""}
+          ${x.last ? `<div class="adm-os">последняя: ${new Date(x.last * 1000).toLocaleString("ru", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${num(x.lastSent)} игрокам</div>` : ""}
           <div class="adm-oc"><button class="btn sm ghost" data-act="adm-bcs" data-a="toggle" data-id="${x.id}">${x.on ? "Пауза" : "Включить"}</button>
             <button class="btn sm ghost" data-act="adm-bcs" data-a="now" data-id="${x.id}">${ic("send")}Сейчас</button>
             <button class="btn sm red" data-act="adm-bcs" data-a="del" data-id="${x.id}">${ic("x")}</button></div></div>`).join("")}</div>` : ""}
@@ -412,7 +412,7 @@ async function admRender(el = topSheet()) {
           <div class="adm-oc" style="flex-wrap:wrap"><select id="adm-bcs-e" class="adm-sel">${sc.every.map(n => `<option value="${n}">${per(n)}</option>`).join("")}</select>
             <input id="adm-bcs-t" type="time" value="18:00" class="adm-oi" style="width:96px"><span class="adm-op">МСК</span>
             <button class="btn sm gold" data-act="adm-bcs-add">${ic("plus")}Добавить</button></div>
-          <div class="adm-os">Придёт ${fmt(sc.audience)} игрокам — тем, у кого включены напоминания от бота (кто выключил — не получит).</div></div>`);
+          <div class="adm-os">Придёт ${num(sc.audience)} игрокам — тем, у кого включены напоминания от бота (кто выключил — не получит).</div></div>`);
     }
   } else if (ADM.tab === "db") {
     body.innerHTML = `<div class="box adm-odd"><div class="adm-oh"><b>${ic("download")}Экспорт</b></div>
@@ -429,12 +429,12 @@ async function admRender(el = topSheet()) {
     const cfg = `<div class="box">
       <div class="adm-oh"><b>Настройки журналов</b></div>
       <div class="adm-os" style="margin:2px 0 10px">Админский — действия админов (эта вкладка). Подробный — каждый запрос игроков (отдельная база, для разбора жалоб и откатов).</div>
-      <div class="row kv"><div class="grow"><div class="t">Админский журнал</div><div class="s">${fmt(r.total || 0)} записей${r.oldest ? ` · с ${admDate(r.oldest)}` : ""}</div></div></div>
+      <div class="row kv"><div class="grow"><div class="t">Админский журнал</div><div class="s">${num(r.total || 0)} записей${r.oldest ? ` · с ${admDate(r.oldest)}` : ""}</div></div></div>
       <div class="auto" style="margin:6px 0 2px"><span style="flex:1">Хранить, дней <span class="hint">(0 — всё)</span></span>
         ${r.canEdit ? `<input class="adm-oi" style="width:64px;text-align:center" inputmode="numeric" id="adm-alog-keep" value="${r.keep_days}"><button class="btn sm gold" data-act="adm-alog-keep">${ic("check")}</button>` : `<b>${r.keep_days || "всё"}</b>`}</div>
       ${r.canEdit ? `<button class="btn sm red" data-act="adm-alog-clear" style="margin-top:8px">${ic("x")}Очистить админский журнал</button>` : ""}
       <div style="height:1px;background:rgba(255,255,255,.09);margin:12px 0"></div>
-      <div class="row kv"><div class="grow"><div class="t">Подробный журнал действий</div><div class="s">${fmt(al.rows || 0)} записей · ${kb(al.bytes || 0)}${al.oldest ? ` · с ${admDate(al.oldest)}` : ""}</div></div>
+      <div class="row kv"><div class="grow"><div class="t">Подробный журнал действий</div><div class="s">${num(al.rows || 0)} записей · ${kb(al.bytes || 0)}${al.oldest ? ` · с ${admDate(al.oldest)}` : ""}</div></div>
         ${al.canEdit ? `<button class="sw${al.on ? " on" : ""}" data-act="adm-actlog-on" data-v="${al.on ? 0 : 1}"></button>` : `<b>${al.on ? "вкл" : "выкл"}</b>`}</div>
       <div class="auto" style="margin:6px 0 2px"><span style="flex:1">Хранить, дней</span>
         ${al.canEdit ? `<input class="adm-oi" style="width:64px;text-align:center" inputmode="numeric" id="adm-actlog-keep" value="${al.keep_days}"><button class="btn sm gold" data-act="adm-actlog-keep">${ic("check")}</button>` : `<b>${al.keep_days}</b>`}</div>
@@ -456,8 +456,8 @@ async function openAdmUser(id) {
         <div class="hint" style="font-size:13px">${u.username ? "@" + esc(u.username) + " · " : ""}id ${u.id}${u.banned ? ` · <span class="tl">заблокирован</span>` : ""}</div></div></div>
       ${fzz && fzz.frozen ? `<div class="adm-frz">${ic("lock")}<div><b>Кошелёк заморожен</b><span>с ${admDate(fzz.ts)}${fzz.by ? " · " + esc(fzz.by.name) : ""}${fzz.reason ? " · " + esc(fzz.reason) : ""}</span></div></div>` : ""}
       <div class="box">${admKv("Баланс", `<b>⭐ ${fmt(u.stars)}</b>`)}${admKv("Подарков", `<b>${fmt(u.gifts)} · ⭐ ${fmt(u.giftsValue)}</b>`)}
-        ${admKv("Итог в играх 24 ч / всего", `<span>${admSgn(u.pnl24)} / ${admSgn(u.pnlAll)}</span>`)}${admKv("Кейсов открыто", `<b>${fmt(u.opened)}</b>`)}
-        ${admKv("Рефералов", `<b>${fmt(u.refs)}</b>`)}${admKv("Регистрация / был", `<b>${admDate(u.created)} / ${admDate(u.seen)}</b>`)}</div>
+        ${admKv("Итог в играх 24 ч / всего", `<span>${admSgn(u.pnl24)} / ${admSgn(u.pnlAll)}</span>`)}${admKv("Кейсов открыто", `<b>${num(u.opened)}</b>`)}
+        ${admKv("Рефералов", `<b>${num(u.refs)}</b>`)}${admKv("Регистрация / был", `<b>${admDate(u.created)} / ${admDate(u.seen)}</b>`)}</div>
       ${wa ? `<div class="sec-t">${ic("wallet")}Кошелёк</div><div class="box adm-wal">
         ${[["main", "Адрес", wa.addr, "по нему игроку переводят звёзды"], ["anon", "Анонимный", wa.anon, "секретный: отправитель не видит, кому ушло"]].map(([k, t, a, s]) => `<div class="row"><div class="grow">
           <div class="s">${t} · ${s}</div><div class="t adm-addr">${esc(a)}</div></div></div>
@@ -491,8 +491,8 @@ async function openAdmUser(id) {
         <button class="btn sm red" data-act="adm-cosm-rm" data-id="${u.id}" data-i="${c.item}" data-n="${esc(c.title)}" data-p="${c.price}">Забрать</button></div>`).join("") || `<div class="hint" style="padding:14px">Ничего не куплено</div>`}</div>
       <div class="sec-t">Подарки · ${u.giftList.length}</div>
       <div class="box">${u.giftList.map(g => `<div class="row"><img class="spi" style="width:36px;height:36px;margin:0" src="${A.model(g.col, g.model, 64)}" alt="">
-        <div class="grow"><div class="t">${esc(g.col)} <small class="hint">#${fmt(g.num)}</small></div><div class="s">${esc(g.model)} · ⭐ ${fmt(g.value)}${g.price != null ? " · на маркете" : ""}</div></div>
-        <button class="btn sm red" data-act="adm-gift-rm" data-id="${u.id}" data-g="${g.id}" data-n="${esc(g.col)} #${fmt(g.num)}">${ic("x")}</button></div>`).join("") || `<div class="hint" style="padding:14px">Подарков нет</div>`}</div>
+        <div class="grow"><div class="t">${esc(g.col)} <small class="hint">#${num(g.num)}</small></div><div class="s">${esc(g.model)} · ⭐ ${fmt(g.value)}${g.price != null ? " · на маркете" : ""}</div></div>
+        <button class="btn sm red" data-act="adm-gift-rm" data-id="${u.id}" data-g="${g.id}" data-n="${esc(g.col)} #${num(g.num)}">${ic("x")}</button></div>`).join("") || `<div class="hint" style="padding:14px">Подарков нет</div>`}</div>
       <div class="sec-t">Последние операции</div>
       <div class="box">${u.events.map(x => admKv(`${esc(x.kind)} · ${admDate(x.ts)}`, admSgn(x.delta))).join("") || `<div class="hint" style="padding:14px">Пусто</div>`}</div>`);
   };
@@ -647,15 +647,15 @@ Object.assign(ACT, {
   },
   "adm-frc-rs": async el => { await post("admin/franchise/cfg", { [el.dataset.k]: null }); H.ok(); toast("Вернули по умолчанию", "ok"); admRender(); },
   "adm-frc-ann": async el => {
-    if (!await confirmM("Разослать всем?", `Сообщение о франшизе получат ${fmt(+el.dataset.n)} игроков. Отменить отправку будет нельзя.`, "Разослать")) return;
+    if (!await confirmM("Разослать всем?", `Сообщение о франшизе получат ${num(+el.dataset.n)} игроков. Отменить отправку будет нельзя.`, "Разослать")) return;
     el.disabled = true;
-    try { const r = await post("admin/franchise/announce"); H.ok(); toast(`Отправляем ${fmt(r.total)} игрокам`, "ok"); admRender(); }
+    try { const r = await post("admin/franchise/announce"); H.ok(); toast(`Отправляем ${num(r.total)} игрокам`, "ok"); admRender(); }
     finally { el.disabled = false; }
   },
   "adm-frc-promo": async el => {
     if (!await confirmM("Разослать предложение?", "Получат активные игроки нужного уровня с включёнными уведомлениями, кому ещё не отправляли (или давно).", "Разослать")) return;
     el.disabled = true;
-    try { const r = await post("admin/franchise/promo"); H.ok(); toast(`Отправляем ${fmt(r.total)} игрокам`, "ok"); admRender(); }
+    try { const r = await post("admin/franchise/promo"); H.ok(); toast(`Отправляем ${num(r.total)} игрокам`, "ok"); admRender(); }
     finally { el.disabled = false; }
   },
   "adm-ev-sw": async el => { const on = el.dataset.v === "1"; await post("admin/flash", { [el.dataset.k]: on }); H.ok(); toast(on ? "Включено" : "Выключено", "ok"); admRender(); },
@@ -679,7 +679,7 @@ Object.assign(ACT, {
   },
   "adm-gw-new": async el => {
     const f = k => topSheet().querySelector(`[data-gw="${k}"]`).value.trim();
-    const b = { title: f("title"), prize: f("prize"), winners: f("winners"), hours: f("hours"), minLevel: f("minLevel") };
+    const b = { title: f("title"), prize: starIn(f("prize")), winners: f("winners"), hours: f("hours"), minLevel: f("minLevel") };
     if (!b.title) return toast("Введи название");
     if (!await confirmM("Опубликовать розыгрыш?", `«${b.title}»: ⭐ ${fmt(+b.prize)} на ${b.winners}, итоги через ${b.hours} ч. Пост сразу появится в канале.`, "Опубликовать")) return;
     el.disabled = true;
@@ -698,7 +698,7 @@ Object.assign(ACT, {
   },
   "adm-db-exp": async el => {
     el.disabled = true;
-    try { const r = await post("admin/db/export"); H.ok(); toast(`Бот прислал базу: ${fmt(r.users)} игроков, ${fmt(r.kb)} КБ`, "ok"); }
+    try { const r = await post("admin/db/export"); H.ok(); toast(`Бот прислал базу: ${num(r.users)} игроков, ${num(r.kb)} КБ`, "ok"); }
     finally { el.disabled = false; }
   },
   "adm-odds-all": async () => {
@@ -738,9 +738,9 @@ Object.assign(ACT, {
   "adm-user": el => openAdmUser(+el.dataset.id),
   "adm-stars": async el => {
     const sign = +el.dataset.v;
-    const v = await promptM(sign > 0 ? "Начислить звёзды" : "Списать звёзды", "Сумма в звёздах. Действие попадёт в журнал.", "1000", sign > 0 ? "Начислить" : "Списать");
-    if (v == null || !(Math.floor(+v) > 0)) return;
-    const amt = Math.floor(+v), b = +(el.dataset.b || 0), neg = sign < 0 && amt > b;
+    const v = await promptM(sign > 0 ? "Начислить звёзды" : "Списать звёзды", "Сумма в звёздах. Действие попадёт в журнал.", "10", sign > 0 ? "Начислить" : "Списать");
+    if (v == null || !(starIn(v) > 0)) return;
+    const amt = starIn(v), b = +(el.dataset.b || 0), neg = sign < 0 && amt > b;
     if (neg && !await confirmM("Списать в минус?", `У игрока ⭐ ${fmt(b)}, баланс станет <b class="tl">⭐ ${fmt(b - amt)}</b>.
       Пока долг не погашен, он не сможет ставить и переводить звёзды. Доход бизнесов, бонусы и продажа подарков пойдут в погашение.`, "Списать в минус")) return;
     await post(`admin/user/${el.dataset.id}/stars`, { delta: sign * amt, neg }); H.ok(); toast("Готово", "ok");

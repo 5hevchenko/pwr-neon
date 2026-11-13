@@ -1,6 +1,7 @@
 """«Живая» игра: лента крупных выигрышей по всем играм, онлайн, «играют сейчас» по играм, реакции на чужие выигрыши.
 Крупный выигрыш пишет app.event() (BIGWIN_MIN), здесь — чтение и реакции."""
 
+from settings import S
 import time
 
 from fastapi import Depends, Request
@@ -100,7 +101,7 @@ async def react(wid: int, req: Request, uid=Depends(auth)):
         n = q1("SELECT COUNT(*) n FROM bigwin_reacts WHERE win=?", wid)["n"]
         _FEED.clear()   # своя реакция видна сразу, а не через 3 с
         if n == NOTIFY_AT:
-            note = (w["user"], f"Твой выигрыш ⭐ {w['amount']:,} в игре «{esc(NAMES.get(w['kind'], w['kind']))}» оценили уже {n} игрока!".replace(",", " "))
+            note = (w["user"], f"Твой выигрыш ⭐ {S(w['amount'])} в игре «{esc(NAMES.get(w['kind'], w['kind']))}» оценили уже {n} игрока!")
     if note:
         notify(*note)
     return {"ok": True}

@@ -63,9 +63,24 @@ starify(document.body);
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const enc = s => encodeURIComponent(s).replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29");
-const fmt = n => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u00a0");   // неразрывный пробел: число не рвётся между строками
-// 12 345 → «12,3K», 10 000 → «10K», 2 500 000 → «2,5M»
-const short = n => { const f = (v, d) => v.toFixed(d).replace(/\.0$/, "").replace(".", ","); return n >= 1e6 ? f(n / 1e6, n >= 1e7 ? 0 : 1) + "M" : n >= 1e4 ? f(n / 1e3, n >= 1e5 ? 0 : 1) + "K" : fmt(n); };
+// ---- числа и звёзды
+// В базе и в запросах звёзды хранятся в тысячных долях (1 ⭐ = 1000 единиц, 1 Telegram Star = 1 ⭐): так считаются и мелкие
+// суммы без дробей. На экране всё делится на STAR_K. fmt / short — для сумм в звёздах, num / numS — для обычных чисел (штуки, очки).
+const STAR_K = 1000;
+const num = n => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "\u00a0");   // неразрывный пробел: число не рвётся между строками
+const numS = n => { const f = (v, d) => v.toFixed(d).replace(/\.0$/, "").replace(".", ","); return n >= 1e6 ? f(n / 1e6, n >= 1e7 ? 0 : 1) + "M" : n >= 1e4 ? f(n / 1e3, n >= 1e5 ? 0 : 1) + "K" : num(n); };
+// звёзды числом: от 100 — целые, от 10 — до одного знака, меньше — до двух (совсем мелочь — до трёх)
+const starTxt = v => {
+  const a = Math.abs(v); if (a >= 100) return num(v);
+  let t = v.toFixed(a >= 10 ? 1 : a >= 0.1 || !a ? 2 : 3); if (t.includes(".")) t = t.replace(/0+$/, "").replace(/\.$/, "");
+  return (t === "-0" ? "0" : t).replace(".", ",");
+};
+const fmt = n => starTxt((+n || 0) / STAR_K);
+// 12 345 ⭐ → «12,3K», 2 500 000 ⭐ → «2,5M»
+const short = n => { const v = (+n || 0) / STAR_K, a = Math.abs(v), f = (x, d) => x.toFixed(d).replace(/\.0$/, "").replace(".", ","); return a >= 1e6 ? f(v / 1e6, a >= 1e7 ? 0 : 1) + "M" : a >= 1e4 ? f(v / 1e3, a >= 1e5 ? 0 : 1) + "K" : starTxt(v); };
+// поле ввода суммы: «12,5» → 12500 единиц; обратно — число без пробелов
+const starIn = t => Math.round((parseFloat(String(t ?? "").replace(/[\s\u00a0]/g, "").replace(",", ".")) || 0) * STAR_K);
+const starOut = n => String(+((+n || 0) / STAR_K).toFixed(3)).replace(".", ",");
 const pct = p => (p / 10).toString().replace(".", ",") + "%";
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const clock = s => { s = Math.max(0, Math.ceil(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
@@ -169,8 +184,8 @@ const sellK = g => g && g.src ? 1 : 1 - FEE("sell", .15);   // предметы 
 
 // доход подарка: 2% ценности в сутки, легендарные ×2, эпики ×1,5
 const giftPerHour = g => g.value * .02 / 24 * (g.mp <= 5 ? 2 : g.mp <= 10 ? 1.5 : 1);
-const perHourTxt = v => v >= 100 ? fmt(Math.round(v)) : v >= 10 ? v.toFixed(1).replace(".", ",") : v.toFixed(2).replace(".", ",");
-const giftName = g => `${esc(g.col)} <small>#${fmt(g.num)}</small>`;
+const perHourTxt = v => fmt(v);
+const giftName = g => `${esc(g.col)} <small>#${num(g.num)}</small>`;
 
 // анимация модели в большой карточке (Lottie)
 let LOTTIE_P = null;
@@ -228,7 +243,7 @@ function modal(html) {
 }
 const confirmM = (title, text, ok = "Да") => modal(`<h3>${title}</h3><p class="hint" style="margin:0 0 16px">${text}</p>
   <div class="btns"><button class="btn ghost" data-m="no">Отмена</button><button class="btn" data-m="ok">${ok}</button></div>`);
-const promptM = (title, text, val = "", ok = "Готово", im = "numeric") => modal(`<h3>${title}</h3><p class="hint" style="margin:0 0 12px">${text}</p>
+const promptM = (title, text, val = "", ok = "Готово", im = "decimal") => modal(`<h3>${title}</h3><p class="hint" style="margin:0 0 12px">${text}</p>
   <input inputmode="${im}"${im === "text" ? ' autocapitalize="characters" autocomplete="off" spellcheck="false"' : ""} value="${esc(val)}"><div class="btns"><button class="btn ghost" data-m="no">Отмена</button><button class="btn" data-m="ok">${ok}</button></div>`);
 
 const fx = $("#fx"), fc = fx.getContext("2d"); let P = [], fxOn = false;
@@ -425,7 +440,7 @@ async function renderCases() {
       return `<div class="case${c.id === "mega" ? " mega" : ""}${ci >= 6 ? " defer" : ""}" data-act="case" data-id="${c.id}" style="--k1:${k1};--k2:${k2}">
                 ${c.id === "mega" ? `<span class="hot">${ic("flame")}HOT</span>` : c.level > 1 ? `<span class="lvtag">${c.level} ур.</span>` : ""}
         <span class="gl-art"><img class="cv" src="${A.orig(c.cover)}" alt="" loading="lazy"></span>
-        <div class="cfoot"><div class="nm">${esc(c.title)}</div>${c.limit ? `<span class="c-limit">${c.left ? `Осталось ${fmt(c.left)} из ${fmt(c.limit)}` : "Тираж закончился"}</span>` : ""}<span class="minis">${c.previews.slice(0, 3).map(x => `<img src="${A.orig(x, 64)}" alt="" loading="lazy">`).join("")}</span></div>
+        <div class="cfoot"><div class="nm">${esc(c.title)}</div>${c.limit ? `<span class="c-limit">${c.left ? `Осталось ${num(c.left)} из ${num(c.limit)}` : "Тираж закончился"}</span>` : ""}<span class="minis">${c.previews.slice(0, 3).map(x => `<img src="${A.orig(x, 64)}" alt="" loading="lazy">`).join("")}</span></div>
         ${lvl < c.level ? `<div class="lock">${ic("lock")}${c.level} ур.</div>` : `<span class="pr">⭐ ${fmt(c.price)}</span>`}</div>`;
     }).join("")}</div>
     <div class="sec-t"><span class="live-dot"></span>Живая лента</div><div class="feed" id="feed"></div>
@@ -522,7 +537,7 @@ async function doOpenInner(sheet, id, c, n) {
     const vt = valTier(g, sheet._ref), RAR = { gold: "Легендарный", pink: "Эпический", purple: "Редкий", blue: "Хороший", gray: "Обычный" };
     won.innerHTML = `<div class="won wt-${vt}" style="margin-top:16px"><div class="won-g"><i class="won-rays"></i>${giftHTML(g, { big: true })}</div>
       <span class="won-rar">${RAR[vt]}</span>
-      <h2 style="margin:10px 0 0;font-size:22px">${esc(g.col)}</h2><div class="hint">#${fmt(g.num)} · ${esc(g.model)} · ${esc(g.backdrop)}</div>
+      <h2 style="margin:10px 0 0;font-size:22px">${esc(g.col)}</h2><div class="hint">#${num(g.num)} · ${esc(g.model)} · ${esc(g.backdrop)}</div>
       <div class="won-v star">≈ ⭐ <b id="won-v">0</b></div></div>`;
     startLottie(won);
     const wv = won.querySelector("#won-v"), t0v = performance.now();
@@ -807,7 +822,7 @@ function giftSheetHTML(o, mine) {
   } else if (g.price != null) {
     acts = `<div class="btns"><button class="btn gold" data-act="buy" data-id="${g.id}">Купить за ⭐ ${fmt(g.price)}</button></div>`;
   }
-  return `${giftHTML(g, { big: true })}<h2>${esc(g.col)}</h2><div class="sub">Коллекционный подарок #${fmt(g.num)}</div>
+  return `${giftHTML(g, { big: true })}<h2>${esc(g.col)}</h2><div class="sub">Коллекционный подарок #${num(g.num)}</div>
     <div class="box">
       <div class="row kv"><span class="k">Модель</span><span class="v">${esc(g.model)}</span><span class="pill">${pct(g.mp)}</span></div>
       <div class="row kv"><span class="k">Фон</span><span class="v">${esc(g.backdrop)}</span><span class="pill">${pct(g.bp)}</span></div>
@@ -838,16 +853,16 @@ async function newTrade(uid) {
     : `<div class="hint" style="padding:4px">Нет свободных подарков</div>`;
   replaceSheet(el, `<div style="display:flex;align-items:center;gap:12px;margin:4px 0 6px">${avaHTML(them, 44, { lv: true })}<div><div class="hint" style="font-size:13px">Обмен с</div><b style="font-size:19px">${esc(them.name)}</b></div></div>
     <div class="sec-t">Ты отдаёшь</div>${grid(me.gifts, pickG, "g")}
-    <div class="auto"><span style="flex:1">+ звёзды от тебя</span><input id="tgs" inputmode="numeric" value="0"></div>
+    <div class="auto"><span style="flex:1">+ звёзды от тебя</span><input id="tgs" inputmode="decimal" value="0"></div>
     <div class="sec-t">Ты хочешь получить</div>${grid(them.gifts, pickW, "w")}
-    <div class="auto"><span style="flex:1">+ звёзды от него</span><input id="tws" inputmode="numeric" value="0"></div>
+    <div class="auto"><span style="flex:1">+ звёзды от него</span><input id="tws" inputmode="decimal" value="0"></div>
     <div class="hint" style="font-size:12px;text-align:center;margin:6px 0 0">Со звёзд, которые переходят в обмене, комиссия ${feeP("trade", .05)} — она уходит в банк игры.</div>
     <div class="box" style="margin-top:14px"><div class="row kv"><span class="k">Баланс</span><span class="v" id="tsum">—</span></div></div>
     <div class="btns"><button class="btn" data-act="send-trade">Предложить обмен</button></div>`);
   const all = new Map([...me.gifts, ...them.gifts].map(g => [g.id, g]));
   const sum = () => {
-    const gv = [...pickG].reduce((s, i) => s + all.get(i).value, 0) + (+el.querySelector("#tgs").value || 0);
-    const wv = [...pickW].reduce((s, i) => s + all.get(i).value, 0) + (+el.querySelector("#tws").value || 0);
+    const gv = [...pickG].reduce((s, i) => s + all.get(i).value, 0) + starIn(el.querySelector("#tgs").value);
+    const wv = [...pickW].reduce((s, i) => s + all.get(i).value, 0) + starIn(el.querySelector("#tws").value);
     const d = wv - gv;
     el.querySelector("#tsum").innerHTML = `отдаёшь ⭐${short(gv)} · получаешь ⭐${short(wv)} <span class="${d >= 0 ? "win" : "lose"}">(${d >= 0 ? "+" : "−"}${short(Math.abs(d))})</span>`;
   };
@@ -858,7 +873,7 @@ async function newTrade(uid) {
   });
   el.querySelectorAll("input").forEach(i => i.oninput = sum); sum();
   el._send = async () => {
-    await post("trades", { to: uid, give: [...pickG], want: [...pickW], giveStars: +el.querySelector("#tgs").value || 0, wantStars: +el.querySelector("#tws").value || 0 });
+    await post("trades", { to: uid, give: [...pickG], want: [...pickW], giveStars: starIn(el.querySelector("#tgs").value), wantStars: starIn(el.querySelector("#tws").value) });
     H.ok(); toast("Предложение отправлено", "ok"); closeSheet(); refreshFriends();
   };
 }
@@ -910,7 +925,7 @@ function franchiseInfo() {
 
 // ============================================================ приглашение
 function invite() {
-  const text = ME.refBonus ? `Залетай открывать кейсы 🎁 По моей ссылке получишь +${ME.refBonus} ⭐ на старт (игровых)` : "Залетай открывать кейсы 🎁";
+  const text = ME.refBonus ? `Залетай открывать кейсы 🎁 По моей ссылке получишь +${fmt(ME.refBonus)} ⭐ на старт` : "Залетай открывать кейсы 🎁";
   const url = `https://t.me/share/url?url=${enc(ME.refLink)}&text=${enc(text)}`;
   if (inTg) tg.openTelegramLink(url); else { navigator.clipboard?.writeText(ME.refLink); toast("Ссылка скопирована"); }
 }
@@ -926,7 +941,7 @@ const ACT = {
   "claim-daily": async () => {
     const r = await post("daily"); H.ok();
     if (r.milestone) { toast(`🏆 Веха ${r.milestone.day} дней подряд! +⭐ ${fmt(r.milestone.stars)} + ключ «${r.milestone.key}»`, "ok"); burst(innerWidth / 2, innerHeight / 3, ["#ffd76a", "#ff6fb5", "#7cc2ff", "#fff"], 160); }
-    else { toast(`+⭐ ${r.bonus}${r.key ? ` + ключ «${r.key}»` : ""} · серия ${r.streak} дн.`, "ok"); burst(innerWidth / 2, innerHeight / 3, ["#ffd76a", "#fff"]); }
+    else { toast(`+⭐ ${fmt(r.bonus)}${r.key ? ` + ключ «${r.key}»` : ""} · серия ${r.streak} дн.`, "ok"); burst(innerWidth / 2, innerHeight / 3, ["#ffd76a", "#fff"]); }
     if (r.key || r.milestone) CASES = [];
     closeSheet(); await loadMe(); if (TAB === "cases") renderCases();
   },
@@ -942,14 +957,14 @@ const ACT = {
   gift: el => openGift(REG.get(el.dataset.k)),
   sell: async el => {
     const g = topSheet()._o.g;
-    if (!await confirmM("Продать подарок?", `${esc(g.col)} #${fmt(g.num)} уйдёт за ⭐ ${fmt(Math.floor(g.value * sellK(g)))} (${g.src ? "100%" : sellP()} ценности). Хочешь дороже — выстави на маркет.`, "Продать")) return;
+    if (!await confirmM("Продать подарок?", `${esc(g.col)} #${num(g.num)} уйдёт за ⭐ ${fmt(Math.floor(g.value * sellK(g)))} (${g.src ? "100%" : sellP()} ценности). Хочешь дороже — выстави на маркет.`, "Продать")) return;
     const r = await post(`gift/${el.dataset.id}/sell`); setStars(r.stars); H.ok(); toast(`+⭐ ${fmt(r.paid)}`, "ok"); giftChanged();
   },
   list: async el => {
     const g = topSheet()._o.g;
-    const v = await promptM("Цена на маркете", `Ценность ⭐ ${fmt(g.value)}. Комиссия маркета ${feeP("market", .05)}.`, Math.round(g.value * 1.1), "Выставить");
+    const v = await promptM("Цена на маркете", `Ценность ⭐ ${fmt(g.value)}. Комиссия маркета ${feeP("market", .05)}.`, starOut(Math.round(g.value * 1.1)), "Выставить");
     if (v == null) return;
-    await post(`gift/${el.dataset.id}/list`, { price: Math.floor(+v) }); H.ok(); toast("Выставлено на маркет", "ok"); giftChanged();
+    await post(`gift/${el.dataset.id}/list`, { price: starIn(v) }); H.ok(); toast("Выставлено на маркет", "ok"); giftChanged();
   },
   unlist: async el => { await post(`gift/${el.dataset.id}/unlist`); toast("Снято с продажи"); giftChanged(); },
   buy: async el => {
@@ -1007,8 +1022,8 @@ const ACT = {
   "crash-allin": () => crashAllin(),
   "auto-tog": el => { autoOn = !autoOn; el.classList.toggle("on", autoOn); H.sel(); },
   amt: el => {
-    const i = $("#camt"), v = el.dataset.v, cur = +i.value || 0;
-    i.value = v === "half" ? Math.max(10, Math.floor(cur / 2)) : v === "dbl" ? Math.min(ME.stars, cur * 2) : v === "max" ? ME.stars : v;
+    const i = $("#camt"), v = el.dataset.v, cur = starIn(i.value);
+    i.value = starOut(v === "half" ? Math.max(10, Math.floor(cur / 2)) : v === "dbl" ? Math.min(ME.stars, cur * 2) : v === "max" ? ME.stars : +v);
     H.sel();
   },
 };

@@ -1,5 +1,6 @@
 """«Звездопад»: общая шкала на 60 000 ⭐. Игроки вкладывают звёзды; когда шкала заполнена, один из участников
 (шанс = доля вклада) получает дорогой подарок ценностью 50–65 тыс. ⭐. Средний приз ~57 тыс. → банку остаётся ~5%."""
+from settings import S
 import random
 
 from fastapi import Depends, Request
@@ -87,7 +88,7 @@ def starfall(uid=Depends(auth)):
 async def starfall_bet(req: Request, uid=Depends(auth)):
     amount = int((await req.json()).get("amount", 0))
     if amount < MIN_BET:
-        err(f"минимум ⭐ {MIN_BET}")
+        err(f"минимум ⭐ {S(MIN_BET)}")
     if A.SELF_GUARD:
         A.SELF_GUARD(uid, amount)
     won = None
@@ -96,7 +97,7 @@ async def starfall_bet(req: Request, uid=Depends(auth)):
         mine = q1("SELECT COALESCE(SUM(amount),0) s FROM sf_bets WHERE round=? AND user=?", r["id"], uid)["s"]
         amount = min(amount, r["target"] - r["filled"], USER_CAP - mine)
         if amount <= 0:
-            err(f"в одном раунде можно вложить не больше ⭐ {USER_CAP}")
+            err(f"в одном раунде можно вложить не больше ⭐ {S(USER_CAP)}")
         if bal(uid) < amount:
             err("Не хватает звёзд")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (amount, uid))
@@ -115,6 +116,6 @@ async def starfall_bet(req: Request, uid=Depends(auth)):
         win, col, value, st = won
         name = q1("SELECT name FROM users WHERE id=?", win)["name"]
         for u in st:
-            notify(u, f"🌠 <b>Звездопад!</b> Шкала заполнена — <b>{esc(name)}</b> забирает {esc(col)} ценностью ⭐ {value}"
+            notify(u, f"🌠 <b>Звездопад!</b> Шкала заполнена — <b>{esc(name)}</b> забирает {esc(col)} ценностью ⭐ {S(value)}"
                       + (" — это ты! Подарок уже в сумке." if u == win else ". Новый раунд уже начался."))
     return {**result, "added": amount, "stars": bal(uid), "levelup": lvl}

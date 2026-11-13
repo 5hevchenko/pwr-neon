@@ -5,9 +5,9 @@
 let CX = null, CA = null, cxRange = "1d", cxSide = "buy", cxAmt = 1000;
 
 // цена в звёздах: крупные — целыми, мелкие — с нужным числом знаков
-const pxFmt = v => v == null ? "—" : v >= 1000 ? fmt(Math.round(v)) : v >= 1 ? v.toFixed(2).replace(".", ",") : v.toPrecision(3).replace(".", ",");
-const usdFmt = v => v == null ? "" : "$" + (v >= 1000 ? fmt(Math.round(v)) : v >= 1 ? v.toFixed(2) : v.toPrecision(3));
-const qtyFmt = v => !v ? "0" : v >= 1000 ? fmt(Math.round(v)) : v >= 1 ? (+v.toFixed(4)).toString().replace(".", ",") : v.toLocaleString("en", { maximumSignificantDigits: 4, useGrouping: false }).replace(".", ",");
+const pxFmt = v => v == null ? "—" : v >= 1e5 ? fmt(v) : (v / STAR_K).toPrecision(3).replace(/\.?0+$/, "").replace(".", ",");   // цена монеты в звёздах
+const usdFmt = v => v == null ? "" : "$" + (v >= 1000 ? num(Math.round(v)) : v >= 1 ? v.toFixed(2) : v.toPrecision(3));
+const qtyFmt = v => !v ? "0" : v >= 1000 ? num(Math.round(v)) : v >= 1 ? (+v.toFixed(4)).toString().replace(".", ",") : v.toLocaleString("en", { maximumSignificantDigits: 4, useGrouping: false }).replace(".", ",");
 const pctFmt = v => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(2).replace(".", ",") + "%";
 // логотип монеты (PNG в web/coins), пока грузится — цветной кружок со знаком
 const coinBadge = (a, s = 40) => `<span class="cbadge" style="--c:${a.color};--s:${s}px">${a.glyph}<img src="coins/${a.id}.png?v=1" alt="" onerror="this.remove()"></span>`;
@@ -67,7 +67,7 @@ function fillCX() {
     ${CX.top.length ? `<div class="sec-t">${ic("crown")}Крупнейшие портфели</div>
       <div class="box">${CX.top.map((u, i) => `<div class="row tap" data-act="profile" data-id="${u.id}"><span class="place p${i + 1}">${i + 1}</span>${avaHTML(u, 34)}
         <div class="grow"><div class="t">${esc(u.name)}</div></div><b>⭐ ${short(u.value)}</b></div>`).join("")}</div>` : ""}
-    <div class="disc">Курсы реальные (OKX), обновляются каждые 10 секунд, графики — за 24 часа. 1 ⭐ = $${String(CX.starUsd).replace(".", ",")}. Комиссия ${String(CX.fee * 100).replace(".", ",")}% с каждой сделки. Монеты игровые: вывести или перевести их на настоящий кошелёк нельзя. ${esc(ME.disclaimer)}</div>`;
+    <div class="disc">Курсы реальные (OKX), обновляются каждые 10 секунд, графики — за 24 часа. 1 ⭐ = $${String(+(CX.starUsd * STAR_K).toFixed(2)).replace(".", ",")}. Комиссия ${String(CX.fee * 100).replace(".", ",")}% с каждой сделки. Монеты игровые: вывести или перевести их на настоящий кошелёк нельзя. ${esc(ME.disclaimer)}</div>`;
 }
 
 // ------------------------------------------------------------ монета
@@ -129,7 +129,7 @@ function fillCA(el) {
     ${a.tx.length ? `<div class="sec-t">${ic("clock")}Твои сделки</div><div class="box">${a.tx.map(t => `<div class="row"><span class="pic ${t.side === "buy" ? "g" : "r"}">${ic(t.side === "buy" ? "plus" : "coins")}</span>
       <div class="grow"><div class="t">${{ buy: "Покупка", sell: "Продажа", swap: "Обмен", swapin: "Получено обменом" }[t.side] || t.side} ${qtyFmt(t.qty)} ${a.id}</div><div class="s">по ⭐ ${pxFmt(t.price)} · ${new Date(t.ts * 1000).toLocaleString("ru", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</div></div>
       <b class="${t.side === "buy" ? "tl" : t.side === "sell" ? "tw" : ""}">${t.side === "buy" ? "−" : t.side === "sell" ? "+" : "≈ "}⭐ ${short(t.stars)}</b></div>`).join("")}</div>` : ""}
-    <div class="disc">Курс с биржи OKX, 1 ⭐ = $0,015. Комиссия ${String(a.fee * 100).replace(".", ",")}% при покупке и продаже. Монеты игровые, вывести нельзя.</div>`;
+    <div class="disc">Курс с биржи OKX, 1 ⭐ = $15. Комиссия ${String(a.fee * 100).replace(".", ",")}% при покупке и продаже. Монеты игровые, вывести нельзя.</div>`;
   caBindChart(el); caForm(el);
 }
 // тихое обновление раз в 10 с: цена, позиция, форма — без перерисовки графика
@@ -147,11 +147,11 @@ function caForm(el, soft) {
     const max = Math.max(0, ME.stars);
     if (!soft) cxAmt = Math.min(cxAmt, max) || Math.min(1000, max);
     const get = cxAmt * (1 - a.fee) / (a.price || 1);
-    f.innerHTML = `<div class="ca-in"><span>⭐</span><input id="ca-amt" type="number" inputmode="numeric" min="${a.min}" value="${cxAmt}"><small>≈ ${qtyFmt(get)} ${a.id}</small></div>
+    f.innerHTML = `<div class="ca-in"><span>⭐</span><input id="ca-amt" inputmode="decimal" value="${starOut(cxAmt)}"><small>≈ ${qtyFmt(get)} ${a.id}</small></div>
       <div class="quick">${[100, 1000, 10000].map(v => `<button data-act="ca-amt" data-v="${v}">${short(v)}</button>`).join("")}<button data-act="ca-amt" data-v="max">MAX</button></div>
       <button class="btn cta green ca-go" data-act="ca-buy" ${cxAmt < a.min ? "disabled" : ""}>Купить ${a.id} за ⭐ ${fmt(cxAmt)}</button>`;
     const inp = f.querySelector("#ca-amt");
-    inp.oninput = () => { cxAmt = Math.max(0, Math.floor(+inp.value || 0)); const b = f.querySelector(".ca-go"); b.disabled = cxAmt < a.min; b.innerHTML = `Купить ${a.id} за ⭐ ${fmt(cxAmt)}`; f.querySelector(".ca-in small").textContent = `≈ ${qtyFmt(cxAmt * (1 - a.fee) / (a.price || 1))} ${a.id}`; };
+    inp.oninput = () => { cxAmt = Math.max(0, starIn(inp.value)); const b = f.querySelector(".ca-go"); b.disabled = cxAmt < a.min; b.innerHTML = `Купить ${a.id} за ⭐ ${fmt(cxAmt)}`; f.querySelector(".ca-in small").textContent = `≈ ${qtyFmt(cxAmt * (1 - a.fee) / (a.price || 1))} ${a.id}`; };
   } else {
     const got = p => Math.floor(a.qty * p / 100 * (a.price || 0) * (1 - a.fee));
     f.innerHTML = a.qty ? `<div class="ca-sell">${[25, 50, 100].map(p => `<button class="btn ${p === 100 ? "red" : "ghost"}" data-act="ca-sell" data-v="${p}"><b>${p === 100 ? "Всё" : p + "%"}</b><span>+⭐ ${short(got(p))}</span></button>`).join("")}</div>`

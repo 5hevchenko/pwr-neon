@@ -74,8 +74,8 @@ function bkTopHTML() {
   if (bkTop === "donors") return bkPeople(BK.donors, u => `<b class="tw">⭐ ${short(u.sum)}</b>`, "Банку пока никто ничего не дарил — стань первым меценатом");
   if (bkTop === "saviors") return bkPeople((BK.crisis || {}).saviors || [], u => `<b class="tw">⭐ ${short(u.sum)}</b>`, "Спасителей пока нет — подари банку в кризис");
   const clans = (BK.clanHolders || []).map(c => `<div class="row tap" data-act="clan" data-id="${c.id}"><span class="place">${ic("users")}</span>
-    <div class="grow"><div class="t">[${esc(c.tag)}] ${esc(c.name)}</div><div class="s">клан · дивиденды в казну</div></div><b>${fmt(c.n)} акц.</b></div>`).join("");
-  return bkPeople(BK.holders, u => `<b>${fmt(u.n)} акц.</b>`, "Акции пока никто не купил — будь первым") + clans;
+    <div class="grow"><div class="t">[${esc(c.tag)}] ${esc(c.name)}</div><div class="s">клан · дивиденды в казну</div></div><b>${num(c.n)} акц.</b></div>`).join("");
+  return bkPeople(BK.holders, u => `<b>${num(u.n)} акц.</b>`, "Акции пока никто не купил — будь первым") + clans;
 }
 function fillBK(el) {
   if (!BK || !el.isConnected) return;
@@ -97,7 +97,7 @@ function fillBK(el) {
         <div><span>14 дней</span><b class="${d14 >= 0 ? "up" : "dn"}">${sgn(d14)}</b></div>
         <div><span>С открытия</span><b class="${since >= 0 ? "up" : "dn"}">${sgn(since)}</b></div>
       </div>
-      <button class="bkh-vrow" data-act="bk-vault"><span class="bkh-vi">${ic("lock")}</span><span class="bkh-vt"><b>Хранилище банка</b><small>${(BK.vault || {}).count ? `${fmt(BK.vault.count)} ${plural(BK.vault.count, ["подарок", "подарка", "подарков"])} на ⭐ ${short(BK.vault.value)}` : "проигранные в апгрейде подарки"}</small></span>${ic("chev")}</button>
+      <button class="bkh-vrow" data-act="bk-vault"><span class="bkh-vi">${ic("lock")}</span><span class="bkh-vt"><b>Хранилище банка</b><small>${(BK.vault || {}).count ? `${num(BK.vault.count)} ${plural(BK.vault.count, ["подарок", "подарка", "подарков"])} на ⭐ ${short(BK.vault.value)}` : "проигранные в апгрейде подарки"}</small></span>${ic("chev")}</button>
       <button class="bkh-addr" data-act="bk-addr"><span>Адрес банка</span><b>${payAddrFmt(BK.addr)}</b>${ic("copy")}</button>
       <button class="bkh-gift" data-act="bk-gift">${ic("heart")}Перевести в банк${BK.gifted ? `<em>ты уже подарил ⭐ ${short(BK.gifted)}</em>` : ""}</button>
     </div>
@@ -115,19 +115,19 @@ function fillBK(el) {
     <div class="bksh">
       <div class="bksh-top"><div><span>Цена акции</span><b>⭐ ${fmt(BK.price)}</b><em class="${pch >= 0 ? "up" : "dn"}">${pct(pch)} за 14 дней</em></div>
         ${spark(ps, pch >= 0, 110, 44)}</div>
-      <div class="bksh-div">${ic("coins")}<div class="grow"><b>Дивиденды через ${h} ч ${mi} мин</b><span>${Math.round(BK.divShare * 100)}% вчерашней прибыли банка делится на акции${BK.lastDiv && BK.lastDiv.total ? ` · прошлая выплата ⭐ ${String(BK.lastDiv.perShare).replace(".", ",")} на акцию` : ""}</span></div></div>
-      ${m.n ? `<div class="bks-top"><div><span>У тебя</span><b>${fmt(m.n)}</b></div><div><span>Стоимость</span><b>⭐ ${short(m.value)}</b></div><div><span>Прибыль</span><b class="${pl >= 0 ? "tw" : "tl"}">${sgn(pl)}</b></div></div>
+      <div class="bksh-div">${ic("coins")}<div class="grow"><b>Дивиденды через ${h} ч ${mi} мин</b><span>${Math.round(BK.divShare * 100)}% вчерашней прибыли банка делится на акции${BK.lastDiv && BK.lastDiv.total ? ` · прошлая выплата ⭐ ${fmt(BK.lastDiv.perShare)} на акцию` : ""}</span></div></div>
+      ${m.n ? `<div class="bks-top"><div><span>У тебя</span><b>${num(m.n)}</b></div><div><span>Стоимость</span><b>⭐ ${short(m.value)}</b></div><div><span>Прибыль</span><b class="${pl >= 0 ? "tw" : "tl"}">${sgn(pl)}</b></div></div>
         <div class="bks-row"><span>Дивиденды сегодня (прогноз)</span><b class="tw">+⭐ ${fmt(m.est)}</b></div>
         <div class="bks-row"><span>Получено дивидендов всего</span><b>⭐ ${fmt(m.div)}</b></div>` : ""}
       ${room > 0 ? `<div class="bks-buy-t">${ic("trend")}Купить акции</div><div class="jpbuy bks-buy">${[1, 10, 100, 1000].filter(n => n <= room).map(n => `<button data-act="bk-buy" data-v="${n}"><b>+${n}</b><span>⭐ ${short(n * BK.price)}</span></button>`).join("")}</div>`
-        : `<div class="hint" style="font-size:12.5px;text-align:center;margin-top:8px">Лимит — ${fmt(BK.maxPer)} акций в одни руки</div>`}
+        : `<div class="hint" style="font-size:12.5px;text-align:center;margin-top:8px">Лимит — ${num(BK.maxPer)} акций в одни руки</div>`}
       ${m.n ? `<button class="btn ghost bks-sell" data-act="bk-sell" ${m.sellIn ? "disabled" : ""}>${m.sellIn ? `${ic("lock")}Продажа через ${Math.floor(m.sellIn / 3600)} ч ${Math.floor(m.sellIn % 3600 / 60)} мин` : `${ic("coins")}Продать все · ⭐ ${short(Math.floor(m.n * BK.price * (1 - BK.sellFee)))}`}</button>` : ""}
-      <div class="bks-foot"><span>Акций у игроков</span><div class="cbar"><div style="width:${Math.max(.5, BK.held / BK.supply * 100)}%"></div></div><b>${fmt(BK.held)} / ${short(BK.supply)}</b></div>
+      <div class="bks-foot"><span>Акций у игроков</span><div class="cbar"><div style="width:${Math.max(.5, BK.held / BK.supply * 100)}%"></div></div><b>${num(BK.held)} / ${numS(BK.supply)}</b></div>
     </div>
     <details class="bk-how"><summary>${ic("info")}Как работают акции</summary>
-      <p>Цена акции = банк / ${short(BK.supply)}. Игроки проигрывают — банк растёт и акции дорожают, выигрывают — дешевеют.</p>
-      <p>Каждый день в 00:00 UTC (11:00 по Сахалину) ${Math.round(BK.divShare * 100)}% вчерашней прибыли банка делится на акции у игроков (если акций у игроков меньше ${short(BK.divFloor || 10000)} — делится как на ${short(BK.divFloor || 10000)}, остаток остаётся в банке). В убыточный для банка день дивидендов нет.</p>
-      <p>Не больше ${fmt(BK.maxPer)} акций в одни руки. Продать можно через сутки после покупки, комиссия ${pctF(BK.sellFee)}.</p></details>
+      <p>Цена акции = банк / ${numS(BK.supply)}. Игроки проигрывают — банк растёт и акции дорожают, выигрывают — дешевеют.</p>
+      <p>Каждый день в 00:00 UTC (11:00 по Сахалину) ${Math.round(BK.divShare * 100)}% вчерашней прибыли банка делится на акции у игроков (если акций у игроков меньше ${numS(BK.divFloor || 10000)} — делится как на ${numS(BK.divFloor || 10000)}, остаток остаётся в банке). В убыточный для банка день дивидендов нет.</p>
+      <p>Не больше ${num(BK.maxPer)} акций в одни руки. Продать можно через сутки после покупки, комиссия ${pctF(BK.sellFee)}.</p></details>
 
     <div class="sec-t">${ic("coins")}Вклады в банк</div>
     <div class="bkdep">
@@ -187,10 +187,10 @@ async function openVault() {
   el.querySelector("#vl-body").innerHTML = `
     <div class="vlh">
       <div class="vlh-door"><i></i><i></i><i></i>${ic("lock")}</div>
-      <div class="vlh-t"><span>Хранилище банка</span><b>${fmt(d.count)} ${plural(d.count, ["подарок", "подарка", "подарков"])}</b><em>⭐ ${fmt(d.value)}</em></div>
+      <div class="vlh-t"><span>Хранилище банка</span><b>${num(d.count)} ${plural(d.count, ["подарок", "подарка", "подарков"])}</b><em>⭐ ${fmt(d.value)}</em></div>
     </div>
     <p class="vl-how">Сюда попадают подарки, проигранные в апгрейде. Через ${Math.round(d.ttl / 3600)} часов банк перерабатывает их в звёзды.
-      ${d.recycled.n ? `За неделю переработано ${fmt(d.recycled.n)} ${plural(d.recycled.n, ["подарок", "подарка", "подарков"])} на ⭐ ${short(d.recycled.value)}.` : ""}</p>
+      ${d.recycled.n ? `За неделю переработано ${num(d.recycled.n)} ${plural(d.recycled.n, ["подарок", "подарка", "подарков"])} на ⭐ ${short(d.recycled.value)}.` : ""}</p>
     ${d.items.length ? `<div class="vl-grid">${cells}</div>` : emptyHTML("lock", "Хранилище пустое — апгрейды пока все удачные")}
     <div class="disc">${esc(ME.disclaimer)}</div>`;
   starify(el);
@@ -237,7 +237,7 @@ Object.assign(ACT, {
   },
   "bk-sell": async () => {
     const n = BK.mine.n, got = Math.floor(n * BK.price * (1 - BK.sellFee));
-    if (!await confirmM(`Продать ${fmt(n)} ${plural(n, ["акцию", "акции", "акций"])}?`, `Получишь ⭐ ${fmt(got)} (комиссия ${pctF(BK.sellFee)}). Дивиденды за сегодня не придут.`, "Продать")) return;
+    if (!await confirmM(`Продать ${num(n)} ${plural(n, ["акцию", "акции", "акций"])}?`, `Получишь ⭐ ${fmt(got)} (комиссия ${pctF(BK.sellFee)}). Дивиденды за сегодня не придут.`, "Продать")) return;
     const r = await post("bank/shares", { n: -n }); setStars(r.stars); H.ok(); toast(`Продано · +⭐ ${fmt(got)}`, "ok");
     await loadBK(); loadBank();
   },

@@ -4,6 +4,7 @@
 Перерыв: 1, 7 или 30 дней без ставок, отменить нельзя. Проверка — в app.check_bet и во входах игр, которые его не зовут.
 Итоги недели: в понедельник бот присылает раунды, итог, лучший выигрыш и любимую игру; при заметном минусе
 напоминает про лимиты."""
+from settings import S
 import asyncio
 import time
 
@@ -62,9 +63,9 @@ def guard(uid, amount=0):
     if r["day_loss"] > 0:
         left = r["day_loss"] - loss_today(uid)
         if left <= 0:
-            err(f"Дневной лимит проигрыша {nf(r['day_loss'])} ⭐ исчерпан. Ставки откроются в {_msk(day_start() + 86400)[-5:]} по Москве")
+            err(f"Дневной лимит проигрыша {S(r['day_loss'])} ⭐ исчерпан. Ставки откроются в {_msk(day_start() + 86400)[-5:]} по Москве")
         if amount > left:
-            err(f"До дневного лимита проигрыша осталось {nf(left)} ⭐, ставка не больше этой суммы")
+            err(f"До дневного лимита проигрыша осталось {S(left)} ⭐, ставка не больше этой суммы")
     if not (r["day_loss"] > 0 or r["pause_until"] > t or r["next_at"]):
         LIM.discard(uid)
 
@@ -92,7 +93,7 @@ async def limits_set(req: Request, uid=Depends(auth)):
             except (TypeError, ValueError):
                 err("Введи целое число")
             if v and not 100 <= v <= 100_000_000:
-                err("Лимит от 100 ⭐")
+                err("Лимит от 0,1 ⭐")
             if v and (not cur or v < cur):   # строже — сразу
                 db.execute("UPDATE self_limit SET day_loss=?, next_loss=NULL, next_at=0, ts=? WHERE user=?", (v, t, uid))
             elif v != cur:                   # мягче или снять — через сутки
@@ -141,8 +142,8 @@ def _report():
         bk = q1(f"SELECT kind FROM events WHERE user=? AND kind IN {GAME_KINDS} AND ts>=? AND ts<? ORDER BY delta DESC LIMIT 1", u["id"], week, ws)
         net = r["net"] or 0
         text = (f"<b>Твоя неделя в играх</b>\n\nРаундов: {nf(r['n'])}\n"
-                f"Итог: <b>{'+' if net >= 0 else '−'}{nf(abs(net))} ⭐</b>\n"
-                + (f"Лучший выигрыш: +{nf(r['best'])} ⭐ ({GAME_NAMES.get(bk['kind'], bk['kind'])})\n" if r["best"] and r["best"] > 0 and bk else "")
+                f"Итог: <b>{'+' if net >= 0 else '−'}{S(abs(net))} ⭐</b>\n"
+                + (f"Лучший выигрыш: +{S(r['best'])} ⭐ ({GAME_NAMES.get(bk['kind'], bk['kind'])})\n" if r["best"] and r["best"] > 0 and bk else "")
                 + (f"Чаще всего: {GAME_NAMES.get(fav['kind'], fav['kind'])}\n" if fav else ""))
         if net <= -REPORT_LOSS:
             text += "\nЕсли хочешь притормозить, в настройках есть дневной лимит проигрыша и перерыв от суток."

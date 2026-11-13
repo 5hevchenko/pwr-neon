@@ -190,7 +190,7 @@ async function openPaySend(id, amt = 0, addr = "") {
   const fee = addr && info.feeAddr != null ? info.feeAddr : info.fee, min = info.min || 10, max = info.max || 0, fp = +(fee * 100).toFixed(2);
   const el = openSheet(`<div class="pay-to">${payAva(u, 78)}<span class="pay-tl">Перевод игроку</span><b>${esc(u.name)}</b><span>${addr ? "по адресу " + payAddrFmt(addr.toUpperCase()) : u.username ? "@" + esc(u.username) : "id " + u.id}</span></div>
     <div class="pay-amt"><label>Сумма перевода</label>
-      <div class="pay-ai"><span class="pay-st">⭐</span><input class="pay-a" inputmode="numeric" placeholder="0" value="${amt || ""}" autocomplete="off" maxlength="15"></div>
+      <div class="pay-ai"><span class="pay-st">⭐</span><input class="pay-a" inputmode="decimal" placeholder="0" value="${amt ? starOut(amt) : ""}" autocomplete="off" maxlength="15"></div>
       <div class="pay-ab">Баланс: <b class="bal-live">${fmt(ME.stars)}</b> ⭐</div></div>
     <div class="pay-chips">${[100, 1000, 10000, 100000].map(v => `<button data-act="pay-chip" data-v="${v}">+${short(v)}</button>`).join("")}<button data-act="pay-chip" data-v="all">Всё</button></div>
     <div class="pay-sum"></div>
@@ -201,9 +201,7 @@ async function openPaySend(id, amt = 0, addr = "") {
   const inp = el.querySelector(".pay-a"), box = el.querySelector(".pay-sum"), go = el.querySelector(".pay-go");
   const upd = () => {
     const a = payAmt(el), f = Math.ceil(a * fee);
-    const txt = a ? fmt(a) : "";
-    if (inp.value !== txt) inp.value = txt;
-    let warn = "";
+        let warn = "";
     if (info.on === false) warn = "Переводы временно отключены";
     else if (a && a < min) warn = `Минимум ${fmt(min)} ⭐`;
     else if (max && a > max) warn = `За один раз не больше ${fmt(max)} ⭐`;
@@ -219,7 +217,7 @@ async function openPaySend(id, amt = 0, addr = "") {
   if (!amt) setTimeout(() => inp.focus(), 350);
 }
 
-const payAmt = el => Math.min(1e12, parseInt((el.querySelector(".pay-a").value || "").replace(/\D/g, ""), 10) || 0);
+const payAmt = el => Math.min(1e12, starIn(el.querySelector(".pay-a").value));
 
 Object.assign(ACT, {
   "pay-hist": () => { const t = $("#pay-hist-t"); if (t) t.scrollIntoView({ block: "start", behavior: "smooth" }); },
@@ -247,8 +245,8 @@ Object.assign(ACT, {
   "pay-copy": el => payCopy(el.dataset.a, "Адрес скопирован"),
   "pay-to": el => openPaySend(+el.dataset.id, 0, el.dataset.addr || ""),
   "pay-amt": async el => {
-    const v = await promptM("Сумма", "Сколько звёзд попросить? QR обновится с этой суммой", el.dataset.v !== "0" ? el.dataset.v : "", "Готово");
-    const a = parseInt(String(v || "").replace(/\D/g, ""), 10) || 0;
+    const v = await promptM("Сумма", "Сколько звёзд попросить? QR обновится с этой суммой", el.dataset.v !== "0" ? starOut(el.dataset.v) : "", "Готово");
+    const a = starIn(v);
     if (v != null) openPayRecv(Math.min(a, 1e9));
   },
   "pay-amt-clear": () => openPayRecv(0),
@@ -263,7 +261,7 @@ Object.assign(ACT, {
     let a = el.dataset.v === "all" ? Math.floor(ME.stars / (1 + s._fee)) : payAmt(s) + +el.dataset.v;
     if (el.dataset.v === "all") while (a > 0 && a + Math.ceil(a * s._fee) > ME.stars) a--;
     if (PAY.info && PAY.info.max) a = Math.min(a, PAY.info.max);
-    s.querySelector(".pay-a").value = String(Math.max(0, a)); s._upd();
+    s.querySelector(".pay-a").value = starOut(Math.max(0, a)); s._upd();
   },
   "pay-go": async el => {
     const s = el.closest(".sheet"), u = s._peer, a = payAmt(s);

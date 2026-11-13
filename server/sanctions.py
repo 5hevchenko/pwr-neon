@@ -6,6 +6,7 @@
 
 Компенсации: начислить звёзды (фикс или % от проигрыша) и/или ключи всем, кто играл в игру за период, —
 с предпросмотром; в журнале с отменой (снимет начисленное)."""
+from settings import S
 import asyncio
 import json
 import re
@@ -165,7 +166,7 @@ async def comp_send(req: Request, aid=Depends(admin)):
         err("под условия никто не попал")
     total = sum(x[3] for x in out)
     if total > COMP_MAX and aid not in OWNERS:
-        err(f"больше ⭐ {COMP_MAX:,} за раз — только владелец".replace(",", " "))
+        err(f"больше ⭐ {S(COMP_MAX)} за раз — только владелец")
     note = " ".join(str(b.get("note", "")).split())[:300] or "Компенсация от администрации"
     cname = E.CASES[p["cid"]]["title"] if p["keys"] else ""
     with tx():
@@ -177,11 +178,11 @@ async def comp_send(req: Request, aid=Depends(admin)):
                 db.execute("INSERT INTO case_keys(user,cid,n) VALUES(?,?,?) ON CONFLICT(user,cid) DO UPDATE SET n=n+?", (uid, p["cid"], p["keys"], p["keys"]))
         import live
         gname = "все игры" if p["game"] == "any" else live.NAMES.get(p["game"], p["game"])
-        log(aid, "comp", None, f"{len(out)} игр. · ⭐ {total:,}".replace(",", " ") + (f" + {p['keys']}× {cname}" if p["keys"] else "") + f" · {gname} · {note}",
+        log(aid, "comp", None, f"{len(out)} игр. · ⭐ {S(total)}" + (f" + {p['keys']}× {cname}" if p["keys"] else "") + f" · {gname} · {note}",
             undo={"t": "comp", "items": [[u, st] for u, _, _, st in out], "cid": p["cid"], "keys": p["keys"]})
     msgs = []
     for uid, _, _, st in out:
-        gift = " и ".join(x for x in (f"⭐ {st:,}".replace(",", " ") if st else "", f"{p['keys']}× ключ «{esc(cname)}»" if p["keys"] else "") if x)
+        gift = " и ".join(x for x in (f"⭐ {S(st)}" if st else "", f"{p['keys']}× ключ «{esc(cname)}»" if p["keys"] else "") if x)
         msgs.append((uid, f"🎁 {esc(note)}\nНачислено: {gift}"))
     asyncio.get_running_loop().create_task(_paced(msgs))
     return {"ok": True, "players": len(out), "stars": total}

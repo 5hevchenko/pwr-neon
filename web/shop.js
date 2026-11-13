@@ -7,7 +7,7 @@ const _openDailyS = openDaily;
 openDaily = function (tab) { _openDailyS(tab); shopFill(); };
 ICONS.tgplane = '<path d="M21.5 4.2 2.9 11.4c-1 .4-1 1.8 0 2.1l4.6 1.5 1.8 5.6c.2.7 1.1.9 1.6.4l2.6-2.4 4.6 3.4c.6.4 1.4.1 1.6-.6L22.9 5.6c.3-1-.6-1.8-1.4-1.4z" fill="currentColor" stroke="none"/><path d="M7.6 15 18 7.6l-8.3 8.6" stroke="#fff" stroke-width="1.4" fill="none"/>';
 // цена в Telegram Stars — компактная таблетка: самолётик + число (подпись «Telegram Stars» — рядом, а не внутри)
-const tgPrice = n => `<span class="tgp">${ic("tgplane")}<b>${fmt(n)}</b></span>`;
+const tgPrice = n => `<span class="tgp">${ic("tgplane")}<b>${num(n)}</b></span>`;
 async function shopFill() {
   const box = $("#shop-box"); if (!box) return;
   SHOP = await api("shop").catch(() => SHOP);
@@ -28,7 +28,7 @@ async function shopFill() {
           ${tgPrice(p.xtr)}</button>`).join("")}</div>
       <div class="shop-cust">
         <div class="shop-cust-h">Своя сумма</div>
-        <div class="shop-c"><span class="tgi">${ic("tgplane")}</span><input id="shop-x" inputmode="numeric" placeholder="От 1 до ${fmt(SHOP.max)} Telegram Stars"></div>
+        <div class="shop-c"><span class="tgi">${ic("tgplane")}</span><input id="shop-x" inputmode="numeric" placeholder="От 1 до ${num(SHOP.max)} Telegram Stars"></div>
         <div class="shop-cv" id="shop-cv">Введи количество — покажем, сколько игровых ⭐ получишь</div>
         <button class="btn shop-buy" data-act="buy-custom" id="shop-cb" disabled>${ic("tgplane")}Оплатить</button>
       </div>
@@ -37,8 +37,8 @@ async function shopFill() {
   const inp = box.querySelector("#shop-x"), cv = box.querySelector("#shop-cv"), cb = box.querySelector("#shop-cb");
   inp.oninput = () => {
     const x = Math.floor(+inp.value || 0), ok = x >= 1 && x <= SHOP.max, b = shopBonus(x);
-    cv.innerHTML = ok ? `Получишь <b>${fmt(shopStars(x))} ⭐</b>${b ? ` (+${b}% бонус)` : ""}${SHOP.first ? " · ×2 первая покупка" : ""}` : x ? `От 1 до ${fmt(SHOP.max)} Telegram Stars` : "Введи количество — покажем, сколько игровых ⭐ получишь";
-    cb.disabled = !ok; cb.innerHTML = `${ic("tgplane")}${ok ? `Оплатить ${fmt(x)}` : "Оплатить"}`;
+    cv.innerHTML = ok ? `Получишь <b>${fmt(shopStars(x))} ⭐</b>${b ? ` (+${b}% бонус)` : ""}${SHOP.first ? " · ×2 первая покупка" : ""}` : x ? `От 1 до ${num(SHOP.max)} Telegram Stars` : "Введи количество — покажем, сколько игровых ⭐ получишь";
+    cb.disabled = !ok; cb.innerHTML = `${ic("tgplane")}${ok ? `Оплатить ${num(x)}` : "Оплатить"}`;
     starify(cv);
   };
 }
@@ -65,7 +65,7 @@ Object.assign(ACT, {
   "buy-pack": el => shopBuy(+el.dataset.x, el),
   "buy-custom": el => {
     const x = Math.floor(+$("#shop-x").value || 0);
-    if (x < 1 || x > SHOP.max) return toast(`От 1 до ${fmt(SHOP.max)} Telegram Stars`);
+    if (x < 1 || x > SHOP.max) return toast(`От 1 до ${num(SHOP.max)} Telegram Stars`);
     shopBuy(x, el);
   },
 });

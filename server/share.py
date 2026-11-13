@@ -1,6 +1,7 @@
 """Карточка большого выигрыша: картинка для чата и для сторис с реферальной ссылкой.
 Сумму и множитель клиент не присылает: они берутся из журнала сервера, подарок проверяется по владельцу, поэтому подделать карточку нельзя.
 Картинка открывается по случайному адресу без авторизации: её забирают серверы Telegram."""
+from settings import S
 import hashlib
 import io
 import math
@@ -341,7 +342,7 @@ async def share_win(req: Request, uid=Depends(auth)):
     base = A.APP_URL.rstrip("/") + "/api/share/img/" + token
     bot = A.bot_name()
     link = f"https://t.me/{bot}?start=ref_{uid}"
-    num = f"{amount:,}".replace(",", " ")
+    num = S(amount)
     if lang == "en":
         text = (f"Look what dropped: {gname}. " if gname else f"Look at this win: {num} stars. ") + "Come and try it too"
     else:
@@ -408,7 +409,7 @@ def share_page(token: str):
         return Response(status_code=404)
     import html as H
     en = r["lang"] == "en"
-    num = f"{r['amount']:,}".replace(",", " ")
+    num = S(r['amount'])
     if r["gift"]:
         title = (f"{r['name']} got {r['gift']}" if en else f"{r['name']}: выпал {r['gift']}")
     else:
@@ -418,5 +419,5 @@ def share_page(token: str):
     link = f"https://t.me/{A.bot_name()}?start=ref_{r['user']}"
     page = _PAGE.format(lang="en" if en else "ru", title=H.escape(title), desc=H.escape(desc), img=H.escape(base + ".jpg"), link=H.escape(link),
                         btn="Play in Telegram" if en else "Играть в Telegram",
-                        note="Stars here are in-game currency." if en else "Звёзды в игре игровые.")
+                        note="1 star = 1 Telegram Star." if en else "1 звезда = 1 Telegram Star.")
     return Response(page, media_type="text/html; charset=utf-8", headers={"Cache-Control": "public, max-age=3600"})

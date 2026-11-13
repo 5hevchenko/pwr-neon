@@ -1,6 +1,7 @@
 """Инструменты владельца: пульт (живые цифры на одном экране), тревоги ботом, разбор игрока, отмена действий админа.
 Тревоги проверяются раз в минуту и уходят владельцам в личку (кто в «режиме секретности» — не получает).
 Пороги и выключатели — kv 'alerts' (админка → Обзор → Тревоги). Повтор одной и той же тревоги — не чаще COOLDOWN."""
+from settings import S
 import asyncio
 import json
 import os
@@ -77,22 +78,22 @@ def _check():
     for w in q("SELECT * FROM bigwins WHERE id>? ORDER BY id", last):
         last = w["id"]
         if c["bigwin"]["on"] and w["amount"] >= c["bigwin"]["min"]:
-            _raise("bigwin", f"bw{w['id']}", f"{_name(w['user'])} выиграл ⭐ {_fmt(w['amount'])} в игре «{live.NAMES.get(w['kind'], w['kind'])}»")
+            _raise("bigwin", f"bw{w['id']}", f"{_name(w['user'])} выиграл ⭐ {S(w['amount'])} в игре «{live.NAMES.get(w['kind'], w['kind'])}»")
     _SEEN["bw"] = last
     # 2) игрок поднял за час
     if c["hour"]["on"]:
         for r in q(f"SELECT user, SUM(delta) s FROM events WHERE kind IN {GAME_KINDS} AND ts>=? GROUP BY user HAVING s>=?", t - 3600, c["hour"]["min"]):
-            _raise("hour", f"hour{r['user']}", f"{_name(r['user'])}: +⭐ {_fmt(r['s'])} в играх за последний час")
+            _raise("hour", f"hour{r['user']}", f"{_name(r['user'])}: +⭐ {S(r['s'])} в играх за последний час")
     # 3) просадка банка
     if c["bank"]["on"]:
         import bank
         d = -q1(f"SELECT COALESCE(SUM(delta),0) s FROM events WHERE ({bank.BANK_KINDS}) AND ts>=?", t - 86400)["s"]
         if d <= -c["bank"]["min"]:
-            _raise("bank", "bank", f"Банк за сутки: −⭐ {_fmt(-d)}. Сейчас в банке ⭐ {_fmt(bank.bank_value())}")
+            _raise("bank", "bank", f"Банк за сутки: −⭐ {S(-d)}. Сейчас в банке ⭐ {S(bank.bank_value())}")
     # 4) игра в минусе за сегодня
     if c["game"]["on"]:
         for r in q(f"SELECT kind, -SUM(delta) h FROM events WHERE kind IN {GAME_KINDS} AND ts>=? GROUP BY kind HAVING h<=?", day_start(), -c["game"]["min"]):
-            _raise("game", f"game{r['kind']}{day_start()}", f"«{live.NAMES.get(r['kind'], r['kind'])}» сегодня в минусе для банка: −⭐ {_fmt(-r['h'])}")
+            _raise("game", f"game{r['kind']}{day_start()}", f"«{live.NAMES.get(r['kind'], r['kind'])}» сегодня в минусе для банка: −⭐ {S(-r['h'])}")
     # 5) крупные выдачи звёзд админами
     lid = _SEEN["log"] if _SEEN["log"] is not None else (q1("SELECT MAX(id) m FROM admin_log")["m"] or 0)
     for r in q("SELECT * FROM admin_log WHERE id>? ORDER BY id", lid):
@@ -103,7 +104,7 @@ def _check():
             except (ValueError, IndexError):
                 continue
             if abs(v) >= c["adminstars"]["min"]:
-                _raise("adminstars", f"as{r['id']}", f"{_name(r['admin'])} {'выдал' if v > 0 else 'снял'} ⭐ {_fmt(abs(v))} игроку {_name(r['target'])}")
+                _raise("adminstars", f"as{r['id']}", f"{_name(r['admin'])} {'выдал' if v > 0 else 'снял'} ⭐ {S(abs(v))} игроку {_name(r['target'])}")
     _SEEN["log"] = lid
     # 6) сервер: память и диск
     if c["server"]["on"]:
@@ -215,19 +216,19 @@ def insight(tid: int, aid=Depends(admin)):
             peers.append({**(user_brief(pu) if pu else {"id": r["peer"], "name": f"id {r['peer']}"}), "sent": r["sent"], "got": r["got"], "n": r["n"]})
         for p in peers:
             if p["got"] >= 200_000 and p["got"] > 3 * max(1, p["sent"]):
-                flags.append(f"Получил от {p['name']} ⭐ {p['got']:,} — возможно, перегон с другого аккаунта".replace(",", " "))
+                flags.append(f"Получил от {p['name']} ⭐ {S(p['got'])} — возможно, перегон с другого аккаунта")
             if p["sent"] >= 200_000 and p["sent"] > 3 * max(1, p["got"]):
-                flags.append(f"Отправил {p['name']} ⭐ {p['sent']:,}".replace(",", " "))
+                flags.append(f"Отправил {p['name']} ⭐ {S(p['sent'])}")
     invited_payers = q1("SELECT COUNT(*) n FROM transfers WHERE dst=? AND src IN (SELECT id FROM users WHERE ref_by=?)", tid, tid)["n"] if peers else 0
     if invited_payers >= 3:
         flags.append(f"{invited_payers} переводов от собственных рефералов — похоже на фарм приглашений")
     tot_games = sum(g["sum"] for g in games)
     rounds = sum(g["n"] for g in games)
     if rounds >= 50 and tot_games > 0 and tot_games >= 0.5 * sum(abs(g["sum"]) for g in games):
-        flags.append(f"Подозрительно стабильный плюс в играх: +⭐ {tot_games:,} за {rounds} раундов".replace(",", " "))
+        flags.append(f"Подозрительно стабильный плюс в играх: +⭐ {S(tot_games)} за {rounds} раундов")
     adm = sum(k["sum"] for k in kinds if k["kind"] == "admin")
     if adm:
-        flags.append(f"Начислено администрацией: ⭐ {adm:,}".replace(",", " "))
+        flags.append(f"Начислено администрацией: ⭐ {S(adm)}")
     return {"kinds": kinds, "games": games, "peers": peers, "flags": flags, "stars": u["stars"]}
 
 
@@ -248,7 +249,7 @@ def undo(lid: int, aid=Depends(admin)):
             d = int(u["delta"])
             db.execute("UPDATE users SET stars=stars+? WHERE id=?", (d, tid))
             event(tid, "admin", d)
-            what = f"звёзды {d:+d}"
+            what = f"звёзды {'+' if d >= 0 else '−'}{S(abs(d))}"
         elif k == "ban":
             on = bool(u["on"])
             db.execute("UPDATE users SET banned=? WHERE id=?", (int(on), tid))
@@ -322,7 +323,7 @@ def undo(lid: int, aid=Depends(admin)):
                     got += take
                 if u.get("keys"):
                     db.execute("UPDATE case_keys SET n=MAX(0, n-?) WHERE user=? AND cid=?", (int(u["keys"]), uid, u["cid"]))
-            what = f"компенсация: снято ⭐ {got:,} у {len(u['items'])} игр.".replace(",", " ")
+            what = f"компенсация: снято ⭐ {S(got)} у {len(u['items'])} игр."
         elif k == "addr":
             import pay
             if u["prev"]:

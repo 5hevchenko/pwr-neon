@@ -4,6 +4,7 @@
 - под залог бизнеса: часть дохода при сборе сама идёт в погашение; не вернул — бизнес забирает банк.
 Рейтинг растёт за возврат в срок (кредит не меньше заметной суммы и дольше 6 часов, иначе рейтинг легко накрутить),
 просрочка его снижает, на 48 часов закрывает новые кредиты и ограничивает ставки."""
+from settings import S
 from settings import conf
 import asyncio
 import math
@@ -215,7 +216,7 @@ async def take_cash(req: Request, uid=Depends(auth)):
         days = _days(uid, b.get("days", 3))
         lim = cash_limit(uid)
         if not 100 <= amount <= lim:
-            err(f"сейчас можно до ⭐ {lim:,}".replace(",", " ") + " — возврат в срок поднимает рейтинг и лимит")
+            err(f"сейчас можно до ⭐ {S(lim)}" + " — возврат в срок поднимает рейтинг и лимит")
         u = q1("SELECT xp, stars FROM users WHERE id=?", uid)
         if level(u["xp"]) < CASH_LEVEL:
             err(f"кредит без залога — с {CASH_LEVEL} уровня")
@@ -249,7 +250,7 @@ async def take_biz(req: Request, uid=Depends(auth)):
         _open_count(uid)
         principal = _biz_terms(bid, r["level"])
         if principal < MIN_VALUE:
-            err(f"под этот бизнес банк даст меньше ⭐ {MIN_VALUE}")
+            err(f"под этот бизнес банк даст меньше ⭐ {S(MIN_VALUE)}")
         debt = math.ceil(principal * (1 + fee_for(uid, days)))
         until = t + days * 86400
         cur = db.execute("INSERT INTO loans(user,gift,biz,principal,debt,ts,until) VALUES(?,NULL,?,?,?,?,?)", (uid, bid, principal, debt, t, until))
@@ -274,7 +275,7 @@ async def take_loan(gid: int, req: Request, uid=Depends(auth)):
         if in_open_trade(gid):
             err("подарок участвует в обмене")
         if g["value"] < MIN_VALUE:
-            err(f"в залог берём подарки от ⭐ {MIN_VALUE}")
+            err(f"в залог берём подарки от ⭐ {S(MIN_VALUE)}")
         _open_count(uid)
         principal, debt = terms(g["value"], fee_for(uid, days))
         until = t + days * 86400
@@ -306,9 +307,9 @@ async def repay(lid: int, req: Request, uid=Depends(auth)):
             err("введи сумму")
         amount = min(amount, left)
         if amount < min(PART_MIN, left):
-            err(f"взнос — от ⭐ {PART_MIN}")
+            err(f"взнос — от ⭐ {S(PART_MIN)}")
         if bal(uid) < amount:
-            err(f"Нужно ⭐ {amount}")
+            err(f"Нужно ⭐ {S(amount)}")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (amount, uid))
         _pay_events(uid, r, amount)
         closed = amount == left
@@ -331,7 +332,7 @@ def _sweep():
             db.execute("UPDATE loans SET status='lost', closed=? WHERE id=?", (t, r["id"]))
             left = r["debt"] - (r["paid"] or 0)
             _score(r["user"], -SCORE_LOST, lost=1, penalty=t + PENALTY)
-            tail = f" Рейтинг −{SCORE_LOST}. {PENALTY // 3600} ч без новых кредитов, ставки до ⭐ {PENALTY_BET:,}.".replace(",", " ")
+            tail = f" Рейтинг −{SCORE_LOST}. {PENALTY // 3600} ч без новых кредитов, ставки до ⭐ {S(PENALTY_BET)}."
             if r["biz"]:   # банк забирает бизнес; товар в пути и внесённое возвращаем, чтобы платить частями не было хуже, чем не платить
                 from income import BIZ_MAP
                 row = q1("SELECT batch_cost FROM biz WHERE user=? AND bid=?", r["user"], r["biz"])
@@ -348,14 +349,14 @@ def _sweep():
                 db.execute("DELETE FROM biz WHERE user=? AND bid=?", (r["user"], r["biz"]))
                 db.execute("DELETE FROM biz_mgr WHERE user=? AND bid=?", (r["user"], r["biz"]))
                 name = BIZ_MAP[r["biz"]][1] if r["biz"] in BIZ_MAP else r["biz"]
-                msgs.append((r["user"], f"Срок кредита истёк — банк забрал бизнес <b>{esc(name)}</b>." + (f" ⭐ {back} вернули на баланс." if back else "") + tail))
+                msgs.append((r["user"], f"Срок кредита истёк — банк забрал бизнес <b>{esc(name)}</b>." + (f" ⭐ {S(back)} вернули на баланс." if back else "") + tail))
                 continue
             if not r["gift"]:   # без залога — списываем остаток долга и штраф с баланса, хоть в минус
                 fine = math.ceil(left * LOST_FEE)
                 db.execute("UPDATE users SET stars=stars-? WHERE id=?", (left + fine, r["user"]))
                 _pay_events(r["user"], r, left)
                 event(r["user"], "fee", -fine)
-                msgs.append((r["user"], f"Срок кредита истёк — ⭐ {left} и штраф ⭐ {fine} списаны с баланса. Если звёзд не хватило, баланс ушёл в минус: "
+                msgs.append((r["user"], f"Срок кредита истёк — ⭐ {S(left)} и штраф ⭐ {S(fine)} списаны с баланса. Если звёзд не хватило, баланс ушёл в минус: "
                                         "доход и выигрыши сначала закроют долг." + tail))
                 continue
             g = q1("SELECT * FROM gifts WHERE id=?", r["gift"])
@@ -368,10 +369,10 @@ def _sweep():
             if g:
                 db.execute("UPDATE gifts SET owner=0, price=?, listed=? WHERE id=?", (max(10, g["value"]), t, g["id"]))
                 msgs.append((r["user"], f"Срок кредита истёк — <b>{esc(g['col'])} #{g['num']}</b> перешёл банку игры и выставлен на маркет."
-                                        + (f" Внесённые частями ⭐ {r['paid']} вернули на баланс." if r["paid"] else "") + tail))
+                                        + (f" Внесённые частями ⭐ {S(r['paid'])} вернули на баланс." if r["paid"] else "") + tail))
         for r in q("SELECT * FROM loans WHERE status='open' AND warned=0 AND until-?<=?", t, WARN):
             db.execute("UPDATE loans SET warned=1 WHERE id=?", (r["id"],))
-            msgs.append((r["user"], f"Через {max(1, (r['until'] - t) // 3600)} ч истекает кредит: верни ⭐ {r['debt'] - (r['paid'] or 0)}, иначе "
+            msgs.append((r["user"], f"Через {max(1, (r['until'] - t) // 3600)} ч истекает кредит: верни ⭐ {S(r['debt'] - (r['paid'] or 0))}, иначе "
                                     + ("подарок заберёт банк." if r["gift"] else "банк заберёт бизнес." if r["biz"] else "долг и штраф спишутся с баланса, даже в минус.")))
     for uid, text in msgs:
         notify(uid, text)

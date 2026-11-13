@@ -9,8 +9,8 @@ const plLeft = s => { s = Math.max(0, s); const d = Math.floor(s / 86400), h = M
 
 function plBars(p) {
   const t = (p.y || 0) + (p.n || 0), py = plPct(p.y || 0, t), pn = t ? 100 - py : 0;
-  const bar = (ch, label, v, pc) => `<div class="pl-bar${ch === "n" ? " no" : ""}${p.my === ch ? " my" : ""}"><i style="width:${pc}%"></i><span>${esc(label)}${p.my === ch ? " · твой голос" : ""}</span><b>${pc}% · ${fmt(v)}</b></div>`;
-  return bar("y", p.yes, p.y || 0, py) + bar("n", p.no, p.n || 0, pn) + `<div class="pl-tot">Проголосовали ${fmt(t)} · до конца ${plLeft(p.ends - Date.now() / 1000)}</div>`;
+  const bar = (ch, label, v, pc) => `<div class="pl-bar${ch === "n" ? " no" : ""}${p.my === ch ? " my" : ""}"><i style="width:${pc}%"></i><span>${esc(label)}${p.my === ch ? " · твой голос" : ""}</span><b>${pc}% · ${num(v)}</b></div>`;
+  return bar("y", p.yes, p.y || 0, py) + bar("n", p.no, p.n || 0, pn) + `<div class="pl-tot">Проголосовали ${num(t)} · до конца ${plLeft(p.ends - Date.now() / 1000)}</div>`;
 }
 function plInner(p) {
   return `<div class="pl-q">${esc(plTitle(p))}</div>${plBody(p) ? `<div class="pl-d">${plBody(p)}</div>` : ""}
@@ -22,7 +22,7 @@ function plInner(p) {
 function pollCard() {
   const p = ME && (ME.polls || [])[0]; if (!p) return "";
   return `<button class="stc st-poll" data-act="pl-open" data-id="${p.id}"><span class="stc-i">${ic("activity")}</span><span class="stc-t"><b>Опрос: ${esc(plTitle(p))}</b>
-    <small>${p.my ? `Твой голос: ${esc(p.my === "y" ? p.yes : p.no)} · ${fmt((p.y || 0) + (p.n || 0))} голосов — посмотри итоги` : "Нажми и проголосуй — это займёт секунду"}</small></span>${ic("chev")}</button>`;
+    <small>${p.my ? `Твой голос: ${esc(p.my === "y" ? p.yes : p.no)} · ${num((p.y || 0) + (p.n || 0))} голосов — посмотри итоги` : "Нажми и проголосуй — это займёт секунду"}</small></span>${ic("chev")}</button>`;
 }
 
 // ---------------- плашка-окно с вопросом ----------------
@@ -64,9 +64,9 @@ async function admPolls(body) {
     return `<div class="box pl-adm${p.active ? " on" : ""}">
       <div class="pl-ah"><b>${esc(p.title)}</b><span class="adm-tag">${p.active ? `идёт · ещё ${plLeft(p.ends - t)}` : "закончен"}</span></div>
       <div class="pl-am">${admDate(p.created)} · ${where}</div>
-      <div class="pl-bar big"><i style="width:${py}%"></i><span>${esc(p.yes)}</span><b>${py}% · ${fmt(p.y)}</b></div>
-      <div class="pl-bar big no"><i style="width:${tot ? 100 - py : 0}%"></i><span>${esc(p.no)}</span><b>${tot ? 100 - py : 0}% · ${fmt(p.n)}</b></div>
-      <div class="pl-stats"><div><b>${fmt(tot)}</b><span>голосов</span></div><div><b>${fmt(p.reach)}</b><span>${p.ingame ? "заходили" : "получили"}</span></div><div><b>${turn}%</b><span>явка</span></div></div>
+      <div class="pl-bar big"><i style="width:${py}%"></i><span>${esc(p.yes)}</span><b>${py}% · ${num(p.y)}</b></div>
+      <div class="pl-bar big no"><i style="width:${tot ? 100 - py : 0}%"></i><span>${esc(p.no)}</span><b>${tot ? 100 - py : 0}% · ${num(p.n)}</b></div>
+      <div class="pl-stats"><div><b>${num(tot)}</b><span>голосов</span></div><div><b>${num(p.reach)}</b><span>${p.ingame ? "заходили" : "получили"}</span></div><div><b>${turn}%</b><span>явка</span></div></div>
       ${p.hours.length > 1 ? `<div class="pl-hist">${p.hours.map(h => `<i title="${h.h} ч: ${h.y}/${h.n}" style="height:${Math.max(4, (h.y + h.n) * 100 / maxH)}%"><u style="height:${plPct(h.y, h.y + h.n)}%"></u></i>`).join("")}</div><div class="pl-am">голоса по часам (жёлтое — «${esc(p.yes)}»)</div>` : ""}
       ${p.last.length ? `<details class="pl-last"><summary>Последние голоса</summary>${p.last.map(v => `<div class="row kv"><div class="grow"><div class="t">${esc(v.name || "игрок")}</div><div class="s">${admDate(v.ts)}</div></div><b class="${v.choice === "y" ? "tw" : ""}">${esc(v.choice === "y" ? p.yes : p.no)}</b></div>`).join("")}</details>` : ""}
       ${p.active ? `<button class="btn ghost sm" data-act="pl-end" data-id="${p.id}" style="margin-top:10px;width:100%">Закончить сейчас и прислать итоги</button>` : ""}

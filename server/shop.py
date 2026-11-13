@@ -1,6 +1,7 @@
 """Покупка игровых звёзд за Telegram Stars (валюта XTR): 1 ⭐ Telegram = 1000 игровых.
 Счёт создаёт сервер (createInvoiceLink), клиент открывает tg.openInvoice; начисление — только по successful_payment от Telegram,
 каждый платёж учитывается один раз (telegram_payment_charge_id)."""
+from settings import S
 from settings import conf
 import json
 
@@ -79,14 +80,14 @@ async def invoice(req: Request, uid=Depends(auth)):
         if not are_friends(uid, to):
             err("дарить звёзды можно только друзьям")
         f = q1("SELECT name FROM users WHERE id=?", to)
-        link = await make_invoice(f"Подарок: {pack_stars(xtr):,} ⭐".replace(",", " "),
-                                  f"Игровые звёзды в подарок для {f['name'][:40]}. Сами звёзды не выводятся.",
+        link = await make_invoice(f"Подарок: {S(pack_stars(xtr))} ⭐",
+                                  f"Звёзды в подарок для {f['name'][:40]}. 1 Telegram Star = 1 звезда.",
                                   {"u": uid, "x": xtr, "to": to}, xtr)
         return {"link": link}
     first = is_first(uid)
-    r = await tg_call("createInvoiceLink", _token=__import__("franchise").pay_token(), title=(f"{pack_stars(xtr, first):,} игровых звёзд".replace(",", " ") + (" (×2 первая покупка)" if first else "")),
-                      description="Игровая валюта: на неё открывают кейсы и играют. Сами звёзды не выводятся.",
-                      payload=json.dumps({"u": uid, "x": xtr}), currency="XTR", prices=[{"label": "Игровые звёзды", "amount": xtr}])
+    r = await tg_call("createInvoiceLink", _token=__import__("franchise").pay_token(), title=(f"{S(pack_stars(xtr, first))} звёзд" + (" (×2 первая покупка)" if first else "")),
+                      description="Звёзды игры: на них открывают кейсы и играют. 1 Telegram Star = 1 звезда.",
+                      payload=json.dumps({"u": uid, "x": xtr}), currency="XTR", prices=[{"label": "Звёзды", "amount": xtr}])
     if not r.get("ok"):
         err("не удалось создать счёт, попробуй позже")
     return {"link": r["result"]}
@@ -144,7 +145,7 @@ def on_paid(m):
         db.execute("UPDATE users SET stars=stars+? WHERE id=?", (stars, uid))
         event(uid, "buy", stars)
         __import__("bank").back(stars)
-    notify(uid, (f"✅ Оплата прошла: +{stars:,} ⭐ на баланс" + (" — первая покупка, звёзд вдвое больше!" if first else "") + " Спасибо!").replace(",", " "))
+    notify(uid, (f"✅ Оплата прошла: +{S(stars)} ⭐ на баланс" + (" — первая покупка, звёзд вдвое больше!" if first else "") + " Спасибо!"))
     try:
         __import__("refs").on_buy(uid, stars)   # пригласившему — % от покупки (refs.py)
     except Exception as e:
@@ -185,6 +186,6 @@ def gift_paid(uid, to, xtr, charge):
         __import__("bank").back(stars)
         names = {r["id"]: r["name"] for r in db.execute("SELECT id,name FROM users WHERE id IN (?,?)", (uid, to))}
     if to == uid:
-        return notify(uid, f"✅ Оплата прошла: +{stars:,} ⭐ на баланс. Спасибо!".replace(",", " "))
-    notify(to, f"🎁 <b>{esc(names.get(uid, 'Друг'))}</b> подарил(а) тебе <b>{stars:,} ⭐</b>!".replace(",", " "))
-    notify(uid, f"✅ Подарок отправлен: {esc(names.get(to, 'другу'))} получил(а) {stars:,} ⭐. Спасибо!".replace(",", " "))
+        return notify(uid, f"✅ Оплата прошла: +{S(stars)} ⭐ на баланс. Спасибо!")
+    notify(to, f"🎁 <b>{esc(names.get(uid, 'Друг'))}</b> подарил(а) тебе <b>{S(stars)} ⭐</b>!")
+    notify(uid, f"✅ Подарок отправлен: {esc(names.get(to, 'другу'))} получил(а) {S(stars)} ⭐. Спасибо!")

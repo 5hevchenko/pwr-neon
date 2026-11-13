@@ -11,7 +11,7 @@ const FC_T = {
 };
 let FC = null, fcSel = null, fcAmt = null, fcClock = null;
 const fcDate = ts => new Date(ts * 1000).toLocaleDateString(LANG === "en" ? "en-GB" : "ru-RU", { day: "numeric", month: "long", timeZone: "Europe/Moscow" });
-const fcVal = (key, v) => v == null ? "—" : key === "crash" ? "×" + fmt(v) : key === "bank" ? (v > 0 ? "+" : v < 0 ? "−" : "") + short(Math.abs(v)) : fmt(v);
+const fcVal = (key, v) => v == null ? "—" : key === "crash" ? "×" + num(v) : key === "bank" ? (v > 0 ? "+" : v < 0 ? "−" : "") + short(Math.abs(v)) : num(v);
 const fcLine = m => m.key === "bank" ? "0" : fcVal(m.key, m.line);
 async function openForecast() {
   openSheet(`${gameHead("Crystal Ball", "Прогноз дня", "", "forecast")}<div id="fc-body">${emptyHTML("hourglass", "Загружаем…")}</div>`, "fc-s");
@@ -34,7 +34,7 @@ function fcDraw() {
   const s = d.stats, cur = fcSel && d.open.find(x => x.key === fcSel.key), has = cur && (cur.mine ? cur.mine.side : fcSel.side);
   const res = m => !m.side ? "возврат" : !m.mine ? "" : m.mine.side === m.side ? "угадал" : "не угадал";
   b.innerHTML = `<div class="bb-round"><span>Ставки на ${fcDate(d.dayTs)}</span><b id="fc-clock">${clock(d.closesIn)}</b><small>до закрытия</small></div>
-    <div class="fc-stats"><div><b>${fmt(s.streak)}</b><span>серия</span></div><div><b>${fmt(s.best)}</b><span>рекорд</span></div><div><b>${s.total ? Math.round(s.won / s.total * 100) + "%" : "—"}</b><span>точность</span></div></div>
+    <div class="fc-stats"><div><b>${num(s.streak)}</b><span>серия</span></div><div><b>${num(s.best)}</b><span>рекорд</span></div><div><b>${s.total ? Math.round(s.won / s.total * 100) + "%" : "—"}</b><span>точность</span></div></div>
     ${d.open.map(m => fcMarket(m, d)).join("")}
     <div class="betp">${betHTML("fc-amt", fcAmt || d.min)}
       <button class="btn cta" data-act="fc-bet" ${has ? "" : "disabled"}>${has ? `Поставить на «${FC_T[cur.key][has]}»` : "Выбери исход"}</button></div>

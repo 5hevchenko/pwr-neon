@@ -1,4 +1,5 @@
 """Крипто-биржа: реальные курсы (OKX), торговля только за игровые звёзды."""
+from settings import S
 import asyncio
 import math
 import time
@@ -217,7 +218,7 @@ async def crypto_buy(aid: str, req: Request, uid=Depends(auth)):
     aid = _asset(aid)[0]
     s = int((await req.json()).get("stars", 0))
     if s < MIN_TRADE:
-        err(f"Минимум ⭐ {MIN_TRADE}")
+        err(f"Минимум ⭐ {S(MIN_TRADE)}")
     price = await fresh(aid)
     with tx():
         if bal(uid) < s:
@@ -361,7 +362,7 @@ async def crypto_swap(aid: str, req: Request, uid=Depends(auth)):
         qty = h["qty"] if pct >= 100 else h["qty"] * pct / 100
         value = qty * pa
         if value < MIN_TRADE:
-            err(f"Минимум на ⭐ {MIN_TRADE}")
+            err(f"Минимум на ⭐ {S(MIN_TRADE)}")
         cost = h["cost"] if pct >= 100 else h["cost"] * pct / 100
         got = value * (1 - SWAP_FEE) / pb
         db.execute("UPDATE crypto SET qty=?, cost=? WHERE user=? AND asset=?", (0 if pct >= 100 else h["qty"] - qty, 0 if pct >= 100 else h["cost"] - cost, uid, aid))
@@ -415,7 +416,7 @@ def liquidate_all():
                 db.execute("UPDATE crypto_pos SET status='liq', close=?, pnl=?, closed=? WHERE id=?", (price, -r["margin"], now(), r["id"]))
                 hit.append(r)
     for r in hit:
-        notify(r["user"], f"Позиция {r['asset']} x{r['lev']} {'лонг' if r['side'] == 'long' else 'шорт'} ликвидирована — маржа ⭐ {r['margin']} сгорела.")
+        notify(r["user"], f"Позиция {r['asset']} x{r['lev']} {'лонг' if r['side'] == 'long' else 'шорт'} ликвидирована — маржа ⭐ {S(r['margin'])} сгорела.")
     return hit
 
 
@@ -449,7 +450,7 @@ async def futures_open(req: Request, uid=Depends(auth)):
     if aid not in FUT_ASSETS or side not in ("long", "short") or lev not in LEVS:
         err("Неверные параметры")
     if margin < MIN_MARGIN:
-        err(f"Минимальная маржа ⭐ {MIN_MARGIN}")
+        err(f"Минимальная маржа ⭐ {S(MIN_MARGIN)}")
     price = await fresh(aid)
     notional = margin * lev
     fee = math.ceil(notional * FUT_FEE)

@@ -68,7 +68,7 @@ function gwHTML(g) {
       <div class="gw-prize">⭐ ${fmt(g.prize)}</div>
       <p><span>${g.winners} ${plural(g.winners, ["победитель", "победителя", "победителей"])}</span><span>, каждому ⭐ ${fmt(g.each)}</span></p></div>
     <div class="box">
-      <div class="row kv"><div class="grow"><div class="t">Участников</div></div><b>${fmt(g.count)}</b></div>
+      <div class="row kv"><div class="grow"><div class="t">Участников</div></div><b>${num(g.count)}</b></div>
       <div class="row kv"><div class="grow"><div class="t">${state}</div></div>${open ? `<b>${gwTimer(g.left)}</b>` : ""}</div>
       <div class="row kv"><div class="grow"><div class="t">Условия</div><div class="s" style="white-space:normal"><span>подписка на канал</span>${g.minLevel > 1 ? `<span> и </span><span>${g.minLevel} ур. в игре</span>` : ""}</div></div></div>
     </div>

@@ -2,6 +2,7 @@
 
 FastAPI + SQLite. Внутри же: игровой цикл краша и long polling бота.
 """
+from settings import S
 from settings import conf, tuned
 import asyncio
 import hashlib
@@ -539,8 +540,8 @@ def register(tg_user, start_param="", bid=0):
             refs.on_register(uid, ref)   # ключ от кейса «от друга» и цель на двоих
     if ref:
         L1, B1 = refs.cfg("l1_level"), refs.cfg("l1_bonus")
-        notify(ref, f"🎉 По твоей ссылке пришёл <b>{esc(name)}</b>." + (f" Тебе +{jb:,} ⭐".replace(",", " ") if jb else "")
-               + (f"\n\nКогда он дойдёт до {L1} уровня — ещё +{B1:,} ⭐".replace(",", " ") if refs.cfg("on") and B1 else ""))
+        notify(ref, f"🎉 По твоей ссылке пришёл <b>{esc(name)}</b>." + (f" Тебе +{S(jb)} ⭐" if jb else "")
+               + (f"\n\nКогда он дойдёт до {L1} уровня — ещё +{S(B1)} ⭐" if refs.cfg("on") and B1 else ""))
     return uid, ref
 
 
@@ -736,14 +737,14 @@ async def on_command(m):
             if s:
                 amt = int(part[1]) if len(part) > 1 else 0
                 await tg_call("sendMessage", chat_id=uid, parse_mode="HTML",
-                              text=f"💸 Перевод игроку <b>{esc(s['name'])}</b>" + (f": <b>{amt} ⭐</b>" if amt else "") + "\nЖми кнопку, чтобы отправить",
+                              text=f"💸 Перевод игроку <b>{esc(s['name'])}</b>" + (f": <b>{S(amt)} ⭐</b>" if amt else "") + "\nЖми кнопку, чтобы отправить",
                               reply_markup={"inline_keyboard": [[{"text": "💸 Перевести", "web_app": {"url": APP_URL + f"?pay={part[0]}&amt={amt}"}}]]})
                 return
     if cmd.startswith("/start") and arg.startswith("claim_"):   # инлайн-чек: забрать (pay.py)
         register(m["from"])   # чек может забрать и новичок — заводим аккаунт из данных Telegram
         r = await asyncio.get_running_loop().run_in_executor(None, pay.claim_cheque, uid, arg[6:])
         if r.get("ok"):
-            amt_s = f"{r['amount']:,}".replace(",", " ")
+            amt_s = S(r['amount'])
             await tg_call("sendMessage", chat_id=uid, parse_mode="HTML",
                           text=f"🎁 Ты получил чек на <b>{amt_s} ⭐</b> от <b>{esc(r['from'])}</b>! Звёзды уже на балансе.", reply_markup=kb)
         else:
@@ -772,7 +773,7 @@ async def on_command(m):
                     db.execute("INSERT OR REPLACE INTO pending_refs VALUES(?,?,?)", (uid, int(arg[4:]), now()))
         txt = ("🎁 <b>Кейсы с подарками и скинами CS</b>\n\nОткрывай кейсы, лови редкие модели и скины, играй в краш, плинко, башню и слоты, "
                "вызывай друзей на дуэли, торгуй на маркете и выполняй задания.\n\n"
-               f"Старт: <b>{START_STARS} ⭐</b>" + (f" + <b>{refs.cfg('new_bonus')} ⭐</b> за приглашение" if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("new_bonus") else "")
+               f"Старт: <b>{S(START_STARS)} ⭐</b>" + (f" + <b>{S(refs.cfg('new_bonus'))} ⭐</b> за приглашение" if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("new_bonus") else "")
                + ("\nИ ключ от кейса в подарок от друга, он уже ждёт в игре." if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("gift_on") else "")
                + f"\n\n<i>⚠️ {esc(disclaimer())}</i>")
         await tg_call("sendMessage", chat_id=uid, text=txt, parse_mode="HTML", reply_markup=kb)
@@ -781,10 +782,10 @@ async def on_command(m):
         c = refs.cfg
         await tg_call("sendMessage", chat_id=uid, parse_mode="HTML", disable_web_page_preview=True,
                       text=(f"👥 <b>Приглашай друзей</b>\n\nТвоя ссылка:\n{link}\n\n"
-                            + (f"• другу сразу +{c('new_bonus'):,} ⭐\n" if c("new_bonus") else "")
-                            + (f"• тебе сразу +{c('join_bonus'):,} ⭐\n" if c("join_bonus") else "")
-                            + (f"• друг дошёл до {c('l1_level')} ур. — тебе +{c('l1_bonus'):,} ⭐\n" if c("l1_bonus") else "")
-                            + (f"• до {c('l2_level')} ур. — ещё +{c('l2_bonus'):,} ⭐\n" if c("l2_bonus") else "")
+                            + (f"• другу сразу +{S(c('new_bonus'))} ⭐\n" if c("new_bonus") else "")
+                            + (f"• тебе сразу +{S(c('join_bonus'))} ⭐\n" if c("join_bonus") else "")
+                            + (f"• друг дошёл до {c('l1_level')} ур. — тебе +{S(c('l1_bonus'))} ⭐\n" if c("l1_bonus") else "")
+                            + (f"• до {c('l2_level')} ур. — ещё +{S(c('l2_bonus'))} ⭐\n" if c("l2_bonus") else "")
                             + (f"• {c('buy_pct')}% от звёзд, которые друг купит\n" if c("buy_pct") else "")
                             + ("• призы за рубежи и недельный топ — в игре: «Пригласи друга»" if c("milestones") or c("top_on") else "")
                             ).replace(",", " ") if c("on") else f"Твоя ссылка:\n{link}",
@@ -1028,7 +1029,7 @@ def cases(uid=Depends(auth)):
         for k, v in odds.items():
             items.append({"col": k, "base": E.base(k), "ev": round(c["evs"][k]), **look_of(k, "shop")})   # шансы наружу не отдаём
         items.sort(key=lambda x: -x["ev"])
-        out.append({"id": c["id"], "title": E.case_title(c["id"], uid), "price": case_price(c), "full": c["price"], "keys": keys.get(c["id"], 0),
+        out.append({"id": c["id"], "title": E.case_title(c["id"], uid), "price": (rg.PRICES if rg else {}).get(c["id"], case_price(c)), "full": (rg.PRICES if rg else {}).get(c["id"], c["price"]), "keys": keys.get(c["id"], 0),
                     "level": c["level"], "cover": E.case_cover(c["id"], uid), **_case_limit(c["id"]), "real": c["id"] in real,
                     "group": "tg" if c["id"] in real else E.CASE_GROUP.get(c["id"], "tg"), "tops": rg.tops(c["id"]) if c["id"] in real else [],   # кейсы подарков — одна вкладка
                     "k": E.case_colors(c["id"]), "floor": bool(c["floor"]), "src": c.get("src"),
@@ -1205,7 +1206,7 @@ def achievements(u, gifts, friends, worth):
          ("💎", "Легенда", "Подарок с моделью ≤ 0,5%", best <= 5),
          ("🚀", "Космонавт", "Забери x10 в краше", u["best_crash"] >= 10),
          ("🌕", "На Луну", "Забери x100 в краше", u["best_crash"] >= 100),
-         ("💰", "Магнат", "Состояние 100 000 ⭐", worth >= 100000),
+         ("💰", "Магнат", "Состояние 100 ⭐", worth >= 100000),
          ("🗂", "Коллекционер", "20 разных коллекций", cols >= 20),
          ("🤝", "Душа компании", "5 друзей", friends >= 5),
          ("📣", "Вербовщик", "Пригласи 3 друзей", u["refs"] >= 3),
@@ -1384,7 +1385,7 @@ def sell(gid: int, uid=Depends(auth)):
 async def list_gift(gid: int, req: Request, uid=Depends(auth)):
     price = int((await req.json()).get("price", 0))
     if not 10 <= price <= 100_000_000:
-        err("цена от 10 ⭐")
+        err("цена от 0,01 ⭐")
     with tx():
         own_gift(gid, uid)
         if in_open_trade(gid):
@@ -1460,7 +1461,7 @@ def buy(gid: int, uid=Depends(auth)):
         stars = q1("SELECT stars FROM users WHERE id=?", uid)["stars"]
         buyer = q1("SELECT name FROM users WHERE id=?", uid)["name"]
     if seller:
-        notify(seller, f"💰 <b>{esc(buyer)}</b> купил твой {esc(g['col'])} #{g['num']} — тебе +{got} ⭐")
+        notify(seller, f"💰 <b>{esc(buyer)}</b> купил твой {esc(g['col'])} #{g['num']} — тебе +{S(got)} ⭐")
     return {"ok": True, "stars": stars}
 
 
@@ -1558,12 +1559,12 @@ def check_bet(uid, amount, lo=10, hi=None):
         SELF_GUARD(uid, amount)
     cap = BET_CAP() if BET_CAP else None
     if cap and amount > cap:
-        err(f"Банк в кризисе — ставка не больше {cap:,} ⭐".replace(",", " "))
+        err(f"Банк в кризисе — ставка не больше {S(cap)} ⭐")
     lc = LOAN_BET_CAP(uid) if LOAN_BET_CAP else None
     if lc and amount > lc:
-        err(f"После просрочки кредита ставка не больше {lc:,} ⭐".replace(",", " "))
+        err(f"После просрочки кредита ставка не больше {S(lc)} ⭐")
     if not lo <= amount <= hi:
-        err(f"ставка от {lo} до {hi:,} ⭐".replace(",", " "))
+        err(f"ставка от {S(lo)} до {S(hi)} ⭐")
     if bal(uid) < amount:
         err("Не хватает звёзд")
 
@@ -1902,7 +1903,7 @@ async def duel_new(req: Request, uid=Depends(auth)):
         cur = db.execute("INSERT INTO duels(a,b,game,stake,status,ts) VALUES(?,?,?,?,?,?)", (uid, to, game, stake, "open", now()))
         name = q1("SELECT name FROM users WHERE id=?", uid)["name"]
     if to:
-        notify(to, f"⚔️ <b>{esc(name)}</b> вызывает тебя на дуэль ({ {'coin': 'монетка', 'dice': 'кости', 'crash': 'краш'}[game] }) на {stake} ⭐")
+        notify(to, f"⚔️ <b>{esc(name)}</b> вызывает тебя на дуэль ({ {'coin': 'монетка', 'dice': 'кости', 'crash': 'краш'}[game] }) на {S(stake)} ⭐")
     return {"id": cur.lastrowid, "stars": bal(uid)}
 
 
@@ -1934,7 +1935,7 @@ def duel_action(did: int, action: str, uid=Depends(auth)):
                 db.execute("UPDATE duels SET b=?, status='live', cp=?, ts=?, ready='{}' WHERE id=?", (uid, cp, now(), did))
                 nm = q1("SELECT name FROM users WHERE id=?", uid)["name"]
                 res = {"live": did, "stars": bal(uid)}
-                msg = (d["a"], f"🚀 <b>{esc(nm)}</b> принял краш-дуэль на {d['stake']} ⭐ — заходи и жми «Готов»!", APP_URL + f"?cduel={did}")
+                msg = (d["a"], f"🚀 <b>{esc(nm)}</b> принял краш-дуэль на {S(d['stake'])} ⭐ — заходи и жми «Готов»!", APP_URL + f"?cduel={did}")
             elif d["game"] == "coin":
                 rng = fair.pub("duel", f"coin:{did}")
                 side = rng.randint(0, 1)             # 0 — создатель, 1 — принявший
@@ -1959,7 +1960,7 @@ def duel_action(did: int, action: str, uid=Depends(auth)):
                 res = duel_out(q1("SELECT * FROM duels WHERE id=?", did))
                 res["stars"] = bal(uid)
                 nm = q1("SELECT name FROM users WHERE id=?", uid)["name"]
-                msg = (d["a"], f"⚔️ <b>{esc(nm)}</b> принял дуэль на {d['stake']} ⭐ — " + ("ты победил! +" + str(pay) + " ⭐" if win == d["a"] else "ты проиграл"))
+                msg = (d["a"], f"⚔️ <b>{esc(nm)}</b> принял дуэль на {S(d['stake'])} ⭐ — " + ("ты победил! +" + str(pay) + " ⭐" if win == d["a"] else "ты проиграл"))
         else:
             err("Действие устарело — обнови экран")
     if msg:
@@ -2002,13 +2003,13 @@ QPOOL = [
     ("avia", "send", "Запусти самолётик 3 раза", "avia", ("avia",), "n", 3, 0, 450, 2),
     ("rlt", "refresh", "Сыграй 3 раунда рулетки", "rlt", ("roulette",), "n", 3, 0, 450, 2),
     ("games5", "games", "Сыграй в 5 разных игр", None, _ALLG, "g", 5, 0, 600, 2),
-    ("win1k", "coins", "Выиграй разом от ⭐ 1 000", None, _ALLG, "x", 1, 1000, 600, 2),
+    ("win1k", "coins", "Выиграй разом от ⭐ 1", None, _ALLG, "x", 1, 1000, 600, 2),
     ("cases25", "box", "Открой 25 кейсов", None, ("case",), "n", 25, 0, 1500, 3),
     ("casew", "crown", "Окупи 3 кейса", None, ("case",), "w", 3, 0, 1200, 3),
     ("upgw", "trend", "Сделай удачный апгрейд", "upgrade", ("upgrade",), "w", 1, 0, 1200, 3),
     ("crash15", "rocket", "Сыграй 15 раундов в краш", "crash", ("crash",), "n", 15, 0, 1000, 3),
     ("games8", "games", "Сыграй в 8 разных игр", None, _ALLG, "g", 8, 0, 1300, 3),
-    ("win10k", "crown", "Выиграй разом от ⭐ 10 000", None, _ALLG, "x", 1, 10000, 1500, 3),
+    ("win10k", "crown", "Выиграй разом от ⭐ 10", None, _ALLG, "x", 1, 10000, 1500, 3),
     ("battle", "users", "Сыграй в «Битву кейсов»", "battle", ("battle",), "n", 1, 0, 1000, 3),
     ("slotsw", "grid", "Выиграй в слотах 5 раз", "slots", ("slots",), "w", 5, 0, 1000, 3),
 ]
@@ -2232,9 +2233,9 @@ async def plinko(req: Request, uid=Depends(auth)):
     balls = []
     with tx():
         if not 10 <= bet:
-            err("ставка от 10 ⭐ за шарик")
+            err("ставка от 0,01 ⭐ за шарик")
         if bet * n > MAX_BET:
-            err(f"за один бросок не больше ⭐ {MAX_BET:,} — уменьши ставку или число шариков".replace(",", " "))
+            err(f"за один бросок не больше ⭐ {S(MAX_BET)} — уменьши ставку или число шариков")
         check_bet(uid, bet * n, 10 * n)   # лимит, баланс и кризисный потолок — на всю сумму
         rr, pf = fair.rolls(uid, "plinko", ref=risk, n=n * PLINKO_ROWS)
         for bi in range(n):
@@ -2450,7 +2451,7 @@ async def dogs_buy(req: Request, uid=Depends(auth)):
     with tx():
         check_bet(uid, bet, 10, 100_000)
         if bal(uid) < cost:
-            err(f"Нужно ⭐ {cost}")
+            err(f"Нужно ⭐ {S(cost)}")
         rng = fair.stream(uid, "dogs", f"buy:{scat}")
         r = DOGS.bonus_round(bet, scat, rng)
         fair.record(uid, "dogs", cost, r["pay"], {"pays": [r["pay"]]}, fair.close_stream(rng))
@@ -2502,7 +2503,7 @@ async def roulette(req: Request, uid=Depends(auth)):
         clean.append((t, v, a))
         total += a
     if not clean or total < 10:
-        err("ставка от 10 ⭐")
+        err("ставка от 0,01 ⭐")
     with tx():
         check_bet(uid, total)
         rr, pf = fair.rolls(uid, "rlt", ref=str(len(clean)), n=1)

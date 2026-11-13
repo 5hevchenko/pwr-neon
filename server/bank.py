@@ -1,4 +1,5 @@
 """Банк казино: история прибыли по дням, акции казино с дивидендами, рекордсмены против банка."""
+from settings import S
 import asyncio
 import json
 import time
@@ -126,7 +127,7 @@ def _crisis_watch():
         with tx():
             db.execute("INSERT INTO crisis_log(start,low) VALUES(?,?)", (now(), b))
         for o in _owners():
-            notify(o, f"🚨 Банк игры упал ниже ⭐ {CRISIS_AT:,} — включён КРИЗИС: ставки до ⭐ {CRISIS_MAX_BET:,}, дивиденды на паузе.".replace(",", " "))
+            notify(o, f"🚨 Банк игры упал ниже ⭐ {S(CRISIS_AT)} — включён КРИЗИС: ставки до ⭐ {S(CRISIS_MAX_BET)}, дивиденды на паузе.")
     elif on:
         with tx():
             db.execute("UPDATE crisis_log SET low=MIN(low,?) WHERE end=0", (b,))
@@ -134,7 +135,7 @@ def _crisis_watch():
         with tx():
             db.execute("UPDATE crisis_log SET end=? WHERE end=0", (now(),))
         for o in _owners():
-            notify(o, f"✅ Банк снова выше ⭐ {CRISIS_AT:,} — кризис закончился.".replace(",", " "))
+            notify(o, f"✅ Банк снова выше ⭐ {S(CRISIS_AT)} — кризис закончился.")
 
 
 # ---------------- хранилище банка: подарки, проигранные в апгрейде. Через Vault TTL перерабатываются ----------------
@@ -273,7 +274,7 @@ def bank_vault_buy(vid: int, uid=Depends(auth)):
             err("выкупить может только прежний владелец")
         price = int(round(r["value"] * (1 + vault_cfg("buyback_premium"))))
         if bal(uid) < price:
-            err(f"для выкупа нужно ⭐ {price:,}".replace(",", " "))
+            err(f"для выкупа нужно ⭐ {S(price)}")
         g = json.loads(r["gift"])
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (price, uid))
         db.execute("DELETE FROM bank_vault WHERE id=?", (vid,))
@@ -301,7 +302,7 @@ def bank_addr():
 def donate(uid, amount):
     """Подарок банку: звёзды игрока уходят в банк, взамен ничего. Банк = старт − сумма событий, поэтому событие с минусом растит банк."""
     if amount < DONATE_MIN:
-        err(f"минимум {DONATE_MIN} ⭐")
+        err(f"минимум {S(DONATE_MIN)} ⭐")
     with tx():
         if bal(uid) < amount:
             err("Не хватает звёзд")
@@ -388,7 +389,7 @@ def _pay(day):
                 o = q1("SELECT owner FROM clans WHERE id=?", cid)
                 clans.feed(cid, o["owner"] if o else 0, "sharediv", a)
     for u, a in paid:
-        notify(u, f"Дивиденды банка: +{a} ⭐ (игровых) за вчера.")
+        notify(u, f"Дивиденды банка: +{S(a)} ⭐ (игровых) за вчера.")
     return paid
 
 
@@ -542,7 +543,7 @@ async def bank_clan_trade(req: Request, uid=Depends(auth)):
                 err("Свободных акций не осталось")
             cost = n * p
             if (c["bank"] or 0) < cost:
-                err(f"в казне только ⭐ {c['bank'] or 0:,}".replace(",", " "))
+                err(f"в казне только ⭐ {S(c['bank'] or 0)}")
             db.execute("UPDATE clans SET bank=bank-? WHERE id=?", (cost, cid))
             db.execute("INSERT INTO clan_shares(clan,n,cost,ts) VALUES(?,?,?,?) ON CONFLICT(clan) DO UPDATE SET n=n+?, cost=cost+?, ts=?",
                        (cid, n, cost, now(), n, cost, now()))
@@ -647,7 +648,7 @@ def _dep_accrue():
             if earned:
                 event(d["user"], "depint", earned)
         _BV["ts"] = 0
-        notify(d["user"], f"🏦 Вклад закрылся: <b>+{d['amount'] + earned:,} ⭐</b>, из них проценты {earned:,} ⭐.".replace(",", " "))
+        notify(d["user"], f"🏦 Вклад закрылся: <b>+{S(d['amount'] + earned)} ⭐</b>, из них проценты {S(earned)} ⭐.")
 
 
 @app.get(R + "/bank/deposits")
@@ -675,13 +676,13 @@ async def dep_open(req: Request, uid=Depends(auth)):
         err("Банк в кризисе — вклады закрыты, дождись восстановления")
     with tx():
         if amount < DEP_MIN:
-            err(f"вклад от ⭐ {DEP_MIN:,}".replace(",", " "))
+            err(f"вклад от ⭐ {S(DEP_MIN)}")
         if bal(uid) < amount:
             err("Не хватает звёзд")
         if q1("SELECT COUNT(*) n FROM deposits WHERE user=?", uid)["n"] >= DEP_MAX_N:
             err(f"не больше {DEP_MAX_N} вкладов одновременно")
         if q1("SELECT COALESCE(SUM(amount),0) s FROM deposits WHERE user=?", uid)["s"] + amount > DEP_MAX_TOTAL:
-            err(f"вклады суммарно не больше ⭐ {DEP_MAX_TOTAL:,}".replace(",", " "))
+            err(f"вклады суммарно не больше ⭐ {S(DEP_MAX_TOTAL)}")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (amount, uid))
         db.execute("INSERT INTO deposits(user,amount,rate,till,accrued,last,ts) VALUES(?,?,?,?,0,?,?)",
                    (uid, amount, rate, now() + days * 86400, now(), now()))

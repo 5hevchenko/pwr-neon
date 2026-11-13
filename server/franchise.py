@@ -13,6 +13,7 @@
 - награды владельцу, каждая один раз на аккаунт: create_reward — за создание бота (если сам владелец не ниже create_level:
   иначе любой твинк создаёт бота в один тап и забирает звёзды; дорастёт — получит), reward — когда бот приведёт N игроков нужного уровня.
 """
+from settings import S
 import asyncio
 import base64
 import hashlib
@@ -313,9 +314,9 @@ async def on_managed(mb):
     cr = cfg("create_reward") and not q1("SELECT 1 FROM fr_create WHERE owner=?", owner)
     lvl_ok = A.level(q1("SELECT xp FROM users WHERE id=?", owner)["xp"] if q1("SELECT 1 FROM users WHERE id=?", owner) else 0) >= cfg("create_level")
     notify(owner, f"🤖 Твой бот @{esc(b['username'])} готов — в нём та же игра и тот же аккаунт.\n\nДелись ссылкой t.me/{esc(b['username'])}"
-           + ("" if not cr or lvl_ok else f"\n\n🎁 <b>{nf(cfg('create_reward'))} ⭐</b> за создание — придут, когда дойдёшь до {cfg('create_level')} уровня")
+           + ("" if not cr or lvl_ok else f"\n\n🎁 <b>{S(cfg('create_reward'))} ⭐</b> за создание — придут, когда дойдёшь до {cfg('create_level')} уровня")
            + ("" if paid or not cfg("reward") else f"\n\n🎁 Когда через него придут {cfg('players')} новых игроков и дорастут до {cfg('level')} уровня — "
-                                                    f"ещё <b>{nf(cfg('reward'))} ⭐</b>"))
+                                                    f"ещё <b>{S(cfg('reward'))} ⭐</b>"))
     await asyncio.get_running_loop().run_in_executor(None, _create_rewards)   # 25 000 за создание — сразу, если уровень позволяет
 
 
@@ -355,8 +356,8 @@ def _create_rewards():
             db.execute("INSERT INTO fr_create(owner,bot,amount,ts) VALUES(?,?,?,?)", (r["owner"], r["bot"], amount, now()))
             db.execute("UPDATE users SET stars=stars+? WHERE id=?", (amount, r["owner"]))
             event(r["owner"], "franchise", amount)
-        notify(r["owner"], f"🎁 За создание бота @{esc(r['un'])} — <b>+{nf(amount)} ⭐</b>"
-               + (f"\n\nКогда через него придут {cfg('players')} новых игроков {cfg('level')}+ уровня — ещё <b>{nf(cfg('reward'))} ⭐</b>" if cfg("reward") else ""))
+        notify(r["owner"], f"🎁 За создание бота @{esc(r['un'])} — <b>+{S(amount)} ⭐</b>"
+               + (f"\n\nКогда через него придут {cfg('players')} новых игроков {cfg('level')}+ уровня — ещё <b>{S(cfg('reward'))} ⭐</b>" if cfg("reward") else ""))
 
 
 CUT_KINDS = A.GAME_KINDS[:-1] + ",'fee')"   # весь доход игры: проигрыши в играх + все налоги и комиссии
@@ -420,7 +421,7 @@ def _cut_daily():
     for uid, un in cut_recipients():
         got = q1("SELECT COALESCE(SUM(delta),0) s FROM events WHERE user=? AND kind='frcut' AND ts>=? AND ts<?", uid, day, day + 86400)["s"]
         if got > 0:
-            notify(uid, f"💼 Пассивный доход за вчера: <b>+{nf(got)} ⭐</b> — {str(cfg('cut_pct')).replace('.', ',')}% от всего дохода игры (игры + налоги и комиссии).\n"
+            notify(uid, f"💼 Пассивный доход за вчера: <b>+{S(got)} ⭐</b> — {str(cfg('cut_pct')).replace('.', ',')}% от всего дохода игры (игры + налоги и комиссии).\n"
                         f"Это отчёт: звёзды уже зачислены на баланс в течение вчерашнего дня (начисляются каждую минуту, "
                         f"пока у тебя есть бот @{esc(un)}). История — в профиле → «История».")
 
@@ -451,7 +452,7 @@ def _rewards():
             db.execute("UPDATE users SET stars=stars+? WHERE id=?", (reward, b["owner"]))
             event(b["owner"], "franchise", reward)
         b["paid"] = 1
-        notify(b["owner"], f"🎉 Твой бот @{esc(b['username'])} привёл {cfg('players')} игроков — тебе <b>{nf(reward)} ⭐</b>")
+        notify(b["owner"], f"🎉 Твой бот @{esc(b['username'])} привёл {cfg('players')} игроков — тебе <b>{S(reward)} ⭐</b>")
 
 
 async def reward_loop():
@@ -475,11 +476,11 @@ async def cmd(m):
     lines = ["🤖 <b>Свой бот с этой игрой</b>\n",
              "Жми кнопку — Telegram создаст бота за пару секунд, без @BotFather. В нём та же игра, тот же баланс и подарки у всех игроков.\n"]
     if cfg("create_reward") and not q1("SELECT 1 FROM fr_create WHERE owner=?", uid):
-        lines.append(f"🎁 <b>{nf(cfg('create_reward'))} ⭐ сразу</b> за создание (с {cfg('create_level')} уровня, один раз)")
+        lines.append(f"🎁 <b>{S(cfg('create_reward'))} ⭐ сразу</b> за создание (с {cfg('create_level')} уровня, один раз)")
     if cfg("cut_pct"):
         lines.append(f"💼 <b>{str(cfg('cut_pct')).replace('.', ',')}%</b> от всего дохода игры (игры + налоги и комиссии) — начисляется каждую минуту, пока у тебя есть бот (с {cfg('create_level')} уровня)")
     if not paid and cfg("reward"):
-        lines.append(f"🎁 Ещё <b>{nf(cfg('reward'))} ⭐</b> — когда через твоего бота придут {cfg('players')} новых игроков и дорастут до {cfg('level')} уровня\n")
+        lines.append(f"🎁 Ещё <b>{S(cfg('reward'))} ⭐</b> — когда через твоего бота придут {cfg('players')} новых игроков и дорастут до {cfg('level')} уровня\n")
     for b in mine:
         st = {"on": "работает", "off": "отключён", "limit": "не подключён (лимит)"}.get(b["status"], b["status"])
         lines.append(f"• @{esc(b['username'])} — {st}" + ("" if paid or b["status"] != "on" else f", игроков: {_progress(b['id'], uid)}/{cfg('players')}"))
@@ -710,9 +711,9 @@ def promo_text():
     """Предложение создать бота: и авто-рассылка, и «Разослать всем» из админки. Суммы — из настроек."""
     r, c, pct = cfg("reward"), cfg("create_reward"), cfg("cut_pct")
     pc = str(pct).replace(".", ",")
-    perks = ([f"• <b>{nf(c)} ⭐ сразу</b> за создание (с {cfg('create_level')} уровня)"] if c else []) \
+    perks = ([f"• <b>{S(c)} ⭐ сразу</b> за создание (с {cfg('create_level')} уровня)"] if c else []) \
         + ([f"• <b>{pc}% от всего дохода игры (игры + налоги и комиссии)</b> — пассивный доход каждую минуту, пока у тебя есть бот"] if pct else []) \
-        + ([f"• ещё <b>{nf(r)} ⭐</b>, когда придут {cfg('players')} игроков {cfg('level')}+ уровня"] if r else [])
+        + ([f"• ещё <b>{S(r)} ⭐</b>, когда придут {cfg('players')} игроков {cfg('level')}+ уровня"] if r else [])
     return ("🤖 <b>Свой бот с этой игрой" + (" — и доход каждую минуту</b>" if pct else "</b>") + "\n\n"
             "Одной кнопкой создай свой бот с нашей игрой — без @BotFather и без кода. "
             "Та же игра, тот же баланс, подарки и турниры."

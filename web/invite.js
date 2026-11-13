@@ -43,13 +43,13 @@ invite = async function () {
   if (!d) { box.innerHTML = ""; return; }
   const step = (icn, cls, t, s) => `<div class="row"><span class="pic ${cls}">${ic(icn)}</span><div class="grow"><div class="t">${t}</div><div class="s">${s}</div></div></div>`;
   const next = d.milestones.find(m => !m.done);
-  box.innerHTML = `<div class="inv-stats inv-s3"><div><b>${fmt(d.invited)}</b><span>${plural(d.invited, ["друг пришёл", "друга пришли", "друзей пришли"])}</span></div>
-      <div><b>${fmt(d.active)}</b><span>активных (${d.l1[0]}+ ур.)</span></div>
+  box.innerHTML = `<div class="inv-stats inv-s3"><div><b>${num(d.invited)}</b><span>${plural(d.invited, ["друг пришёл", "друга пришли", "друзей пришли"])}</span></div>
+      <div><b>${num(d.active)}</b><span>активных (${d.l1[0]}+ ур.)</span></div>
       <div><b class="tw">+${short(d.earned)} ⭐</b><span>заработано</span></div></div>
     <div class="sec-t">Подарок по ссылке</div>
     <div class="box"><div class="row"><span class="pic y">${ic("gift")}</span><div class="grow"><div class="t">Подари подарок тому, кто ещё не играет</div>
       <div class="s" style="white-space:normal">В сумке открой подарок, нажми «Подарить другу» и выбери «Подарок по ссылке». Кто придёт по нему, станет твоим другом</div></div></div>
-      <div class="row kv"><div class="grow"><div class="t">Пришли по твоим подаркам</div><div class="s">Отправлено ссылок: ${fmt(d.giftLinks)}</div></div><b>${fmt(d.giftFriends)}</b></div>
+      <div class="row kv"><div class="grow"><div class="t">Пришли по твоим подаркам</div><div class="s">Отправлено ссылок: ${num(d.giftLinks)}</div></div><b>${num(d.giftFriends)}</b></div>
       <div class="row"><button class="btn sm ghost" style="width:100%" data-act="inv-bag">${ic("gift")}Выбрать подарок в сумке</button></div></div>
     ${d.duoOn ? `<div class="sec-t">Цель на двоих</div>
       <div class="hint" style="font-size:12px;margin:-4px 0 8px;white-space:normal"><span>Друг за ${d.duoDays} дней доходит до ${d.duoLevel} уровня и набирает оборот ⭐ ${short(d.duoFriend)}, ты ⭐ ${short(d.duoRef)}.</span> <span>Оборот: выигрыши и проигрыши вместе.</span> <span>Награда каждому ⭐ ${short(d.duoPrize)}</span></div>
@@ -83,7 +83,7 @@ Object.assign(ACT, {
   "inv-copy": () => copyText(ME.refLink),
   "inv-bag": () => { closeSheet(); setTab("inv"); setTimeout(() => toast("Открой подарок: «Подарить другу», затем «Подарок по ссылке»"), 400); },
   "inv-share": () => {
-    const text = ME.refBonus ? `Залетай открывать кейсы с подарками Telegram 🎁 По моей ссылке получишь +${ME.refBonus} ⭐ на старт (игровых)` : "Залетай открывать кейсы с подарками Telegram 🎁";
+    const text = ME.refBonus ? `Залетай открывать кейсы с подарками Telegram 🎁 По моей ссылке получишь +${fmt(ME.refBonus)} ⭐ на старт` : "Залетай открывать кейсы с подарками Telegram 🎁";
     const url = `https://t.me/share/url?url=${enc(ME.refLink)}&text=${enc(text)}`;
     if (inTg) tg.openTelegramLink(url); else copyText(ME.refLink);
   },

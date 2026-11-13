@@ -1,6 +1,7 @@
 """Битва кейсов: 2–4 участника открывают одинаковые кейсы (1–5 раундов), у кого сумма подарков больше — забирает ВСЕ подарки.
 Свободные места создатель может отдать боту казино: бот не платит, его подарки достаются победителю-игроку;
 если побеждает бот, подарки участников остаются у казино. Матожидание игрока = обычное открытие кейса."""
+from settings import S
 import asyncio
 import json
 import random
@@ -136,7 +137,7 @@ async def battle_new(req: Request, uid=Depends(auth)):
         if q1("SELECT COUNT(*) n FROM battles WHERE host=? AND status='waiting'", uid)["n"] >= 3:
             err("не больше 3 открытых битв")
         if bal(uid) < cost:
-            err(f"Нужно ⭐ {cost}")
+            err(f"Нужно ⭐ {S(cost)}")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (cost, uid))
         players = [uid] + [None] * (slots - 1)
         cur = db.execute("INSERT INTO battles(host,cid,rounds,slots,price,players,ts) VALUES(?,?,?,?,?,?,?)",
@@ -162,7 +163,7 @@ def _notify_done(b, res):
         if p and p != b.get("_actor"):
             notify(p, f"⚔️ Битва кейсов «{esc(E.case_title(b['cid'], p))}» завершена — "
                       + ("ты победил и забрал всё! " if p == winner else f"победил <b>{esc(wname)}</b>. ")
-                      + f"Банк битвы ⭐ {total}")
+                      + f"Банк битвы ⭐ {S(total)}")
 
 
 @app.post(R + "/battles/{bid}/join")
@@ -177,7 +178,7 @@ def battle_join(bid: int, uid=Depends(auth)):
             err("ты уже в этой битве")
         cost = b["price"] * b["rounds"]
         if bal(uid) < cost:
-            err(f"Нужно ⭐ {cost}")
+            err(f"Нужно ⭐ {S(cost)}")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (cost, uid))
         res = _fill(b, uid)
     b["_actor"] = uid

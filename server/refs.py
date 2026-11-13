@@ -9,6 +9,7 @@
 - недельный топ: кто привёл больше активных друзей за неделю (по выплатам l1) — призы top_prizes, минимум top_min друзей.
 Экономика: награды за друга растут с его уровнем, а не с оборотом ставок — правило «меньше 1% от оборота» не задето.
 """
+from settings import S
 import asyncio
 import json
 import re
@@ -119,7 +120,7 @@ def _levels():
                     continue
                 db.execute("INSERT INTO ref_pay(friend,stage,ref,amount,ts) VALUES(?,?,?,?,?)", (f["id"], stage, f["ref_by"], bonus, now()))
                 if bonus:
-                    msgs.append(_pay(f["ref_by"], bonus, "ref_lvl", f"🎯 Твой друг <b>{esc(f['name'])}</b> дошёл до {L} уровня — тебе +{nf(bonus)} ⭐"))
+                    msgs.append(_pay(f["ref_by"], bonus, "ref_lvl", f"🎯 Твой друг <b>{esc(f['name'])}</b> дошёл до {L} уровня — тебе +{S(bonus)} ⭐"))
     return msgs
 
 
@@ -138,7 +139,7 @@ def _milestones():
                 if q1("SELECT 1 FROM ref_ms WHERE user=? AND cnt=?", r["r"], cnt) or not q1("SELECT 1 FROM users WHERE id=? AND banned=0", r["r"]):
                     continue
                 db.execute("INSERT INTO ref_ms(user,cnt,amount,ts) VALUES(?,?,?,?)", (r["r"], cnt, amount, now()))
-                msgs.append(_pay(r["r"], amount, "ref_ms", f"🏅 У тебя {cnt} активных друзей в игре — награда <b>+{nf(amount)} ⭐</b>"))
+                msgs.append(_pay(r["r"], amount, "ref_ms", f"🏅 У тебя {cnt} активных друзей в игре — награда <b>+{S(amount)} ⭐</b>"))
     return msgs
 
 
@@ -168,7 +169,7 @@ def _top_payout():
             amount = prizes[place]
             place += 1
             db.execute("INSERT INTO ref_top(week,place,user,n,amount) VALUES(?,?,?,?,?)", (prev, place, r["ref"], r["n"], amount))
-            msgs.append(_pay(r["ref"], amount, "ref_top", f"🏆 {place} место в недельном топе приглашений ({r['n']} активных друзей) — <b>+{nf(amount)} ⭐</b>"))
+            msgs.append(_pay(r["ref"], amount, "ref_top", f"🏆 {place} место в недельном топе приглашений ({r['n']} активных друзей) — <b>+{S(amount)} ⭐</b>"))
         if not place:   # пометка «неделя закрыта», даже если никто не прошёл порог
             db.execute("INSERT INTO ref_top(week,place,user,n,amount) VALUES(?,0,0,0,0)", (prev,))
     return msgs
@@ -205,7 +206,7 @@ def on_buy(uid, stars):
         if not q1("SELECT 1 FROM users WHERE id=? AND banned=0", u["ref_by"]):
             return
         _pay(u["ref_by"], amount, "ref_buy", "")
-    notify(u["ref_by"], f"💎 Твой друг <b>{esc(u['name'])}</b> пополнил баланс — тебе {cfg('buy_pct')}%: <b>+{nf(amount)} ⭐</b>")
+    notify(u["ref_by"], f"💎 Твой друг <b>{esc(u['name'])}</b> пополнил баланс — тебе {cfg('buy_pct')}%: <b>+{S(amount)} ⭐</b>")
 
 
 # ============================== подарок от друга и цель на двоих ==============================
@@ -292,8 +293,8 @@ def _duo():
                     continue
                 db.execute("UPDATE ref_duo SET status='done', prize=? WHERE friend=?", (prize, d["friend"]))
                 if prize:
-                    msgs.append(_pay(f["id"], prize, "ref_duo", f"Цель с другом <b>{esc(r['name'])}</b> выполнена: тебе +{nf(prize)} ⭐"))
-                    msgs.append(_pay(r["id"], prize, "ref_duo", f"Цель с другом <b>{esc(f['name'])}</b> выполнена: тебе +{nf(prize)} ⭐"))
+                    msgs.append(_pay(f["id"], prize, "ref_duo", f"Цель с другом <b>{esc(r['name'])}</b> выполнена: тебе +{S(prize)} ⭐"))
+                    msgs.append(_pay(r["id"], prize, "ref_duo", f"Цель с другом <b>{esc(f['name'])}</b> выполнена: тебе +{S(prize)} ⭐"))
         elif t >= d["until"]:
             with tx():
                 db.execute("UPDATE ref_duo SET status='expired' WHERE friend=? AND status='open'", (d["friend"],))
@@ -396,7 +397,7 @@ async def admin_refs_set(req: Request, aid=Depends(admin)):
                 err("формат: 15000,7500,3000")
             ps = _prizes(v)
             if len(ps) > 10 or any(not 0 <= p <= 1_000_000 for p in ps):
-                err("до 10 призов, до 1 000 000 ⭐")
+                err("до 10 призов, до 1 000 ⭐")
             cur[k] = ",".join(map(str, ps))
         else:
             try:

@@ -5,6 +5,7 @@
    7–14 — ключ «Удача» + звёзды, 15–45 — ключ «Роскошь» + звёзды побольше. Каждая ступень — не чаще своего интервала.
    Только тем, кто реально играл (от 30 раундов), и с включёнными уведомлениями. Кто вернулся за 3 дня — отмечаем
    в comeback_log (статистика в админке → Обзор)."""
+from settings import S
 from settings import conf
 import asyncio
 import time
@@ -61,7 +62,7 @@ def _cashback():
             db.execute("UPDATE users SET stars=stars+? WHERE id=?", (amt, r["user"]))
             event(r["user"], "cashback", amt)
             msgs.append((r["user"], f"💸 <b>Кэшбэк недели</b>: прошлая неделя не задалась — возвращаем 5% проигрыша, "
-                                    f"+{amt:,} ⭐ уже на балансе. Удачи на этой неделе!".replace(",", " ")))
+                                    f"+{S(amt)} ⭐ уже на балансе. Удачи на этой неделе!"))
         db.execute("INSERT INTO cashback VALUES(?,0,0,0,?)", (week, now()))   # отметка «неделя выплачена»
     for u, t in msgs:
         notify(u, t)
@@ -97,7 +98,7 @@ def _comeback():
                     db.execute("UPDATE users SET stars=stars+? WHERE id=?", (stars, u["id"]))
                     event(u["id"], "comeback", stars)
                 days = (t - u["seen"]) // 86400
-                gift = f"ключ от кейса «{esc(title)}»" + (f" и {stars:,} ⭐".replace(",", " ") if stars else "")
+                gift = f"ключ от кейса «{esc(title)}»" + (f" и {S(stars)} ⭐" if stars else "")
                 text = (f"👋 {esc(u['name'])}, давно не виделись! Положили тебе {gift} — открой бесплатно. Бонус дня тоже ждёт 🎁" if tier == 1 else
                         f"🎁 {esc(u['name'])}, тебя не было {days} дн. — мы скучали! Держи {gift}. Заходи забрать, пока не сгорело." if tier == 2 else
                         f"💎 {esc(u['name'])}, без тебя тут не то. Подарок за возвращение: {gift}. Всё уже в игре — открывай!")

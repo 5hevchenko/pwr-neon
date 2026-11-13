@@ -1,6 +1,7 @@
 """Переводы звёзд между игроками (экран «Кошелёк» в стиле WeChat): свой QR «Получить», сканер, перевод по QR/поиску.
 QR и ссылка ведут на бота: t.me/<бот>?start=pay_<id>[_<сумма>] → кнопка открывает игру с ?pay=<id>&amt=<сумма>.
 Получатель получает ровно сумму перевода, комиссия (как в обменах) списывается с отправителя сверху и уходит в банк."""
+from settings import S
 import asyncio
 import hashlib
 import hmac
@@ -285,9 +286,9 @@ async def pay_send(req: Request, uid=Depends(auth)):
     if not cfg("on"):
         err("Переводы временно отключены")
     if amount < cfg("min"):
-        err(f"минимум {cfg('min')} ⭐")
+        err(f"минимум {S(cfg('min'))} ⭐")
     if cfg("max") and amount > cfg("max"):
-        err(f"за один раз не больше {cfg('max'):,} ⭐".replace(",", " "))
+        err(f"за один раз не больше {S(cfg('max'))} ⭐")
     await check_pin(uid, str(b.get("pin", "")))
     fee = _fee(amount, fee_k)
     with tx():
@@ -299,7 +300,7 @@ async def pay_send(req: Request, uid=Depends(auth)):
         if q1("SELECT COUNT(*) n FROM transfers WHERE src=? AND ts>?", uid, now() - 86400)["n"] >= cfg("day"):
             err(f"не больше {cfg('day')} переводов в сутки")
         if bal(uid) < amount + fee:
-            err(f"Не хватает звёзд: нужно {amount + fee} ⭐ с комиссией")
+            err(f"Не хватает звёзд: нужно {S(amount + fee)} ⭐ с комиссией")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (amount + fee, uid))
         db.execute("UPDATE users SET stars=stars+? WHERE id=?", (amount, to))
         event(uid, "transfer", -amount)
@@ -309,7 +310,7 @@ async def pay_send(req: Request, uid=Depends(auth)):
         db.execute("INSERT INTO transfers(src,dst,amount,fee,note,ts,anon) VALUES(?,?,?,?,?,?,?)", (uid, to, amount, fee, note, now(), int(anon)))
         name = "Неизвестный пользователь" if anon else q1("SELECT name FROM users WHERE id=?", uid)["name"]
         left = bal(uid)
-    notify(to, f"💸 Перевод от <b>{esc(name)}</b>: <b>{amount:,} ⭐</b>".replace(",", " ") + (f"\n\n<i>«{esc(note)}»</i>" if note else ""))
+    notify(to, f"💸 Перевод от <b>{esc(name)}</b>: <b>{S(amount)} ⭐</b>" + (f"\n\n<i>«{esc(note)}»</i>" if note else ""))
     return {"ok": True, "stars": left, "amount": amount, "fee": fee}
 
 
@@ -407,21 +408,21 @@ async def on_inline(iq):
     if not cfg("inline_on") or not cfg("on"):
         return await _inline_hint(qid, "Переводы сейчас отключены")
     if amount < cfg("min"):
-        return await _inline_hint(qid, f"Напиши сумму чека — минимум {cfg('min')} ⭐")
+        return await _inline_hint(qid, f"Напиши сумму чека — минимум {S(cfg('min'))} ⭐")
     if cfg("max") and amount > cfg("max"):
-        return await _inline_hint(qid, f"Максимум за раз — {cfg('max')} ⭐")
+        return await _inline_hint(qid, f"Максимум за раз — {S(cfg('max'))} ⭐")
     fee = _fee(amount)
     u = q1("SELECT stars FROM users WHERE id=?", uid)   # отправитель мог ни разу не открыть игру — аккаунта нет
     if not u:
         return await _inline_hint(qid, "Сначала открой игру — потом сможешь отправлять чеки")
     if u["stars"] < amount + fee:
-        return await _inline_hint(qid, f"Не хватает звёзд: нужно {amount + fee} ⭐ с комиссией")
+        return await _inline_hint(qid, f"Не хватает звёзд: нужно {S(amount + fee)} ⭐ с комиссией")
     code = f"{amount}x{uid}x{secrets.token_hex(5)}"   # отправитель зашит в код — забор сможет списать сам, если feedback выкл.
     link = f"https://t.me/{BOT_NAME}?start=claim_{code}"   # главный бот — только он обрабатывает /start claim_
-    res = {"type": "article", "id": code, "title": f"Перевести {amount} ⭐",
-           "description": f"Комиссия {fee} ⭐ · заберёт первый, кто откроет",
-           "input_message_content": {"message_text": f"💸 Чек на <b>{amount} ⭐</b> в игре GiftBot\nЗаберёт первый, кто откроет кнопкой ниже.", "parse_mode": "HTML"},
-           "reply_markup": {"inline_keyboard": [[{"text": f"🎁 Получить {amount} ⭐", "url": link}]]}}
+    res = {"type": "article", "id": code, "title": f"Перевести {S(amount)} ⭐",
+           "description": f"Комиссия {S(fee)} ⭐ · заберёт первый, кто откроет",
+           "input_message_content": {"message_text": f"💸 Чек на <b>{S(amount)} ⭐</b> в игре GiftBot\nЗаберёт первый, кто откроет кнопкой ниже.", "parse_mode": "HTML"},
+           "reply_markup": {"inline_keyboard": [[{"text": f"🎁 Получить {S(amount)} ⭐", "url": link}]]}}
     await tg_call("answerInlineQuery", inline_query_id=qid, results=[res], cache_time=1, is_personal=True)
 
 
@@ -444,7 +445,7 @@ def reserve_cheque(uid, code):
             return
         u = q1("SELECT stars FROM users WHERE id=?", uid)
         if not u or u["stars"] < amount + fee:
-            notify(uid, f"↩️ Чек на {amount} ⭐ не создан: не хватило звёзд с комиссией")
+            notify(uid, f"↩️ Чек на {S(amount)} ⭐ не создан: не хватило звёзд с комиссией")
             return
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (amount + fee, uid))
         db.execute("INSERT INTO cheques(code,sender,amount,fee,created) VALUES(?,?,?,?,?)", (code, uid, amount, fee, now()))
@@ -499,7 +500,7 @@ def claim_cheque(uid, code):
         db.execute("INSERT INTO transfers(src,dst,amount,fee,note,ts,anon) VALUES(?,?,?,?,?,?,0)", (sender, uid, amount, fee, "чек", now()))
         snm = q1("SELECT name FROM users WHERE id=?", sender)
     rnm = q1("SELECT name FROM users WHERE id=?", uid)
-    amt_s = f"{amount:,}".replace(",", " ")
+    amt_s = S(amount)
     notify(sender, f"🎁 Твой чек на <b>{amt_s} ⭐</b> забрал <b>{esc(rnm['name'] if rnm else 'игрок')}</b>")
     return {"ok": True, "amount": amount, "from": snm["name"] if snm else "игрок"}
 
@@ -513,7 +514,7 @@ def sweep_cheques():
             db.execute("UPDATE users SET stars=stars+? WHERE id=?", (r["amount"] + r["fee"], r["sender"]))
             db.execute("UPDATE cheques SET refunded=1 WHERE code=?", (r["code"],))
     for r in rows:
-        amt_s = f"{r['amount']:,}".replace(",", " ")
+        amt_s = S(r['amount'])
         notify(r["sender"], f"↩️ Чек на <b>{amt_s} ⭐</b> никто не забрал — звёзды вернулись на баланс")
 
 

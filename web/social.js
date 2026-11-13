@@ -118,7 +118,7 @@ async function renderMarket() {
 async function loadMarket() {
   const d = await api(`market?sort=${MK.sort}&col=${enc(MK.col)}&qs=${enc(MK.qs)}&mine=${MK.mine}&rare=${MK.rare}`);
   if (TAB !== "market") return;
-  $("#mk-st").innerHTML = `<div><b>${fmt(d.count)}</b><span>лотов</span></div><div><b>${d.floor ? "⭐ " + short(d.floor) : "—"}</b><span>${MK.col ? "флор коллекции" : "флор"}</span></div><div><b>⭐ ${short(d.vol24)}</b><span>оборот 24ч · ${d.sales24}</span></div>`;
+  $("#mk-st").innerHTML = `<div><b>${num(d.count)}</b><span>лотов</span></div><div><b>${d.floor ? "⭐ " + short(d.floor) : "—"}</b><span>${MK.col ? "флор коллекции" : "флор"}</span></div><div><b>⭐ ${short(d.vol24)}</b><span>оборот 24ч · ${d.sales24}</span></div>`;
   $("#mk-my").textContent = d.myCount ? ` · ${d.myCount}` : "";
   $("#mk-cols").innerHTML = [["", "Все коллекции"], ...d.cols.map(c => [c, c])].map(([k, t]) => `<span data-act="mk" data-k="col" data-v="${esc(k)}" class="${k === MK.col ? "on" : ""}">${k ? `<img src="${A.orig(k, 64)}" alt="">` : ""}${esc(t)}</span>`).join("");
   $("#mk-sales").innerHTML = d.sales.length && !MK.mine ? `<div class="sec-t">${ic("activity")}Последние продажи</div>
@@ -133,9 +133,9 @@ async function loadMarket() {
   }).join("")}</div>` : emptyHTML("store", MK.mine ? "У тебя нет лотов. Нажми «Продать», чтобы выставить подарок" : "Лотов не нашлось");
 }
 async function listGift(g) {
-  const v = await promptM("Цена на маркете", `${esc(g.col)} #${fmt(g.num)} · ценность ⭐ ${fmt(g.value)}. Комиссия маркета ${feeP("market", .05)}.`, Math.round(g.value * 1.1), "Выставить");
+  const v = await promptM("Цена на маркете", `${esc(g.col)} #${num(g.num)} · ценность ⭐ ${fmt(g.value)}. Комиссия маркета ${feeP("market", .05)}.`, starOut(Math.round(g.value * 1.1)), "Выставить");
   if (v == null) return;
-  await post(`gift/${g.id}/list`, { price: Math.floor(+v) }); H.ok(); toast("Выставлено на маркет");
+  await post(`gift/${g.id}/list`, { price: starIn(v) }); H.ok(); toast("Выставлено на маркет");
   MYP = null;
   if (TAB === "market") loadMarket();
   if (TAB === "inv") renderInventory();
@@ -239,7 +239,7 @@ function profileHTML(p, tab = "show") {
   else if (tab === "stats") {
     const list = Object.entries(st.games).sort((a, b) => b[1] - a[1]), max = list.length ? list[0][1] : 1, net = st.won - st.lost;
     body = `<div class="pst">
-        <div><span>Раундов</span><b>${fmt(st.rounds)}</b></div>
+        <div><span>Раундов</span><b>${num(st.rounds)}</b></div>
         <div><span>Выиграно</span><b class="tw">+⭐ ${short(st.won)}</b></div>
         <div><span>Проиграно</span><b class="tl">−⭐ ${short(st.lost)}</b></div>
         <div><span>Итог</span><b class="${net >= 0 ? "tw" : "tl"}">${net >= 0 ? "+" : "−"}⭐ ${short(Math.abs(net))}</b></div>
@@ -249,7 +249,7 @@ function profileHTML(p, tab = "show") {
       ${list.length ? `<div class="sec-t">${ic("activity")}Во что играет</div><div class="box">${list.map(([k, n], i) => {
         const [icn, name] = GAME_NAMES[k] || ["box", k];
         return `<div class="row kv pg"><span class="pic ${i ? "b" : "y"}">${ic(icn)}</span><div class="grow"><div class="t">${name}${i ? "" : ` <span class="pill">любимая</span>`}</div>
-          <div class="cbar"><div style="width:${Math.max(4, n / max * 100)}%"></div></div></div><b>${fmt(n)}</b></div>`;
+          <div class="cbar"><div style="width:${Math.max(4, n / max * 100)}%"></div></div></div><b>${num(n)}</b></div>`;
       }).join("")}</div>` : emptyHTML("games", "Ещё не играл")}`;
   } else body = show.length ? `<div class="showcase">${show.map((g, i) => `<div class="sc${i === 0 ? " main" : ""}" data-act="gift" data-k="${reg({ g, mine: isMe, owner: p })}">${giftHTML(g)}<div class="cap">${giftName(g)}<span>⭐ ${short(g.value)}</span></div></div>`).join("")}</div>
       ${!p.pinned.length && isMe ? `<button class="btn ghost" style="margin-top:12px" data-act="edit-profile">${ic("pin")}Выбрать подарки для витрины</button>` : ""}`
@@ -270,9 +270,9 @@ function profileHTML(p, tab = "show") {
     ${p.bio ? `<div class="pf-bio">${esc(p.bio)}</div>` : ""}
     <div class="pf-stats">
       <span><b>⭐ ${short(p.worth)}</b> состояние</span>
-      <span><b>${fmt(p.gifts.length)}</b> ${plural(p.gifts.length, ["подарок", "подарка", "подарков"])}</span>
-      <span><b>${fmt(p.cols)}</b> ${plural(p.cols, ["коллекция", "коллекции", "коллекций"])}</span>
-      <span ${isMe ? 'data-act="friends"' : ""}><b>${fmt(p.friends)}</b> ${plural(p.friends, ["друг", "друга", "друзей"])}</span>
+      <span><b>${num(p.gifts.length)}</b> ${plural(p.gifts.length, ["подарок", "подарка", "подарков"])}</span>
+      <span><b>${num(p.cols)}</b> ${plural(p.cols, ["коллекция", "коллекции", "коллекций"])}</span>
+      <span ${isMe ? 'data-act="friends"' : ""}><b>${num(p.friends)}</b> ${plural(p.friends, ["друг", "друга", "друзей"])}</span>
     </div>
   </div>
     <div class="pacts">${isMe

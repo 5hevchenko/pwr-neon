@@ -64,7 +64,7 @@ function ckDraw(deadAt) {
   const t = ckTable(), step = CK.active ? CK.step : 0;
   w.innerHTML = `<div class="cklane side start"><div class="ckgrass"></div><div class="ckhen" id="ck-hen">${CK_HEN}</div></div>` +
     t.map((m, i) => `<div class="cklane${i < step ? " done" : ""}${i === step && CK.active ? " next" : ""}${deadAt === i + 1 ? " dead" : ""}" data-i="${i + 1}">
-      <div class="ckcars"></div><div class="ckbar"><i></i><i></i></div><div class="ckman"><span>x${m >= 100 ? short(m) : m.toFixed(2).replace(".", ",")}</span></div></div>`).join("") +
+      <div class="ckcars"></div><div class="ckbar"><i></i><i></i></div><div class="ckman"><span>x${m >= 100 ? numS(m) : m.toFixed(2).replace(".", ",")}</span></div></div>`).join("") +
     `<div class="cklane side finish"><div class="ckflag"></div><b>ФИНИШ</b></div>`;
   ckPlaceHen(deadAt ? deadAt : step, !deadAt);
 }

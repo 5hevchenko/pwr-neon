@@ -2,6 +2,7 @@
 Каждый день (по Москве) оба отправляют друг другу огонёк → серия +1. Пропустили день — серия сгорает.
 Отправить огонёк можно, только сыграв сегодня хотя бы раунд (иначе это ферма на твинках).
 Тип огонька растёт с длиной серии; на вехах обоим — звёзды (маленькие, фиксированные)."""
+from settings import S
 import asyncio
 
 from fastapi import Depends
@@ -100,7 +101,7 @@ def spark_send(fid: int, uid=Depends(auth)):
                     event(x, "sparks", reward)
             k, t = tier(n)
             msgs.append((fid, f"🔥 Серия с <b>{esc(me['name'])}</b>: {n} {'день' if n % 10 == 1 and n % 100 != 11 else 'дня' if 2 <= n % 10 <= 4 and not 12 <= n % 100 <= 14 else 'дней'}!"
-                              + (f" Награда +{reward:,} ⭐ каждому".replace(",", " ") if reward else "")))
+                              + (f" Награда +{S(reward)} ⭐ каждому" if reward else "")))
         else:
             n = r["count"] if r["last"] >= d - 1 else 0
             msgs.append((fid, f"🔥 Огонёк от <b>{esc(me['name'])}</b>" + (f": серия {n} — ответь, чтобы не сгорела!" if n else ": ответь, и начнётся ваша серия!")))

@@ -36,7 +36,7 @@ function fillJP(el) {
     ${JP.last && JP.last.winners.length ? `<div class="sec-t">${ic("trophy")}Прошлый розыгрыш · ⭐ ${fmt(JP.last.pool)}</div>
       <div class="box">${JP.last.winners.map((w, i) => `<div class="row tap" data-act="profile" data-id="${w.id}"><span class="place p${i + 1}">${i + 1}</span>${avaHTML(w, 36)}
         <div class="grow"><div class="t">${esc(w.name)}</div><div class="s">${w.tickets} ${plural(w.tickets, ["билет", "билета", "билетов"])}</div></div><b class="tw">+⭐ ${short(w.amount)}</b></div>`).join("") || `<div class="hint dempty">Победителей не было</div>`}</div>` : ""}
-    <div class="disc">Каждый день банк отдаёт 10% своей прибыли (минимум ⭐ 10 000) и все купленные билеты в фонд. Розыгрыш в 00:00 UTC (11:00 по Сахалину): 3 победителя, шанс пропорционален числу билетов. ${esc(ME.disclaimer)}</div>`;
+    <div class="disc">Каждый день банк отдаёт 10% своей прибыли (минимум ⭐ 10) и все купленные билеты в фонд. Розыгрыш в 00:00 UTC (11:00 по Сахалину): 3 победителя, шанс пропорционален числу билетов. ${esc(ME.disclaimer)}</div>`;
 }
 Object.assign(ACT, {
   jp: () => openJP(),

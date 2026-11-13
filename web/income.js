@@ -12,7 +12,7 @@ function incLive() {
   const biz = INC.biz.reduce((s, b) => s + (b.level ? Math.min(b.cap, b.accrued + b.income / 3600 * dt) : 0), 0);
   return { gifts, biz };
 }
-const fmt1 = v => v < 10 ? v.toFixed(2).replace(".", ",") : v < 100 ? v.toFixed(1).replace(".", ",") : fmt(Math.floor(v));
+const fmt1 = v => fmt(v);
 function incPaintLive() {
   if (!INC) return;
   const L = incLive(), total = L.gifts + L.biz;
@@ -112,9 +112,9 @@ Object.assign(ACT, {
   },
   "biz-supply": async el => {
     const b = incBiz(el.dataset.id); if (!b) return;
-    const v = await promptM("Закупка товара", `От 100 до ${fmt(b.batchCap)} звёзд. Наценка сейчас +${b.margin}%, через 4 часа получишь больше вложенного. После налога прибыль меньше.`, String(Math.min(b.batchCap, Math.max(100, Math.floor(ME.stars)))), "Закупить", "number");
+    const v = await promptM("Закупка товара", `От ${fmt(100)} до ${fmt(b.batchCap)} звёзд. Наценка сейчас +${b.margin}%, через 4 часа получишь больше вложенного. После налога прибыль меньше.`, starOut(Math.min(b.batchCap, Math.max(100, Math.floor(ME.stars)))), "Закупить");
     if (v === null) return;
-    try { const r = await post(`biz/${b.id}/supply`, { amount: Math.floor(+v) }); setStars(r.stars); H.ok(); toast(`Через 4 часа: ⭐ ${fmt(r.pay)}`, "ok"); await loadInc(); } catch (e) {}
+    try { const r = await post(`biz/${b.id}/supply`, { amount: starIn(v) }); setStars(r.stars); H.ok(); toast(`Через 4 часа: ⭐ ${fmt(r.pay)}`, "ok"); await loadInc(); } catch (e) {}
   },
   "biz-deliver": async el => {
     try { const r = await post(`biz/${el.dataset.id}/deliver`); setStars(r.stars); H.ok(); toast(`Получено ⭐ ${fmt(r.got)}`, "ok"); await loadInc(); } catch (e) {}

@@ -42,7 +42,7 @@ async function openLive() {
   const el = openSheet(emptyHTML("hourglass", "Загружаем…"), "lv-s");
   const draw = async () => {
     const d = await api("live?full=1").catch(() => null); if (!d || !el.isConnected) return;
-    replaceSheet(el, `<h2 class="gtitle">Выигрыши</h2><div class="lv-head"><span class="lv-on"><i></i>${d.online} онлайн</span><span class="hint">выигрыши от ⭐ 3 000 во всех играх</span></div>
+    replaceSheet(el, `<h2 class="gtitle">Выигрыши</h2><div class="lv-head"><span class="lv-on"><i></i>${d.online} онлайн</span><span class="hint">выигрыши от ⭐ 3 во всех играх</span></div>
       <div class="box">${d.wins.map(w => `<div class="row lv-row tap" data-act="profile" data-id="${w.user.id}">${avaHTML(w.user, 36)}<div class="grow"><div class="t">${esc(w.user.name)}${w.user.title ? ` <span class="ttl">${esc(w.user.title)}</span>` : ""}</div>
         <div class="s">${esc(w.game)} · ${clockAgo(w.ts)}</div>
         <div class="lv-reacts">${d.reactsList.map(e => `<button data-act="lv-react" data-id="${w.id}" data-e="${e}" class="${w.mine === e ? "on" : ""}" ${w.user.id === ME.id ? "disabled" : ""}>${e}${w.reacts[e] ? `<b>${w.reacts[e]}</b>` : ""}</button>`).join("")}</div></div>
@@ -66,11 +66,11 @@ renderTop = async function () {
   $("#ss-body").innerHTML = `<div class="ss-hero"><span>Сезон</span><b>${esc(d.title)}</b><em>до конца ${dd} д ${hh} ч</em>
       <div class="ss-pr"><div><i class="fr gold"></i>1 место · ⭐ ${short(d.prizes[0])}</div><div><i class="fr silver"></i>2–3 · ⭐ ${short(d.prizes[1])}–${short(d.prizes[2])}</div><div><i class="fr bronze"></i>4–10 · до ⭐ ${short(d.prizes[3])}</div></div>
       <small>Топ-10 получает звёзды и рамку аватарки на весь следующий сезон, 1 место — титул «Чемпион сезона». Очки — за игру (не больше 100 очков с одной ставки).</small></div>
-    <div class="ss-me"><span>Ты</span><b>${d.me.excluded ? "исключён из сезона" : d.me.place ? d.me.place + " место" : "вне рейтинга"}</b><em class="tw">${fmt(d.me.pts)} очк.</em></div>
+    <div class="ss-me"><span>Ты</span><b>${d.me.excluded ? "исключён из сезона" : d.me.place ? d.me.place + " место" : "вне рейтинга"}</b><em class="tw">${num(d.me.pts)} очк.</em></div>
     ${d.top.length ? `<div class="podium" style="margin-top:12px">${t3.map((r, i) => r ? `<div class="p${[2, 1, 3][i]}" data-act="profile" data-id="${r.id}">${avaHTML(r, 54, { lv: true })}
-        <div class="nm">${nameHTML(r)}</div><div class="sc">${fmt(r.pts)} очк.</div><div class="pl"><span class="tw">⭐ ${short(r.prize)}</span></div><div class="ped">${[2, 1, 3][i]}</div></div>` : "<div></div>").join("")}</div>
+        <div class="nm">${nameHTML(r)}</div><div class="sc">${num(r.pts)} очк.</div><div class="pl"><span class="tw">⭐ ${short(r.prize)}</span></div><div class="ped">${[2, 1, 3][i]}</div></div>` : "<div></div>").join("")}</div>
       <div class="box">${d.top.slice(3).map((r, i) => `<div class="row tap" data-act="profile" data-id="${r.id}"><span class="place">${i + 4}</span>${avaHTML(r, 34)}
-        <div class="grow"><div class="t">${nameHTML(r)}${r.title ? ` <span class="ttl">${esc(r.title)}</span>` : ""}</div>${r.prize ? `<div class="s tw">приз ⭐ ${short(r.prize)}</div>` : ""}</div><b class="num">${fmt(r.pts)}</b></div>`).join("")}</div>`
+        <div class="grow"><div class="t">${nameHTML(r)}${r.title ? ` <span class="ttl">${esc(r.title)}</span>` : ""}</div>${r.prize ? `<div class="s tw">приз ⭐ ${short(r.prize)}</div>` : ""}</div><b class="num">${num(r.pts)}</b></div>`).join("")}</div>`
       : emptyHTML("flame", "Сезон только начался — займи первое место!")}
     <button class="ss-tt" data-act="titles">${ic("medal")}<span><b>Мои титулы</b>выбери, какой показывать под именем</span>${ic("chev")}</button>`;
   starify($("#ss-body"));

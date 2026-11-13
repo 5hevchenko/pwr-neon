@@ -76,13 +76,13 @@ function gdLive(d) {
   const elig = d.me.pts >= d.minPts;
   return `<div class="gd-fund"><div class="gd-fund-h"><span>Призовой фонд</span><b>⭐ ${fmt(d.pool)}</b></div>
       <div class="gd-track"><i style="width:${Math.max(pct, d.pool ? 2 : 0)}%"></i></div>
-      <div class="gd-fund-f"><span>${d.players ? `${fmt(d.players)} ${plural(d.players, ["игрок", "игрока", "игроков"])} сегодня` : "Пока никто не играл"}</span><span>до ⭐ ${short(d.cap)}</span></div></div>
+      <div class="gd-fund-f"><span>${d.players ? `${num(d.players)} ${plural(d.players, ["игрок", "игрока", "игроков"])} сегодня` : "Пока никто не играл"}</span><span>до ⭐ ${short(d.cap)}</span></div></div>
     ${gdPrizes(d)}
     ${d.top.length ? `<div class="sec-t">${ic("trophy")}Рейтинг дня</div><div class="box gd-rows gd-top">${d.top.map(r => `<div class="row tap${r.id === ME.id ? " me" : ""}" data-act="profile" data-id="${r.id}"><span class="place gd-p${r.place}">${r.place}</span>${avaHTML(r, 34)}
-        <div class="grow"><div class="t">${nameHTML(r)}</div>${r.prize ? `<div class="s tw">приз ⭐ ${short(r.prize)}</div>` : ""}</div><b class="num">${fmt(r.pts)}<small> очк.</small></b></div>`).join("")}</div>`
+        <div class="grow"><div class="t">${nameHTML(r)}</div>${r.prize ? `<div class="s tw">приз ⭐ ${short(r.prize)}</div>` : ""}</div><b class="num">${num(r.pts)}<small> очк.</small></b></div>`).join("")}</div>`
       : emptyHTML("trophy", "Рейтинг пуст, первое место свободно")}
-    <div class="tr-me gd-me"><span>Ты</span><b>${d.me.place ? d.me.place + " место" : "вне рейтинга"}</b><em>${fmt(d.me.pts)} очк.</em></div>
-    ${elig ? "" : `<div class="gd-need">${ic("target")}<span>До приза нужно минимум ${fmt(d.minPts)} ${plural(d.minPts, ["очко", "очка", "очков"])}, у тебя ${fmt(d.me.pts)}</span></div>`}`;
+    <div class="tr-me gd-me"><span>Ты</span><b>${d.me.place ? d.me.place + " место" : "вне рейтинга"}</b><em>${num(d.me.pts)} очк.</em></div>
+    ${elig ? "" : `<div class="gd-need">${ic("target")}<span>До приза нужно минимум ${num(d.minPts)} ${plural(d.minPts, ["очко", "очка", "очков"])}, у тебя ${num(d.me.pts)}</span></div>`}`;
 }
 
 function gdPaint(el) {
@@ -98,7 +98,7 @@ function gdPaint(el) {
     <div id="gd-live">${gdLive(d)}</div>
     ${l && l.top.length ? `<div class="sec-t">${ic("award")}<span>Прошлая Игра дня</span>&nbsp;·&nbsp;<span>${esc(lg ? lg.t : l.title)}</span></div><div class="box gd-rows">${l.top.map(r => `<div class="row tap" data-act="profile" data-id="${r.id}"><span class="place gd-p${r.place}">${r.place}</span>${avaHTML(r, 34)}
         <div class="grow"><div class="t">${nameHTML(r)}</div></div><b class="num star">+⭐ ${short(r.prize)}</b></div>`).join("")}</div>` : ""}
-    <div class="disc">Каждый день одна из редких игр получает свой рейтинг. Очко даётся за каждые ⭐ 100 выигрыша или проигрыша в раунде, один раунд приносит не больше 100 очков: решает активность, а не одна крупная ставка. Фонд растёт от того, сколько сыграно в эту игру сегодня, призы начисляются после полуночи по Москве. Победитель получает титул «Игрок дня» и золотую рамку на сутки.</div>`);
+    <div class="disc">Каждый день одна из редких игр получает свой рейтинг. Очко даётся за каждые ⭐ 0,1 выигрыша или проигрыша в раунде, один раунд приносит не больше 100 очков: решает активность, а не одна крупная ставка. Фонд растёт от того, сколько сыграно в эту игру сегодня, призы начисляются после полуночи по Москве. Победитель получает титул «Игрок дня» и золотую рамку на сутки.</div>`);
   starify(el); gdTick();
 }
 Object.assign(ACT, {

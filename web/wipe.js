@@ -45,14 +45,14 @@ function wipeThanks() {
       <div class="wp-orn s4"><i></i><b>✦</b><i></i></div>
       ${played ? `<div class="wp-grid s5">
         ${tile("clock", `${hrs(x.hours)} ч`, "в игре")}
-        ${tile("games", fmt(x.rounds), "раундов сыграно")}
+        ${tile("games", num(x.rounds), "раундов сыграно")}
         ${tile("trend", `+${short(x.earned)}`, "заработано ⭐", "g")}
         ${tile("activity", `−${short(x.spent)}`, "потрачено ⭐", "r")}
         ${x.best ? tile("trophy", `+${short(x.best)}`, `лучший выигрыш · ${esc(x.bestGame)}`, "y") : ""}
         ${tile("bank", short(t.base), t.kind === "buy" ? "куплено ⭐" : "внесено в банк ⭐")}
       </div>
       ${(x.games || []).length ? `<div class="wp-fav s6"><div class="wp-h">Любимые игры</div>${x.games.map((g, i) => `<div class="wp-g"><span><em>${i + 1}</em>${esc(g[0])}</span>
-        <i><u style="width:${Math.max(6, Math.round(g[1] / maxG * 100))}%"></u></i><b>${fmt(g[1])}</b></div>`).join("")}</div>` : ""}` : ""}
+        <i><u style="width:${Math.max(6, Math.round(g[1] / maxG * 100))}%"></u></i><b>${num(g[1])}</b></div>`).join("")}</div>` : ""}` : ""}
       ${t.bad ? `<div class="wp-gift wp-bad s7"><div class="wp-h">Благодарность банка</div>
         <div class="wp-sum"><b>0</b><span class="st">⭐</span></div>
         <small>Ты себя плохо вёл — <b>багоюзер</b>. В этом сезоне банк благодарность не выдаёт. Играй честно — и в следующий раз она будет твоей.</small></div>` : ""}
@@ -102,9 +102,9 @@ async function admWipe(body) {
       ${d.running || d.frozen ? admKv("Статус", `<b class="tw">${d.running ? "идёт вайп" : "игры закрыты перед вайпом"}</b>`) : ""}</div>
 
     <div class="sec-t">Если вайп будет сейчас</div>
-    <div class="box">${admKv("Игроков", fmt(n.players))}${admKv("Звёзд на балансах", `⭐ ${fmt(n.stars)}`)}${admKv("Подарков", fmt(n.gifts))}
-      ${admKv("Бизнесов", fmt(n.biz))}${admKv("В казне кланов", `⭐ ${fmt(n.treasury)}`)}
-      ${admKv("Благодарность банка", `<b class="tw">⭐ ${fmt(d.thanks.total)}</b> · ${fmt(d.thanks.players)} игр.`)}</div>
+    <div class="box">${admKv("Игроков", num(n.players))}${admKv("Звёзд на балансах", `⭐ ${fmt(n.stars)}`)}${admKv("Подарков", num(n.gifts))}
+      ${admKv("Бизнесов", num(n.biz))}${admKv("В казне кланов", `⭐ ${fmt(n.treasury)}`)}
+      ${admKv("Благодарность банка", `<b class="tw">⭐ ${fmt(d.thanks.total)}</b> · ${num(d.thanks.players)} игр.`)}</div>
     ${d.thanks.top.length ? `<div class="box">${d.thanks.top.map(u => `<div class="row kv">${avaHTML(u, 30)}<div class="grow"><div class="t">${esc(u.name)}</div>
       <div class="s">внёс ⭐ ${fmt(u.base)}</div></div><b>+⭐ ${fmt(u.amount)}</b></div>`).join("")}</div>` : ""}
 
@@ -143,7 +143,7 @@ async function admWipe(body) {
     ${ed ? `<button class="btn red" data-act="wp-now" style="margin-top:14px"${d.running ? " disabled" : ""}>${ic("refresh")}Вайп сейчас</button>` : ""}
 
     ${d.last.length ? `<div class="sec-t">Прошлые вайпы</div><div class="box">${d.last.map(w => `<div class="row kv"><div class="grow"><div class="t">Сезон ${w.season || "?"} → ${(w.season || 0) + 1} · ${admDate(w.ts)}${w.by ? "" : " · авто"}</div>
-      <div class="s">${fmt(w.players)} игр. · ⭐ ${fmt(w.stars)} · подарков ${fmt(w.gifts)} · бизнесов ${fmt(w.biz)}</div></div><b>+⭐ ${fmt(w.thanks || 0)}</b></div>`).join("")}</div>` : ""}`;
+      <div class="s">${num(w.players)} игр. · ⭐ ${fmt(w.stars)} · подарков ${num(w.gifts)} · бизнесов ${num(w.biz)}</div></div><b>+⭐ ${fmt(w.thanks || 0)}</b></div>`).join("")}</div>` : ""}`;
   starify(body);
 }
 const wpSave = async (o, msg = "Сохранено") => { await post("admin/wipe", o); H.ok(); toast(msg, "ok"); admRender(); loadMe().catch(() => {}); };

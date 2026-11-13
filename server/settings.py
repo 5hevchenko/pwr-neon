@@ -44,3 +44,18 @@ def tuned(key, default):
     """Как conf, но с учётом правки из админки. Читать в момент раунда, а не при запуске."""
     v = _LIVE.get(key)
     return conf(key, default) if v is None else v
+
+
+STAR_K = 1000   # звёзды хранятся в тысячных: 1 ⭐ на экране (1 Telegram Star) = 1000 единиц в базе и в расчётах
+
+
+def S(n):
+    """Сумма звёзд для текста: единицы игры → ⭐, как на экране (от 100 — целые, от 10 — один знак, меньше — до двух-трёх)."""
+    v = (n or 0) / STAR_K
+    a = abs(v)
+    if a >= 100:
+        return f"{round(v):,}".replace(",", " ")
+    t = f"{v:.1f}" if a >= 10 else f"{v:.2f}" if a >= 0.1 or not a else f"{v:.3f}"
+    if "." in t:
+        t = t.rstrip("0").rstrip(".")
+    return ("0" if t == "-0" else t).replace(".", ",")

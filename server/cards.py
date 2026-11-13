@@ -1,4 +1,5 @@
 """Карточные игры: блэкджек против дилера, «21» и «101» за столом с друзьями."""
+from settings import S
 import asyncio
 import json
 import random
@@ -562,7 +563,7 @@ async def room_new(req: Request, uid=Depends(auth)):
             _save(r)
         name = q1("SELECT name FROM users WHERE id=?", uid)["name"]
     for u in invite:
-        notify(u, f"🃏 <b>{esc(name)}</b> зовёт тебя за стол «{GAMES[game]}» — " + ("ставка подарками на ~" if kind == "gifts" else "ставка ") + f"{stake} ⭐",
+        notify(u, f"🃏 <b>{esc(name)}</b> зовёт тебя за стол «{GAMES[game]}» — " + ("ставка подарками на ~" if kind == "gifts" else "ставка ") + f"{S(stake)} ⭐",
                url=A_APP + "?room=" + str(cur.lastrowid))
     return {"id": cur.lastrowid, "stars": bal(uid)}
 
@@ -604,7 +605,7 @@ async def room_action(rid: int, action: str, req: Request, uid=Depends(auth)):
             if r["kind"] == "gifts":
                 _esc_put(r, uid, b.get("gifts", []))
                 if _esc_value(r, uid) < GIFT_MIN * r["stake"]:
-                    err(f"нужны подарки минимум на {int(GIFT_MIN * r['stake'])} ⭐ ценности")
+                    err(f"нужны подарки минимум на {S(int(GIFT_MIN * r['stake']))} ⭐ ценности")
             else:
                 check_bet(uid, r["stake"], 1, 10 ** 9)
                 db.execute("UPDATE users SET stars=stars-? WHERE id=?", (r["stake"], uid))
@@ -673,7 +674,7 @@ async def room_action(rid: int, action: str, req: Request, uid=Depends(auth)):
                 r["invited"].append(to)
                 _save(r)
             name = q1("SELECT name FROM users WHERE id=?", uid)["name"]
-            notify_list.append((to, f"🃏 <b>{esc(name)}</b> зовёт тебя за стол «{GAMES[r['game']]}» — ставка {r['stake']} ⭐", A_APP + "?room=" + str(rid)))
+            notify_list.append((to, f"🃏 <b>{esc(name)}</b> зовёт тебя за стол «{GAMES[r['game']]}» — ставка {S(r['stake'])} ⭐", A_APP + "?room=" + str(rid)))
         elif action == "act":
             if r["status"] != "playing":
                 err("игра не идёт")

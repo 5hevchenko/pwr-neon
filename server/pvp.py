@@ -1,4 +1,5 @@
 """Джекпот на подарки: общий банк из подарков и звёзд, колесо с секторами по вкладу, победитель забирает всё."""
+from settings import S
 import asyncio
 import json
 import random
@@ -97,7 +98,7 @@ def _tick():
             name = q1("SELECT name FROM users WHERE id=?", winner)["name"]
             for b in bets:
                 if b["user"] == winner:
-                    notify(winner, f"🎰 Ты сорвал джекпот на <b>{total} ⭐</b> — все подарки банка твои!")
+                    notify(winner, f"🎰 Ты сорвал джекпот на <b>{S(total)} ⭐</b> — все подарки банка твои!")
     elif r["status"] == "spinning" and t >= (r["spin_at"] or t) + SPIN + 4:
         with tx():
             db.execute("UPDATE jr_rounds SET status='done' WHERE id=?", (r["id"],))
@@ -155,7 +156,7 @@ async def jr_bet(req: Request, uid=Depends(auth)):
                 err("сначала сними подарок с маркета")
             value += x["value"]
         if value < MIN_BET:
-            err(f"минимальный вклад — {MIN_BET} ⭐")
+            err(f"минимальный вклад — {S(MIN_BET)} ⭐")
         if stars and bal(uid) < stars:
             err("Не хватает звёзд")
         if stars:

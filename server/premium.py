@@ -3,6 +3,7 @@
   · «Набор дня» — раз в сутки (по Москве): звёзды + ключ от дорогого кейса, наборы меняются по дням;
   · «Звёздный сундук» — кейс только за Telegram Stars: топ-коллекции, подарок — лучший из 6 бросков (редкие модели/фоны).
 Счёт: shop.make_invoice; начисление: shop.on_paid → fulfill() (ровно один раз по charge)."""
+from settings import S
 import json
 import random
 
@@ -110,7 +111,7 @@ async def premium_invoice(req: Request, uid=Depends(auth)):
     o = offer_today()
     title, desc = {
         "vip": (f"VIP на {VIP_DAYS} дней", "Бонус дня ×2, бесплатный кейс вдвое чаще, комиссия маркета −50%, золотая рамка и значок VIP."),
-        "offer": ("Набор дня", f"{o['stars']:,} игровых звёзд + ключ от кейса «{E.case_title(o['cid'], uid)}». Только сегодня.".replace(",", " ")),
+        "offer": ("Набор дня", f"{S(o['stars'])} звёзд + ключ от кейса «{E.case_title(o['cid'], uid)}». Только сегодня."),
         "chest": ("Звёздный сундук", "Подарок из топ-коллекций с редкой моделью: Plush Pepe, Heart Locket, Durov's Cap, Precious Peach."),
     }[k]
     link = await shop.make_invoice(title, desc, {"u": uid, "x": amount(k), "k": k, "d": o["id"]}, amount(k))
@@ -146,7 +147,7 @@ def fulfill(uid, k, xtr, charge, p):
             event(uid, "buy", stars)
             __import__("bank").back(stars)
             db.execute("INSERT INTO case_keys(user,cid,n) VALUES(?,?,1) ON CONFLICT(user,cid) DO UPDATE SET n=n+1", (uid, o[2]))
-            msg = (f"🎁 Набор дня: +{stars:,} ⭐ и ключ от кейса «{esc(E.case_title(o[2], uid))}». Спасибо!").replace(",", " ")
+            msg = (f"🎁 Набор дня: +{S(stars)} ⭐ и ключ от кейса «{esc(E.case_title(o[2], uid))}». Спасибо!")
         elif k == "chest":
             import fair
             rng = fair.stream(uid, "chest", "chest")
@@ -155,7 +156,7 @@ def fulfill(uid, k, xtr, charge, p):
             cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created) VALUES(?,?,?,?,?,?,?,?)",
                              (uid, d["col"], d["model"], d["backdrop"], d["symbol"], d["num"], d["value"], t))
             db.execute("INSERT INTO feed(user,gift,cs,ts) VALUES(?,?,?,?)", (uid, cur.lastrowid, "chest", t))
-            msg = (f"💎 Звёздный сундук: {esc(d['col'])} «{esc(d['model'])}» — ценность ⭐ {d['value']:,}. Подарок уже в сумке!").replace(",", " ")
+            msg = (f"💎 Звёздный сундук: {esc(d['col'])} «{esc(d['model'])}» — ценность ⭐ {S(d['value'])}. Подарок уже в сумке!")
         db.execute("INSERT INTO payments(charge,user,xtr,stars,ts,kind) VALUES(?,?,?,?,?,?)", (charge, uid, xtr, stars, t, k))
     if msg:
         notify(uid, msg)

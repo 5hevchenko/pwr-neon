@@ -155,7 +155,7 @@ function seasonCard() {
   if (!SSB) return "";
   const left = Math.max(0, SSB.ends - Date.now() / 1000), dd = Math.floor(left / 86400);
   return `<button class="stc st-season" data-act="go-season"><span class="stc-i">${ic("flame")}</span><span class="stc-t"><b>Сезон · ${esc(SSB.title)}</b>
-    <small>${SSB.place ? `ты ${SSB.place}-й из ${SSB.players} · ${fmt(SSB.pts)} очк.` : `главный приз ⭐ ${short(SSB.prize)} — сыграй и попади в рейтинг`} · ещё ${dd} д</small></span>${ic("chev")}</button>`;
+    <small>${SSB.place ? `ты ${SSB.place}-й из ${SSB.players} · ${num(SSB.pts)} очк.` : `главный приз ⭐ ${short(SSB.prize)} — сыграй и попади в рейтинг`} · ещё ${dd} д</small></span>${ic("chev")}</button>`;
 }
 function shopCard() {   // только тем, кто ещё ни разу не покупал
   if (!SHOP || !SHOP.on || !SHOP.first || !inTg) return "";

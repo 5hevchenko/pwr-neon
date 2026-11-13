@@ -4,6 +4,7 @@
 Вероятности заданы так, чтобы каждый сектор возвращал одинаковый заявленный процент. Бонусы устроены так, что любой выбор
 игрока даёт одно и то же матожидание: выбор меняет только риск, поэтому лучшей стратегии против банка нет.
 """
+from settings import S
 import asyncio
 import hashlib
 import hmac as hmac_mod
@@ -211,7 +212,7 @@ async def bet(req: Request, uid=Depends(auth)):
         check_bet(uid, amount, 10, MAX_BET)
         total = q1("SELECT COALESCE(SUM(amount),0) s FROM cr_bet WHERE round=? AND user=?", ST["round"], uid)["s"]
         if total + amount > MAX_BET:
-            err(f"на раунд не больше ⭐ {MAX_BET:,}".replace(",", " "))
+            err(f"на раунд не больше ⭐ {S(MAX_BET)}")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (amount, uid))
         db.execute("INSERT INTO cr_bet(round,user,sector,amount) VALUES(?,?,?,?)", (ST["round"], uid, sector, amount))
         lvl = add_xp(uid, max(1, amount // 20))

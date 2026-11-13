@@ -2,6 +2,7 @@
 Очко клану — за участника, который вступил в клан на этой неделе, завёл аккаунт не раньше чем за 3 дня до вступления
 (старых игроков перетаскивать бессмысленно) и дорос до 5 уровня (против твинков). Считаются только те, кто остался в клане.
 Призы топ-3 идут в казну клана (и тратимую часть, и счёт уровня), минимум 2 новичка."""
+from settings import S
 import asyncio
 import json
 
@@ -56,7 +57,7 @@ def _settle():
             event(0, "clanrecruit", prize)
             out.append({"place": place, "id": cid, "tag": c["tag"], "name": c["name"], "n": n, "prize": prize})
             for m in q("SELECT user FROM clan_members WHERE clan=?", cid):
-                msgs.append((m["user"], f"Клан [{esc(c['tag'])}] занял {place} место в наборе недели: {n} новых игроков. В казну +{prize:,} ⭐".replace(",", " ")))
+                msgs.append((m["user"], f"Клан [{esc(c['tag'])}] занял {place} место в наборе недели: {n} новых игроков. В казну +{S(prize)} ⭐"))
         db.execute("INSERT INTO clan_recruit(week,result,ts) VALUES(?,?,?)", (week, json.dumps(out, ensure_ascii=False), now()))
     for u, t in msgs:
         notify(u, t)

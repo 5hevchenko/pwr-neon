@@ -5,6 +5,7 @@
 Честность: при создании публикуем sha256(seed), seed держим в секрете. В конце победители — участники с наименьшим
 sha256(seed:id); тех, кто к итогам отписался от канала, пропускаем по тому же порядку. Итоги раскрывают seed и список
 участников, и любой может пересчитать победителей сам."""
+from settings import S
 import asyncio
 import hashlib
 import json
@@ -56,7 +57,7 @@ def _link(gid):
 def _post_text(g):
     end = A.time.strftime("%d.%m %H:%M", A.time.gmtime(g["until"] + 3 * 3600))
     return (f"<b>Розыгрыш: {esc(g['title'])}</b>\n\n"
-            f"Приз: <b>{nf(g['prize'])} ⭐</b> (игровые звёзды), победителей: <b>{g['winners']}</b>, каждому {nf(g['prize'] // g['winners'])} ⭐.\n"
+            f"Приз: <b>{S(g['prize'])} ⭐</b> (игровые звёзды), победителей: <b>{g['winners']}</b>, каждому {S(g['prize'] // g['winners'])} ⭐.\n"
             f"Условия: подписка на этот канал и аккаунт в игре" + (f" от {g['min_level']} уровня" if g["min_level"] > 1 else "") + ".\n"
             f"Итоги: {end} по Москве.\n\n"
             f"Честный выбор победителей. Хэш секретного числа: <code>{g['hash']}</code>. После итогов число опубликуем, и любой сможет проверить.")
@@ -131,7 +132,7 @@ async def _draw(g):
             event(u, "giveaway", each)
         db.execute("UPDATE gw SET status='done', result=? WHERE id=?", (json.dumps({"winners": winners, "skipped": skipped, "entries": sorted(entries)}), g["id"]))
     for u in winners:
-        notify(u, f"Победа в розыгрыше «{esc(g['title'])}»: +{nf(each)} ⭐ уже на балансе")
+        notify(u, f"Победа в розыгрыше «{esc(g['title'])}»: +{S(each)} ⭐ уже на балансе")
     names = []
     for u in winners:
         r = q1("SELECT name, username FROM users WHERE id=?", u)
@@ -213,9 +214,9 @@ async def admin_gw_create(req: Request, aid=Depends(admin)):
     if not 1 <= winners <= 50:
         err("Победителей от 1 до 50")
     if not 1000 <= prize <= cap:
-        err(f"Приз от 1 000 до {nf(cap)} ⭐")
+        err(f"Приз от 1 до {S(cap)} ⭐")
     if prize // winners < 100:
-        err("Каждому победителю не меньше 100 ⭐")
+        err("Каждому победителю не меньше 0,1 ⭐")
     if not 1 <= hours <= 24 * 14:
         err("Длительность от 1 часа до 14 дней")
     if not 1 <= lvl <= 50:

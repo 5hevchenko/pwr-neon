@@ -1,4 +1,5 @@
 """Краш-дуэль 1 на 1, «Больше/меньше» (Hi-Lo) и крафт подарков."""
+from settings import S
 from settings import conf, tuned
 import json
 import math
@@ -143,7 +144,7 @@ def cduel_act(did: int, action: str, uid=Depends(auth)):
         out["stars"] = bal(uid)
         nm = q1("SELECT name FROM users WHERE id=?", uid)["name"]
     if other:
-        notify(other, f"🚀 <b>{esc(nm)}</b> готов к краш-дуэли на {d['stake']} ⭐ — заходи, ракета ждёт тебя", url=APP_URL + f"?cduel={did}")
+        notify(other, f"🚀 <b>{esc(nm)}</b> готов к краш-дуэли на {S(d['stake'])} ⭐ — заходи, ракета ждёт тебя", url=APP_URL + f"?cduel={did}")
     return out
 
 

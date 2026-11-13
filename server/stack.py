@@ -3,6 +3,7 @@
 кто построил хотя бы MIN_SCORE этажей — без тренировки не взять.
 Рекорд не подделать: сервер выдаёт стартовые положения блоков, клиент присылает моменты тапов (мс от появления блока),
 сервер сам пересчитывает башню по тем же целочисленным формулам, что и клиент (stack.js)."""
+from settings import S
 import asyncio
 import json
 import secrets
@@ -155,7 +156,7 @@ def _pay(w):
             event(r["user"], "stack", PRIZES[i])
             u = q1("SELECT * FROM users WHERE id=?", r["user"])
             winners.append({"user": user_brief(u), "score": r["score"], "prize": PRIZES[i]})
-            msgs.append((r["user"], f"🏗 «Стопка»: <b>{i + 1} место</b> за неделю ({r['score']} этажей) — +{PRIZES[i]} ⭐ (игровых)!"))
+            msgs.append((r["user"], f"🏗 «Стопка»: <b>{i + 1} место</b> за неделю ({r['score']} этажей) — +{S(PRIZES[i])} ⭐ (игровых)!"))
         db.execute("INSERT INTO stack_paid(week,ts,winners) VALUES(?,?,?)", (w, now(), json.dumps(winners, ensure_ascii=False)))
     for uid, text in msgs:
         notify(uid, text)

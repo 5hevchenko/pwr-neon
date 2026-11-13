@@ -10,6 +10,7 @@
 За freeze минут до вайпа все POST игроков закрыты (кроме админки и вебхуков ботов) — нельзя поставить старые звёзды и
 забрать выигрыш уже после сброса. Перед вайпом — предупреждения всем игрокам за warn часов, после — сообщение «вайп прошёл».
 """
+from settings import S
 import asyncio
 import json
 import re
@@ -254,7 +255,7 @@ def _do_wipe(by):
         db.execute("UPDATE wipe_log SET stats=? WHERE id=?", (json.dumps(st), wid))
         CFG["deny"] = []   # список «без благодарности» — только на один вайп
         db.execute("INSERT INTO kv(k,v) VALUES('wipecfg',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v", (json.dumps(CFG),))
-        log(by, "wipe", None, f"сезон {st['season']}: игроков {st['players']}, звёзд {st['stars']}, подарков {st['gifts']}, "
+        log(by, "wipe", None, f"сезон {st['season']}: игроков {st['players']}, звёзд {S(st['stars'])}, подарков {st['gifts']}, "
                               f"бизнесов {st['biz']}, благодарность {st['thanks']}")
     try:
         import bank
@@ -323,13 +324,13 @@ async def _run(by):
         if x.get("rounds") or x.get("hours"):
             fav = ", ".join(g[0] for g in x.get("games", [])[:3])
             st = (f"\n\n📊 <b>Твой сезон:</b>\n⏱ В игре: ~{f"{x['hours']:g}".replace('.', ',')} ч\n🎲 Раундов: {nf(x['rounds'])}"
-                  f"\n📈 Заработал: +{nf(x['earned'])} ⭐\n📉 Потратил: −{nf(x['spent'])} ⭐"
-                  + (f"\n🏆 Лучший выигрыш: +{nf(x['best'])} ⭐ ({esc(x['bestGame'])})" if x.get("best") else "")
+                  f"\n📈 Заработал: +{S(x['earned'])} ⭐\n📉 Потратил: −{S(x['spent'])} ⭐"
+                  + (f"\n🏆 Лучший выигрыш: +{S(x['best'])} ⭐ ({esc(x['bestGame'])})" if x.get("best") else "")
                   + (f"\n❤️ Любимые игры: {esc(fav)}" if fav else ""))
         th = "\n\n🚫 <b>Благодарность банка: 0 ⭐.</b> Ты себя плохо вёл — багоюзер. В новом сезоне играй честно." if r and r["bad"] else \
-            f"\n\n🏦 <b>Банк благодарит тебя: +{nf(r['amount'])} ⭐</b> — {str(CFG['thanks_pct']).replace('.', ',')}% от того, что ты внёс в банк. Уже на балансе!" \
+            f"\n\n🏦 <b>Банк благодарит тебя: +{S(r['amount'])} ⭐</b> — {str(CFG['thanks_pct']).replace('.', ',')}% от того, что ты внёс в банк. Уже на балансе!" \
             if r and r["amount"] > 0 else ""
-        return (head + st + th + f"\n\n🧹 Сезон {wid + 1} начался: всё сброшено, уровень сохранён, старт — <b>{nf(int(CFG['start']))} ⭐</b>."
+        return (head + st + th + f"\n\n🧹 Сезон {wid + 1} начался: всё сброшено, уровень сохранён, старт — <b>{S(int(CFG['start']))} ⭐</b>."
                 + (f"\n{every}" if every else "") + (f" Следующий — {_when(nxt)}." if nxt else ""))
     await _mass(letter)
 
@@ -341,11 +342,11 @@ PART_LINES = {"gifts": "подарки, сейф и залоги", "biz": "би�
 def announce_text():
     """Объявление о сезонах со всеми условиями — из текущих настроек (кнопка в админке)."""
     c = CFG
-    gone = [f"звёзды — у всех станет <b>{nf(int(c['start']))} ⭐</b>"] + [PART_LINES[k] for k in PART_LINES if c.get(k)]
+    gone = [f"звёзды — у всех станет <b>{S(int(c['start']))} ⭐</b>"] + [PART_LINES[k] for k in PART_LINES if c.get(k)]
     every = f"сезон длится <b>{c['days']} дней</b>" if c["days"] else "сезон длится до следующего вайпа"
     th = (f"\n\n🏦 <b>Благодарность от банка</b>\nВ начале нового сезона банк вернёт каждому <b>{str(c['thanks_pct']).replace('.', ',')}%</b> от того, "
           + ("сколько звёзд он купил за сезон." if c["thanks_base"] == "buy" else "что он внёс в банк за сезон (проигрыши и комиссии минус выплаты банка).")
-          + (f" Не больше {nf(int(c['thanks_cap']))} ⭐ одному." if c["thanks_cap"] else "")
+          + (f" Не больше {S(int(c['thanks_cap']))} ⭐ одному." if c["thanks_cap"] else "")
           + "\nЗвёзды сразу придут на баланс, а в игре будет ждать письмо с итогами твоего сезона: часы в игре, раунды, "
             "сколько заработал и потратил, любимые игры и лучший выигрыш.") if c["thanks_pct"] > 0 else ""
     warn = " и за ".join(_left(h) for h in sorted(c["warn"], reverse=True))
@@ -389,7 +390,7 @@ async def wipe_loop():
                             await _mass(f"⚠️ <b>Через {_left(h)} — вайп</b> ({_when(c['next'])}).\n"
                                         + (f"Вайпы — раз в {c['days']} дн.\n" if c["days"] else "") + "\n"
                                         + f"Сбросятся {esc(_kept())}. Уровень останется. После вайпа у всех будет "
-                                        f"<b>{nf(int(c['start']))} ⭐</b>"
+                                        f"<b>{S(int(c['start']))} ⭐</b>"
                                         + (f" + благодарность банка: {c['thanks_pct']}% от того, что ты внёс в банк за сезон" if c["thanks_pct"] > 0 else "")
                                         + f".\n\nЗа {c['freeze']} мин до вайпа игры закроются.")
                             break
@@ -456,7 +457,7 @@ async def admin_wipe_set(req: Request, aid=Depends(admin)):
     if not 0 <= new["days"] <= 365:
         err("период — от 0 (только вручную) до 365 дней")
     if not 0 <= new["start"] <= 10_000_000:
-        err("стартовый баланс — до 10 000 000 ⭐")
+        err("стартовый баланс — до 10 000 ⭐")
     if not 0 <= new["thanks_pct"] <= 100:
         err("благодарность — от 0 до 100%")
     if new["thanks_base"] not in BASES or new["thanks_cap"] < 0:

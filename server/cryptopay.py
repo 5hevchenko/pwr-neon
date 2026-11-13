@@ -10,6 +10,7 @@
     «×2 первая покупка» и доля пригласившему работают так же, как при оплате Stars.
 Ключ — переменная окружения CRYPTOPAY_TOKEN (выдаёт @CryptoBot → Crypto Pay → Create App). Без ключа раздел скрыт.
 Продажа включается тем же переключателем, что и пакеты звёзд (админка → «Продажи»)."""
+from settings import S
 import asyncio
 import os
 
@@ -77,7 +78,7 @@ async def crypto_invoice(req: Request, uid=Depends(auth)):
     stars = shop.pack_stars(xtr_eq(usd), shop.is_first(uid))
     try:
         inv = await _call("createInvoice", currency_type="fiat", fiat="USD", amount=f"{usd:.2f}", accepted_assets=ASSETS,
-                          description=f"{stars:,} игровых звёзд".replace(",", " "), payload=str(uid), expires_in=TTL, allow_comments=False)
+                          description=f"{S(stars)} звёзд", payload=str(uid), expires_in=TTL, allow_comments=False)
     except Exception as e:
         print("cryptopay createInvoice:", type(e).__name__, e, flush=True)
         err("Не удалось создать счёт — попробуй позже")
@@ -111,7 +112,7 @@ def _credit(row, inv):
         db.execute("UPDATE crypto_invoices SET status='paid' WHERE id=?", (row["id"],))
         event(uid, "buy", stars)
         __import__("bank").back(stars)
-    notify(uid, (f"✅ Оплата криптой прошла: +{stars:,} ⭐ на баланс" + (" — первая покупка, звёзд вдвое больше!" if first else "") + " Спасибо!").replace(",", " "))
+    notify(uid, (f"✅ Оплата криптой прошла: +{S(stars)} ⭐ на баланс" + (" — первая покупка, звёзд вдвое больше!" if first else "") + " Спасибо!"))
     try:
         __import__("refs").on_buy(uid, stars)
     except Exception as e:

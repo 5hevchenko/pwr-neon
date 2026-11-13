@@ -17,7 +17,7 @@ async function openJR() {
     <div class="jrhist" id="jr-h"></div>
     <div class="betp">
       <button class="btn cta gold" data-act="jr-gifts">${ic("gift")}Поставить подарки</button>
-      <div class="jrst"><label class="amtf"><span>⭐</span><input id="jr-amt" inputmode="numeric" value="500"></label><button class="btn ghost" data-act="jr-stars">Поставить звёзды</button></div>
+      <div class="jrst"><label class="amtf"><span>⭐</span><input id="jr-amt" inputmode="decimal" value="${starOut(500)}"></label><button class="btn ghost" data-act="jr-stars">Поставить звёзды</button></div>
 
     </div>
     <div class="sec-t">Участники <span id="jr-n"></span></div><div id="jr-p"></div>`, "jr-s");

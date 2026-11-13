@@ -1,4 +1,5 @@
 """Гарантированный доход: подарки приносят звёзды, сейф (стейкинг подарков), бизнесы."""
+from settings import S
 from settings import conf
 import hashlib
 import json
@@ -357,7 +358,7 @@ async def biz_supply(bid: str, req: Request, uid=Depends(auth)):
             err("сначала забери текущую партию")
         cap = biz_batch_cap(bid, r["level"])
         if not 100 <= amount <= cap:
-            err(f"партия от ⭐ 100 до ⭐ {cap:,}".replace(",", " "))
+            err(f"партия от ⭐ 0,1 до ⭐ {S(cap)}")
         if bal(uid) < amount:
             err("Не хватает звёзд")
         pay = amount + int(amount * biz_margin(uid, bid, t))

@@ -20,6 +20,7 @@
   · на выводе цена проверяется ещё раз: подорожал больше чем в slip раз — отказ, приз остаётся в сумке (продать его можно всегда);
   · не получилось купить или подарить — приз возвращается в сумку; ответа нет и исход неизвестен — заявку разбирает админ.
 Ключи: TONNEL_AUTH (и TONNEL_PROXY) — переменные окружения, см. tonnel.py. Без них коллекционные подарки выдаёт админ вручную."""
+from settings import S
 import asyncio
 import hashlib
 import os
@@ -42,11 +43,13 @@ from app import DEV, R, TOKEN, app, auth, bal, db, err, esc, event, notify, now,
 from settings import conf
 
 ON = conf("realgifts.on", True)
-RTP = conf("realgifts.rtp", 0.60)                       # доля цены кейса, которая в среднем возвращается призами
+RTP = conf("realgifts.rtp", 0.87)                       # доля цены кейса, которая в среднем возвращается призами
 REFRESH = int(conf("realgifts.refresh_min", 10) * 60)   # как часто обновлять цены
 MAX_AGE = int(conf("realgifts.max_age_min", 40) * 60)   # цена старше — приз убирается из кейса
 SLIP = conf("realgifts.slip", 1.15)                     # на выводе приз может стоить не больше цены выигрыша × slip
 NFT_MODE = conf("realgifts.nft_mode", "auto")           # коллекционные: auto — покупает сервер (нет сессии площадки — заявка админу), manual — всегда админ, off — выключены
+PRICE_K = conf("realgifts.price_k", 1000)                # цены кейсов в описаниях — в целых ⭐ (1 ⭐ = 1 Telegram Star); в игре звёзды хранятся в тысячных
+MARKUP = conf("realgifts.markup", 1.45)                 # приз оценивается в ⭐ дороже, чем стоит нам в Telegram Stars: подарок за 15 Stars — 22 ⭐
 STARS = conf("realgifts.stars", [15, 100])              # какие обычные подарки кладём в кейсы: цена в Telegram Stars, от и до
 MAX_USD = conf("realgifts.max_usd", 600.0)              # коллекционные дороже в кейсы не кладём: такой приз нечем обеспечить
 K_FILL = conf("realgifts.k_fill", 1.5)                  # вес подарков между собой в дешёвых кейсах: (1 / цена)^k
@@ -69,13 +72,37 @@ def _defs():
     for cid, c in E.CASES.items():
         if c.get("src") == "cs" or cid in HIDE:
             continue
-        out.append({"id": cid, "title": c["title"], "price": int(c["price"]), "level": c.get("level", 1), "gifts": list(c["cols"])})
+        out.append({"id": cid, "title": c["title"], "price": int(c["price"]) * PRICE_K, "level": c.get("level", 1), "gifts": list(c["cols"])})
         E.FIXED_PRICE[cid] = int(c["price"])   # цена твёрдая: курс банка и акции на неё не действуют, иначе съедут шансы
     return out
 
 
 CASES = _defs()
 IDS = {c["id"] for c in CASES}
+PRICES = {c["id"]: c["price"] for c in CASES}   # цена кейса в единицах игры (для витрины кейсов); _build может её снизить
+
+
+db.execute("CREATE TABLE IF NOT EXISTS real_case_price(cid TEXT PRIMARY KEY, price INTEGER, ts INTEGER)")
+for _r in q("SELECT cid, price FROM real_case_price"):
+    if _r["cid"] in PRICES and 0 < _r["price"] < PRICES[_r["cid"]]:
+        PRICES[_r["cid"]] = _r["price"]
+
+
+def _keep_price(cid, price):
+    with tx():
+        db.execute("INSERT OR REPLACE INTO real_case_price(cid,price,ts) VALUES(?,?,?)", (cid, price, now()))
+
+
+def _nice(x):
+    """Круглая цена кейса в единицах игры: до 100 ⭐ — шаг 5, до 1000 — 25, до 10 000 — 250, дальше — 2500."""
+    v = x / shop.RATE
+    step = 5 if v < 100 else 25 if v < 1000 else 250 if v < 10000 else 2500
+    return int(v // step * step) * shop.RATE
+
+
+def _value(stars_cost):
+    """Ценность приза в игре: себестоимость в Telegram Stars × MARKUP, в целых ⭐."""
+    return int(stars_cost * MARKUP + 0.5) * shop.RATE
 NAMES = sorted({n for c in CASES for n in c["gifts"] if n in E.NATIVE})
 
 db.execute("CREATE TABLE IF NOT EXISTS real_items(id INTEGER PRIMARY KEY AUTOINCREMENT, user INTEGER, kind TEXT, ref TEXT, title TEXT, xtr INTEGER, "
@@ -253,6 +280,11 @@ async def refresh():
     _rebuild()
 
 
+# обычные подарки Telegram называются по своему эмодзи; незнакомый — «Подарок за N Stars»
+TG_NAMES = {"💝": "Сердце", "🧸": "Мишка", "🎁": "Подарок", "🌹": "Роза", "🎂": "Торт", "💐": "Букет", "🚀": "Ракета", "🍾": "Шампанское",
+            "🏆": "Кубок", "💍": "Кольцо", "💎": "Алмаз"}
+
+
 def _real(c):
     """Настоящие призы кейса со свежей ценой: обычные подарки и коллекционные из его состава."""
     out = []
@@ -260,8 +292,8 @@ def _real(c):
     if _fresh(_CAT["ts"]):
         for g in _CAT["items"]:
             if lo <= g["xtr"] <= hi:
-                out.append({"key": "tg:" + g["id"], "kind": "tg", "ref": g["id"], "title": f"Подарок за {g['xtr']} Stars", "xtr": g["xtr"],
-                            "usd": round(g["xtr"] * W.XTR_USD, 4), "value": g["xtr"] * shop.RATE, "emoji": g["emoji"], "img": bool(g["thumb"])})
+                out.append({"key": "tg:" + g["id"], "kind": "tg", "ref": g["id"], "title": TG_NAMES.get(g["emoji"], f"Подарок за {g['xtr']} Stars"), "xtr": g["xtr"],
+                            "usd": round(g["xtr"] * W.XTR_USD, 4), "value": _value(g["xtr"]), "emoji": g["emoji"], "img": bool(g["thumb"])})
     if nft_ready() and _fresh(_TON["ts"], 3):
         for name in c["gifts"]:
             p = _NFT.get(name)
@@ -269,7 +301,7 @@ def _real(c):
                 usd = p["ton"] * (1 + FEE) * _TON["usd"]
                 if usd <= MAX_USD:
                     out.append({"key": "nft:" + name, "kind": "nft", "ref": name, "title": name, "xtr": 0, "usd": round(usd, 4),
-                                "value": int(round(usd / W.XTR_USD * shop.RATE, -2)), "emoji": "", "img": True})
+                                "value": _value(usd / W.XTR_USD), "emoji": "", "img": True})
     return sorted(out, key=lambda x: x["value"])
 
 
@@ -296,18 +328,35 @@ def _solve(items, target):
 
 
 def _build(c):
-    """Кейс с твёрдой ценой: шансы призов подобраны так, чтобы средний приз был RTP × цена (у бесплатного — FREE_EV)."""
-    base = {"id": c["id"], "title": c["title"], "price": c["price"], "level": c["level"], "paused": True, "items": [], "w": []}
+    """Кейс с твёрдой ценой: шансы призов подобраны так, чтобы средний приз был RTP × цена (у бесплатного — FREE_EV).
+    Если призы кейса дешевле, чем нужно для его цены, цена снижается до той, которую они обеспечивают, и дальше держится."""
+    price = PRICES.get(c["id"], c["price"])
+    base = {"id": c["id"], "title": c["title"], "price": price, "level": c["level"], "paused": True, "items": [], "w": []}
     items = _real(c)
     if len(items) < MIN_REAL:
         return dict(base, why="нет цен подарков")
-    nominal = c["price"] or FREE_EV / RTP          # от чего считаются призы звёздами
+    nominal = price or FREE_EV / RTP               # от чего считаются призы звёздами
     target = RTP * nominal
     if target >= items[0]["value"]:                 # только подарки
+        full = items
         while len(items) > MIN_REAL and _ev(items, 0.5) < target:   # дорогому кейсу дешёвые призы не нужны
             items = items[1:]
-        if _ev(items, 0.0) < target:
-            return dict(base, why="не хватает дорогих призов")
+        if _ev(items, 0.0) < target:                # призы не тянут такую цену — снижаем её
+            have = sum(1 for x in full if x["kind"] == "nft")
+            if have < 0.8 * len(c["gifts"]):        # цены есть не у всего состава (старт, сбой площадки): цену не трогаем, ждём
+                return dict(base, why="не хватает цен подарков")
+            keep = min(5, len(full))                    # сколько призов оставляем самое меньшее: самые дорогие из состава
+            price = _nice(max(_ev(full[i:], 0.5) for i in range(len(full) - keep + 1)) / RTP)
+            target = RTP * price
+            if price >= base["price"] or target < full[0]["value"]:
+                return dict(base, why="не хватает дорогих призов")
+            base["price"] = nominal = PRICES[c["id"]] = price
+            _keep_price(c["id"], price)
+            items = full
+            while len(items) > MIN_REAL and _ev(items, 0.5) < target:
+                items = items[1:]
+            if _ev(items, 0.0) < target:
+                return dict(base, why="не хватает дорогих призов")
         k = _solve(items, target)
         w = _weights(items, k)
         tw = sum(w)
@@ -403,7 +452,7 @@ def state(uid):
     hist = [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status IN ('sent','sold') ORDER BY upd DESC LIMIT 15", uid)]
     return {"on": enabled(), "cases": cases, "ids": sorted(IDS), "bag": bag, "history": hist, "stars": bal(uid), "limit": limit, "used": used,
             "left": round(max(0, limit - used), 2), "held": W.held(uid), "holdHours": W.HOLD_H,
-            "rtp": int(RTP * 100), "limitK": int(W.LIMIT_K * 100), "usdK": W.XTR_USD / shop.RATE}
+            "rtp": int(RTP * 100), "limitK": int(W.LIMIT_K * 100), "usdK": W.XTR_USD / shop.RATE / MARKUP}
 
 
 @app.get(R + "/realgifts")
@@ -586,11 +635,11 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
         db.execute("UPDATE users SET stars=stars-?, opened=opened+1 WHERE id=?", (paid, uid))
         if key:
             event(uid, "gift", it["value"])
-            __import__("refs").on_key_open(uid, cid, it["title"] if it["kind"] != "star" else f"{it['value']} ⭐")
+            __import__("refs").on_key_open(uid, cid, it["title"] if it["kind"] != "star" else f"{S(it['value'])} ⭐")
         else:
             event(uid, "case", it["value"] - paid, stake=paid)
         fair.record(uid, "case", paid, it["value"], {"case": cid, "drops": [it["value"]], "prize": it["title"]}, fair.close_stream(rng))
-        lvl = A.add_xp(uid, max(20, price // 10))
+        lvl = A.add_xp(uid, max(20, price // (10 * PRICE_K)))
     WIN = 42
     strip = _strip(b, 50)
     strip[WIN] = _pub(it)

@@ -1,5 +1,6 @@
 """Кланы: до 20 игроков, казна (взносы идут в банк казино и качают уровень клана → бонус к доходу),
 недельная битва кланов по обороту в играх: топ-3 получают призы от банка, делятся между участниками по вкладу."""
+from settings import S
 from settings import conf
 import asyncio
 import re
@@ -244,7 +245,7 @@ async def clan_create(req: Request, uid=Depends(auth)):
         if q1("SELECT 1 FROM clans WHERE name=? OR tag=?", name, tag):
             err("такое название или тег уже заняты")
         if bal(uid) < CREATE_COST:
-            err(f"создание клана стоит ⭐ {CREATE_COST}")
+            err(f"создание клана стоит ⭐ {S(CREATE_COST)}")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (CREATE_COST, uid))
         event(uid, "clan", -CREATE_COST)
         cur = db.execute("INSERT INTO clans(name,tag,owner,created,color) VALUES(?,?,?,?,?)", (name, tag, uid, t, color))
@@ -332,7 +333,7 @@ def clan_kick(tid: int, uid=Depends(auth)):
 async def clan_donate(req: Request, uid=Depends(auth)):
     amount = int((await req.json()).get("amount", 0))
     if not 100 <= amount <= 10_000_000:
-        err("взнос от ⭐ 100")
+        err("взнос от ⭐ 0,1")
     with tx():
         cid = my_clan_id(uid) or err("ты не в клане")
         import loans
@@ -387,7 +388,7 @@ def _settle():
                 if pay:
                     db.execute("UPDATE users SET stars=stars+? WHERE id=?", (pay, u))
                     event(u, "clanprize", pay)
-                    msgs.append((u, f"🏆 Клан [{esc(c['tag'])}] занял {place + 1} место в битве кланов! Твоя доля: ⭐ {pay}"))
+                    msgs.append((u, f"🏆 Клан [{esc(c['tag'])}] занял {place + 1} место в битве кланов! Твоя доля: ⭐ {S(pay)}"))
             out.append({"place": place + 1, "id": c["id"], "name": c["name"], "tag": c["tag"], "score": tot, "prize": prize})
         db.execute("INSERT INTO clan_wars(week,result,ts) VALUES(?,?,?)", (week, json.dumps(out, ensure_ascii=False), now()))
     for u, text in msgs:
@@ -511,7 +512,7 @@ def _goals():
                     if _rounds(m["user"], ws) < GOAL_ROUNDS:   # неактивным (и твинкам) ключ не положен
                         continue
                     db.execute("INSERT INTO case_keys(user,cid,n) VALUES(?,?,1) ON CONFLICT(user,cid) DO UPDATE SET n=n+1", (m["user"], cid_))
-                    msgs.append((m["user"], f"🎯 Клан [{esc(c['tag'])}] выполнил цель недели — оборот ⭐ {need:,}! ".replace(",", " ")
+                    msgs.append((m["user"], f"🎯 Клан [{esc(c['tag'])}] выполнил цель недели — оборот ⭐ {S(need)}! "
                                             + f"Тебе ключ от кейса «{esc(E.case_title(cid_, m['user']))}»."))
     for u, t in msgs:
         notify(u, t)
@@ -555,9 +556,9 @@ async def clan_spend(req: Request, uid=Depends(auth)):
         if kind == "pay":
             amount, mode = int(b.get("amount", 0)), str(b.get("mode", "equal"))
             if amount < 100 * len(mem):
-                err(f"минимум ⭐ {100 * len(mem)} — по ⭐ 100 на участника")
+                err(f"минимум ⭐ {S(100 * len(mem))} — по ⭐ 0,1 на участника")
             if bank < amount:
-                err(f"в казне только ⭐ {bank:,}".replace(",", " "))
+                err(f"в казне только ⭐ {S(bank)}")
             if mode == "contrib":   # по вкладу за неделю (оборот в играх)
                 sc = _scores(cid, week_start())
                 tot = sum(sc.values())
@@ -574,8 +575,8 @@ async def clan_spend(req: Request, uid=Depends(auth)):
                     event(u, "clanpay", x - tax)
                     if tax:
                         event(u, "fee", -tax)
-                    msgs.append((u, f"🛡 Казна клана [{esc(c['tag'])}]: тебе ⭐ {x - tax:,}".replace(",", " ")
-                                 + (f" (налог ⭐ {tax:,})".replace(",", " ") if tax else "")))
+                    msgs.append((u, f"🛡 Казна клана [{esc(c['tag'])}]: тебе ⭐ {S(x - tax)}"
+                                 + (f" (налог ⭐ {S(tax)})" if tax else "")))
             detail = need
         elif kind == "keys":
             k = str(b.get("cid", ""))
@@ -583,7 +584,7 @@ async def clan_spend(req: Request, uid=Depends(auth)):
                 err("нет такого кейса")
             need = E.CASES[k]["price"] * len(mem)
             if bank < need:
-                err(f"в казне не хватает: нужно ⭐ {need:,}".replace(",", " "))
+                err(f"в казне не хватает: нужно ⭐ {S(need)}")
             for m in mem:
                 db.execute("INSERT INTO case_keys(user,cid,n) VALUES(?,?,1) ON CONFLICT(user,cid) DO UPDATE SET n=n+1", (m["user"], k))
                 msgs.append((m["user"], f"🛡 Клан [{esc(c['tag'])}] купил всем ключ от кейса «{esc(E.case_title(k, m['user']))}» — открывай!"))
@@ -592,7 +593,7 @@ async def clan_spend(req: Request, uid=Depends(auth)):
         elif kind == "boost":
             need = boost_price(len(mem))
             if bank < need:
-                err(f"в казне не хватает: нужно ⭐ {need:,}".replace(",", " "))
+                err(f"в казне не хватает: нужно ⭐ {S(need)}")
             db.execute("UPDATE clans SET boost_until=? WHERE id=?", (max(now(), c["boost_until"] or 0) + BOOST[1], cid))
             event(uid, "clanspend", -need)
             detail = int(BOOST[0] * 100)
@@ -604,7 +605,7 @@ async def clan_spend(req: Request, uid=Depends(auth)):
                 err("клан уже максимального размера")
             need = slots_price(sl)
             if bank < need:
-                err(f"в казне не хватает: нужно ⭐ {need:,}".replace(",", " "))
+                err(f"в казне не хватает: нужно ⭐ {S(need)}")
             db.execute("UPDATE clans SET slots=? WHERE id=?", (sl + SLOTS_STEP, cid))
             event(uid, "clanspend", -need)
             detail = sl + SLOTS_STEP + perk_slots(clan_level(c["treasury"]))

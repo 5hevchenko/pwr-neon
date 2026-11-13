@@ -1,4 +1,5 @@
 """Админ-панель: доступ только у Telegram id из ADMIN_IDS. Чужим отвечаем 404, будто маршрута нет."""
+from settings import S
 import asyncio
 import base64
 import os
@@ -207,7 +208,7 @@ async def adjust(tid: int, req: Request, aid=Depends(admin)):
     with tx():
         u = q1("SELECT stars FROM users WHERE id=?", tid) or err("нет такого игрока", 404)
         if u["stars"] + delta < 0 and not b.get("neg"):   # в минус — только явно (neg): долг гасится доходом, ставить и переводить нельзя
-            err(f"у игрока только ⭐ {u['stars']}")
+            err(f"у игрока только ⭐ {S(u['stars'])}")
         db.execute("UPDATE users SET stars=stars+? WHERE id=?", (delta, tid))
         event(tid, "admin", delta)
         log(aid, "stars", tid, (f"{delta:+d} {reason}" + (" (в минус)" if u["stars"] + delta < 0 else "")).strip(), undo={"t": "stars", "delta": -delta})
@@ -668,7 +669,7 @@ def remove_gift(tid: int, gid: int, aid=Depends(admin)):
         unpin(tid, gid)
         cancel_trades_with(gid)
         event(tid, "gift", -g["value"])
-        log(aid, "gift-remove", tid, f"{g['col']} #{g['num']} {g['model']} (⭐ {g['value']})")
+        log(aid, "gift-remove", tid, f"{g['col']} #{g['num']} {g['model']} (⭐ {S(g['value'])})")
     return {"ok": True}
 
 
@@ -791,9 +792,9 @@ async def cosm_remove(tid: int, item: str, req: Request, aid=Depends(admin)):
         if amt:
             db.execute("UPDATE users SET stars=stars+? WHERE id=?", (amt, tid))
             event(tid, "admin", amt)
-        log(aid, "cosm", tid, f"забрал «{title}»" + (f", вернул ⭐ {amt}" if amt else " без возврата"))
+        log(aid, "cosm", tid, f"забрал «{title}»" + (f", вернул ⭐ {S(amt)}" if amt else " без возврата"))
     if amt:
-        notify(tid, f"↩️ Покупку «{esc(title)}» отменили — ⭐ {amt:,} вернулись на баланс.".replace(",", " "))
+        notify(tid, f"↩️ Покупку «{esc(title)}» отменили — ⭐ {S(amt)} вернулись на баланс.")
     return {"ok": True, "refund": amt}
 
 

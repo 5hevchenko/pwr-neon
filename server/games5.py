@@ -9,6 +9,7 @@
 
 Аукцион: подарки из хранилища банка. Деньги победителя идут в банк.
 """
+from settings import S
 import asyncio
 import json
 import time
@@ -197,7 +198,7 @@ def ladder_hint(uid=Depends(auth)):
         r = q1("SELECT * FROM ladder_game WHERE user=?", uid) or err("игра не начата")
         cost = int(_ld_stake(r) * LD_HINT) + 1
         if bal(uid) < cost:
-            err(f"Подсказка стоит ⭐ {cost:,}".replace(",", " "))
+            err(f"Подсказка стоит ⭐ {S(cost)}")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (cost, uid))
         db.execute("UPDATE ladder_game SET hints=hints+1 WHERE user=?", (uid,))
         event(uid, "fee", -cost)
@@ -300,7 +301,7 @@ async def bb_bet(req: Request, uid=Depends(auth)):
             err("в этом раунде ты уже поставил на другой исход")
         mine = q1("SELECT COALESCE(SUM(amount),0) s FROM bb_bet WHERE hour=? AND user=?", h, uid)["s"]
         if mine + amount > BB_MAX:
-            err(f"на раунд не больше ⭐ {BB_MAX:,}".replace(",", " "))
+            err(f"на раунд не больше ⭐ {S(BB_MAX)}")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (amount, uid))
         db.execute("INSERT INTO bb_bet(hour,user,side,amount,ts) VALUES(?,?,?,?,?)", (h, uid, side, amount, now()))
     return {**bb_state(uid), "stars": bal(uid)}
@@ -326,7 +327,7 @@ def _auction_tick():
             else:   # без ставок подарок возвращается в хранилище
                 db.execute("INSERT INTO bank_vault(user,gift,value,ts) VALUES(0,?,?,?)", (a["gift"], a["value"], t))
         if a["top_user"]:
-            notify(a["top_user"], f"🏆 Аукцион выигран: {g['col']} {g['model']} за ⭐ {a['top_bid']:,}".replace(",", " "))
+            notify(a["top_user"], f"🏆 Аукцион выигран: {g['col']} {g['model']} за ⭐ {S(a['top_bid'])}")
     if not q1("SELECT 1 FROM auction WHERE done=0"):
         v = q1("SELECT * FROM bank_vault ORDER BY value DESC LIMIT 1")
         if v:
@@ -364,7 +365,7 @@ async def auction_bid(req: Request, uid=Depends(auth)):
             err("твоя ставка уже первая")
         need = max(int(a["value"] * AUC_START), int(a["top_bid"] * AUC_STEP) + 1)
         if amount < need:
-            err(f"минимальная ставка ⭐ {need:,}".replace(",", " "))
+            err(f"минимальная ставка ⭐ {S(need)}")
         if bal(uid) < amount:
             err("Не хватает звёзд")
         db.execute("UPDATE users SET stars=stars-? WHERE id=?", (amount, uid))
