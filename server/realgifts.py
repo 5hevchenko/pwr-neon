@@ -333,6 +333,13 @@ def _build(c):
 def _rebuild():
     for c in CASES:
         _BUILT[c["id"]] = _build(c)
+    paused = [f"{b['title']} ({b.get('why')})" for b in _BUILT.values() if b["paused"]]
+    line = (f"realgifts: обычных подарков {len(_CAT['items'])}, цен коллекционных {sum(1 for n in NAMES if n in _NFT and _fresh(_NFT[n]['ts']))} из {len(NAMES)} "
+            f"(Portals: {_FEED.get('portals', 0)}), TON ${_TON['usd']:.3f}, кейсов работает {len(_BUILT) - len(paused)} из {len(_BUILT)}"
+            + (f", на паузе: {', '.join(paused[:8])}" if paused else ""))
+    if _FEED.get("log") != line:   # в журнал — только когда картина изменилась
+        _FEED["log"] = line
+        print(line, flush=True)
 
 
 def _now_usd(it):
@@ -623,7 +630,7 @@ def admin_state(aid=Depends(admin)):
     out = q1("SELECT COUNT(*) n, COALESCE(SUM(MAX(usd,cost)),0) usd FROM real_items WHERE status='sent'")
     opened = q1("SELECT COUNT(*) n, COALESCE(SUM(paid),0) paid, COALESCE(SUM(value),0) value FROM real_items")
     return {"on": enabled(), "nftMode": NFT_MODE, "nftReady": nft_ready(), "nftAuto": nft_auto(), "tonnelLib": T.available(), "tonnelSession": T.has_session(),
-            "feed": dict(_FEED), "paused": [{"title": b["title"], "why": b.get("why", "")} for b in _BUILT.values() if b["paused"]],
+            "feed": {k: v for k, v in _FEED.items() if k != "log"}, "paused": [{"title": b["title"], "why": b.get("why", "")} for b in _BUILT.values() if b["paused"]],
             "tonnelBal": _TN["bal"], "tonnelErr": _TN["err"], "tonnelAge": age(_TN["ts"]), "botStars": _BOT["stars"], "ton": _TON["usd"], "tonAge": age(_TON["ts"]),
             "catalog": len(_CAT["items"]), "catalogAge": age(_CAT["ts"]), "xtrUsd": W.XTR_USD,
             "prices": [{"name": n, "ton": _NFT[n]["ton"], "lo": _NFT[n]["lo"], "age": age(_NFT[n]["ts"])} for n in NAMES if n in _NFT],
