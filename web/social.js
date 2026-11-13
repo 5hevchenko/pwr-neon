@@ -230,7 +230,7 @@ function profileHTML(p, tab = "show") {
   const REL = { none: ["userPlus", "В друзья", "add", ""], outgoing: ["userClock", "Заявка отправлена", "remove", "ghost"], incoming: ["userCheck", "Принять заявку", "add", "green"], friend: ["userCheck", "В друзьях", "remove", "ghost"] }[p.rel];
   const got = p.ach.filter(a => a.got).length, st = p.stats || { games: {}, won: 0, lost: 0, best: 0, rounds: 0 };
   const byValue = [...p.gifts].sort((a, b) => b.value - a.value);
-  const show = p.pinned.length ? p.pinned : byValue.slice(0, 3);
+  const show = p.pinned.length ? p.pinned : (p.pinnedReal || []).length ? [] : byValue.slice(0, 3);
   const cell = (g, o = {}) => `<div class="gcell" data-act="gift" data-k="${reg({ g, mine: isMe, owner: p })}">${giftHTML(g, o)}${g.price != null ? `<span class="onm">${ic("tag")}${short(g.price)}</span>` : ""}<div class="cap">${giftName(g)}</div></div>`;
   // подарки из кейсов (настоящие) лежат отдельно от скинов и коллекций — в профиле показываем и те, и другие
   const real = p.real || [], rcell = x => `<${isMe ? `button data-act="rg-item" data-id="${x.id}"` : "div"} class="rg-cell k-${x.kind}">${rgArt(x)}<b>${esc(x.title)}</b><small>⭐ ${short(x.value)}</small></${isMe ? "button" : "div"}>`;
@@ -255,10 +255,13 @@ function profileHTML(p, tab = "show") {
         return `<div class="row kv pg"><span class="pic ${i ? "b" : "y"}">${ic(icn)}</span><div class="grow"><div class="t">${name}${i ? "" : ` <span class="pill">любимая</span>`}</div>
           <div class="cbar"><div style="width:${Math.max(4, n / max * 100)}%"></div></div></div><b>${num(n)}</b></div>`;
       }).join("")}</div>` : emptyHTML("games", "Ещё не играл")}`;
-  } else body = show.length ? `<div class="showcase">${show.map((g, i) => `<div class="sc${i === 0 ? " main" : ""}" data-act="gift" data-k="${reg({ g, mine: isMe, owner: p })}">${giftHTML(g)}<div class="cap">${giftName(g)}<span>⭐ ${short(g.value)}</span></div></div>`).join("")}</div>
-      ${!p.pinned.length && isMe ? `<button class="btn ghost" style="margin-top:12px" data-act="edit-profile">${ic("pin")}Выбрать подарки для витрины</button>` : ""}`
-    : real.length ? `<div class="rg-grid">${real.slice(0, 3).map(rcell).join("")}</div>`
-    : emptyHTML("gift", isMe ? "Открой первый кейс — тут будет витрина" : "Витрина пуста");
+  } else {
+    const pr = p.pinnedReal || [];
+    const pick = isMe && !p.pinned.length && !pr.length ? `<button class="btn ghost" style="margin-top:12px" data-act="edit-profile">${ic("pin")}Выбрать подарки для витрины</button>` : "";
+    body = (show.length ? `<div class="showcase">${show.map((g, i) => `<div class="sc${i === 0 ? " main" : ""}" data-act="gift" data-k="${reg({ g, mine: isMe, owner: p })}">${giftHTML(g)}<div class="cap">${giftName(g)}<span>⭐ ${short(g.value)}</span></div></div>`).join("")}</div>` : "")
+      + (pr.length ? `<div class="rg-grid"${show.length ? ` style="margin-top:10px"` : ""}>${pr.map(rcell).join("")}</div>` : !show.length && real.length ? `<div class="rg-grid">${real.slice(0, 3).map(rcell).join("")}</div>` : "");
+    body = body ? body + pick : emptyHTML("gift", isMe ? "Открой первый кейс — тут будет витрина" : "Витрина пуста");
+  }
   // шапка профиля в духе X / Telegram / Discord: обложка во всю ширину; аватар слева наполовину на обложке (в «вырезе» цвета фона);
   // справа от аватара на обложке — теги; ниже слева имя, @ник, описание и цифры строкой. Свои классы pf-* — старые .phead-правила не влияют.
   return `<div class="pf">

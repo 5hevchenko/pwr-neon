@@ -255,3 +255,10 @@ html.lite .cr-wheel{transition-duration:1s}
 /* правила не прилипают к блоку ставки ни в одной игре */
 .betp+.rules,.betp+details.rules{margin-top:12px}
 .sheet .rules{margin-bottom:12px}
+
+/* карусель: подпись над бонусными секторами и пояснение на самих кнопках */
+.cr-bt{display:flex;flex-direction:column;gap:2px;margin:12px 2px 8px}
+.cr-bt b{font-family:var(--disp);font-size:15px;font-weight:700}
+.cr-bt span{font-size:12.5px;line-height:1.35;color:var(--hint)}
+.cr-grid.b3 .cr-sec{min-height:74px;padding:8px 6px}
+.cr-grid.b3 .cr-sec small{font-size:11px;line-height:1.25;text-align:center;white-space:normal}

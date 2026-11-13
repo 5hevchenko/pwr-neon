@@ -213,7 +213,7 @@ ACT["rg-upg"] = async el => {
   try { d = await api(`realgifts/item/${id}/upgrade`); } catch (e) { return; }
   H.sel();
   RGU = { id, item: d.item, targets: d.targets, busy: false, pick: d.targets.find(t => t.chance <= 50) || d.targets[0] || null };
-  if (el.closest(".rg-item-s")) closeSheet();
+  if (el.closest(".rg-item-s, .pgs")) closeSheet();
   openSheet(rgUpgHTML(), "rg-s rg-upg-s");
 };
 ACT["rgu-pick"] = el => {

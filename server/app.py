@@ -1248,7 +1248,9 @@ def friend_status(a, b):
 def profile(tid: int, uid=Depends(auth)):
     u = q1("SELECT * FROM users WHERE id=?", tid) or err("игрок не найден", 404)
     gifts = [gift_out(r) for r in q("SELECT * FROM gifts WHERE owner=? ORDER BY id DESC", tid)]
-    pinned = [g for pid in json.loads(u["pinned"] or "[]") for g in gifts if g["id"] == pid]
+    pin_ids = json.loads(u["pinned"] or "[]")
+    pinned = [g for pid in pin_ids for g in gifts if g["id"] == pid]
+    real = __import__("sys").modules["realgifts"].public_bag(tid) if "realgifts" in __import__("sys").modules else []
     fr = q1("SELECT COUNT(*) n FROM friends WHERE (a=? OR b=?) AND status='ok'", tid, tid)["n"]
     worth = net_worth(tid)
     games = {r["kind"]: r["n"] for r in q(f"SELECT kind, COUNT(*) n FROM events WHERE user=? AND kind IN {GAME_KINDS} GROUP BY kind", tid)}
@@ -1260,7 +1262,7 @@ def profile(tid: int, uid=Depends(auth)):
             "avatarImg": u["avatar"] if "avatar" in u.keys() else "", "tgPhoto": u["photo"] or "",
             "stats": {"games": games, "won": won, "lost": lost, "best": best, "rounds": sum(games.values())}, **user_brief(u), "lv": level_info(u["xp"]), "bio": u["bio"], "banner": u["banner"],
             "pinned": pinned, "gifts": gifts, "worth": worth, "opened": u["opened"],
-            "real": __import__("sys").modules["realgifts"].public_bag(tid) if "realgifts" in __import__("sys").modules else [],   # подарки из кейсов (настоящие)
+            "real": real, "pinnedReal": [x for pid in pin_ids if pid < 0 for x in real if x["id"] == -pid],   # подарки из кейсов (настоящие) и какие из них на витрине
             "badges": json.loads(u["p_badges"] or "[]") if "p_badges" in u.keys() else [], "cover": u["p_cover"] if "p_cover" in u.keys() else 0,
             "bestCrash": u["best_crash"], "friends": fr, "refs": u["refs"], "since": u["created"],
             "seen": u["seen"] or 0, "now": now(),   # последний онлайн (seen обновляется при входе, не чаще раза в минуту)
@@ -1399,6 +1401,8 @@ async def edit_profile(req: Request, uid=Depends(auth)):
             err("Ник — минимум 2 символа")
     with tx():
         own = {r["id"] for r in q("SELECT id FROM gifts WHERE owner=?", uid)}
+        if "realgifts" in __import__("sys").modules:   # подарки из кейсов на витрине — с отрицательным номером
+            own |= {-r["id"] for r in q("SELECT id FROM real_items WHERE user=? AND status='bag'", uid)}
         pinned = [p for p in pinned if p in own]
         db.execute("UPDATE users SET bio=?, banner=?, pinned=? WHERE id=?", (bio, banner, json.dumps(pinned), uid))
         if set_nick:

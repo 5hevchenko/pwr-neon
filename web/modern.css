@@ -207,3 +207,6 @@ html .pacts .btn{font-size:12.5px!important;letter-spacing:0!important;padding-l
 html .mk2-oh .grow{flex:1 1 0!important;min-width:0!important}
 html .mk2-oh .grow b,html .mk2-oh .grow span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 html .mk2-oh .mk2-pct{margin-left:auto!important;min-width:84px}
+/* подарок из кейса на витрине в окне «Изменить профиль» */
+.epins .gcell.rgpin{display:grid;place-items:center;aspect-ratio:1/1;border-radius:16px;background:var(--sf)}
+.epins .gcell.rgpin .rg-art{width:72%;height:72%}

@@ -12,7 +12,8 @@ const GAMES = [
   { id: "swap", t: "Обменник", s: "Поменяй подарок на другой той же ценности — покрасивее", img: "Loot Bag", k: ["#ffb340", "#4a2200"], chips: ["без риска", "12 вариантов"] },
 ];
 // бейдж в шапке игры: сколько игра возвращает игрокам, по нажатию — панель «Честность»
-const gpfBtn = id => { const v = ME && ME.edges && ME.edges[id]; return `<button class="gpf" data-act="fair" data-game="${id}" aria-label="Честность игры">${ic("shield")}${v ? (v * 100).toFixed(v * 100 % 1 ? 1 : 0) + "%" : ""}</button>`; };
+// кнопка «честность игры» в шапке: только значок, цифру возврата не показываем
+const gpfBtn = id => `<button class="gpf" data-act="fair" data-game="${id}" aria-label="Честность игры">${ic("shield")}</button>`;
 const gameHead = (img, t, s, pf) => `<div class="ghead"><img src="${A.orig(img, 128)}" alt=""><div><h2>${t}</h2><span>${s}</span></div>${pf ? gpfBtn(pf) : ""}</div>`;
 
 // ------------------------------------------------------------ хаб: категории, избранное, недавние
@@ -322,10 +323,14 @@ async function pickGifts(title, o, cb) {
   MYP = await api("user/" + ME.id);
   const free = MYP.gifts.filter(x => x.price == null).sort((a, b) => b.value - a.value);
   const sel = new Set((o.pre || []).map(x => x.id).filter(id => free.some(f => f.id === id)));
-  const el = openSheet(`<h2 class="gtitle">${title}</h2>${o.min ? `<div class="hint" style="margin:-6px 0 10px;font-size:13px">Нужно подарков минимум на ⭐ ${fmt(o.min)}</div>` : ""}
+  // подарки из кейсов (настоящие) апгрейдятся своим экраном: показываем их тут же, нажатие сразу открывает их апгрейд
+  const real = o.real ? (MYP.real || []) : [];
+  const realHTML = real.length ? `<div class="sec-t" style="margin-top:0">Подарки из кейсов</div><div class="rg-grid" style="margin-bottom:14px">${real.map(x =>
+    `<button class="rg-cell k-${x.kind}" data-act="rg-upg" data-id="${x.id}">${rgArt(x)}<b>${esc(x.title)}</b><small>⭐ ${short(x.value)}</small></button>`).join("")}</div>${free.length ? `<div class="sec-t">Скины и коллекции</div>` : ""}` : "";
+  const el = openSheet(`<h2 class="gtitle">${title}</h2>${realHTML}${o.min ? `<div class="hint" style="margin:-6px 0 10px;font-size:13px">Нужно подарков минимум на ⭐ ${fmt(o.min)}</div>` : ""}
     ${free.length ? `<div class="ggrid" id="pg-grid">${free.map(x => `<div class="gcell" data-pg="${x.id}">${giftHTML(x, { lite: true, tag: "⭐ " + short(x.value) })}<span class="sel"></span><div class="cap">${giftName(x)}</div></div>`).join("")}</div>
       <div class="pgbar"><div><b id="pg-n"></b><span id="pg-v"></span></div><button class="btn sm ghost" data-act="pg-all">Все</button><button class="btn sm" data-act="pg-ok">Готово</button></div>`
-      : emptyHTML("gift", "Нет свободных подарков — открой кейс")}`, "pgs");
+      : real.length ? "" : emptyHTML("gift", "Нет свободных подарков — открой кейс")}`, "pgs");
   el._pg = { sel, free, cb, max: o.max || 10, min: o.min || 0 };
   const draw = () => {
     el.querySelectorAll("[data-pg]").forEach(c => { const on = sel.has(+c.dataset.pg); c.classList.toggle("picked", on); c.querySelector(".sel").innerHTML = on ? ic("check") : ""; });
@@ -449,7 +454,7 @@ async function upgLoad() {
   }
   upgDraw();
 }
-function upgPick() { if (!UP.busy) pickGifts("Что ставим?", { pre: UP.gs, max: 10 }, gs => { UP.gs = gs; UP.ts = []; UP.items = []; upgDraw(); upgLoad(); }); }
+function upgPick() { if (!UP.busy) pickGifts("Что ставим?", { pre: UP.gs, max: 10, real: true }, gs => { UP.gs = gs; UP.ts = []; UP.items = []; upgDraw(); upgLoad(); }); }
 async function upgGo() {
   if (UP.busy || !UP.gs.length || !UP.ts.length) return;
   const ch = upgChance();

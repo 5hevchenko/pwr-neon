@@ -18,14 +18,18 @@ function crSVG() {   // секторы с подписями; 0° — верх �
     return `<path d="M100 100L${pt(a, R)}A${R} ${R} 0 0 1 ${pt(a + 9, R)}Z" fill="${CR_COL[k]}" stroke="#0b0b12" stroke-width=".5"/>
       <text transform="rotate(${m} 100 100)" x="100" y="11" text-anchor="middle" font-size="7.5" font-weight="800" fill="${CR_DARK[k] ? "#14141c" : "#fff"}">${CR_LBL[k]}</text>`; }).join("")}</svg>`;
 }
+// что значит бонусный сектор — коротко прямо на кнопке (шансы видны по самому колесу, цифрами их не пишем)
+const CR_SUB = { safe: "угадай цифру — приз ×5", ladder: "выбери высоту: выше — больше", bomb: "выбери шаг — успей до взрыва" };
 async function openCarousel() {
   const el = openSheet(`<div class="ghead">${gpfBtn("carousel")}<img src="${CR_ICON}" alt=""><div><h2>Карусель</h2></div></div>
     <div class="cr-stage"><i class="cr-pin"></i><div class="cr-wheel" id="cr-wheel">${crSVG()}</div>
       <div class="cr-hub"><b id="cr-time">—</b><span id="cr-ph"></span></div></div>
     <div class="cr-hist" id="cr-hist"></div><div id="cr-bonus"></div>
-    <div class="cr-grid" id="cr-grid"></div><div class="cr-grid b3" id="cr-grid2"></div>
+    <div class="cr-grid" id="cr-grid"></div>
+    <div class="cr-bt"><b>Бонусные секторы</b><span>Выпал бонус — все, кто на него ставил, играют мини-игру на свою ставку. На колесе это буквы С, Л и Б.</span></div>
+    <div class="cr-grid b3" id="cr-grid2"></div>
     <div class="betp">${betHTML("cr-amt", CRS.amt)}</div>
-    <details class="rules"><summary>${ic("award")}Как играть</summary><div>Раунд общий на всех. Ставь на один или несколько секторов: если колесо остановится на нём, получишь ставку × множитель. Бонусы: в «Сейфе» угадай цифру, в «Лестнице» и «Бомбе» выбери, насколько рискнуть. Чем выше риск, тем больше выигрыш, средний возврат одинаковый.</div></details>`, "cr-s");
+    <details class="rules"><summary>${ic("award")}Как играть</summary><div>Раунд общий на всех. Ставь на один или несколько секторов: если колесо остановится на нём, получишь ставку × множитель. Сейф, Лестница и Бомба — бонусные секторы с мини-игрой. «Сейф»: выбери цифру от 0 до 9 — угадал, приз в 5 раз больше. «Лестница»: выбери, на какую ступень подняться — чем выше, тем больше приз, но лестница может оборваться раньше. «Бомба»: выбери, на каком шаге забрать приз — чем позже, тем он больше, но если рванёт раньше, ставка сгорит.</div></details>`, "cr-s");
   CRS.lastSpin = 0;
   await crPoll();
   clearInterval(CRS.t);
@@ -50,7 +54,7 @@ function crDraw() {
   }
   const can = s.phase === "bet";
   const secBtn = x => `<button class="cr-sec${s.sector === x.id && s.phase !== "bet" ? " hit" : ""}" style="--c:${CR_COL[x.id]}" data-act="cr-bet" data-v="${x.id}" ${can ? "" : "disabled"}>
-      <b>${esc(x.title)}</b><small>${x.p}%</small>${s.mine[x.id] ? `<em>⭐ ${short(s.mine[x.id])}</em>` : ""}</button>`;
+      <b>${esc(x.title)}</b><small>${CR_SUB[x.id] || "множитель"}</small>${s.mine[x.id] ? `<em>⭐ ${short(s.mine[x.id])}</em>` : ""}</button>`;
   g.innerHTML = s.sectors.filter(x => x.mult).map(secBtn).join("");
   const g2 = $("#cr-grid2"); if (g2) { g2.innerHTML = s.sectors.filter(x => !x.mult).map(secBtn).join(""); starify(g2); }
   $("#cr-hist").innerHTML = s.history.map(h => `<i style="--c:${CR_COL[h.sector]}"></i>`).join("");

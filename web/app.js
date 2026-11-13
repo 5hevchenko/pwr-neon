@@ -696,7 +696,7 @@ async function refreshProfileSheets() {
 async function editProfile() {
   await loadBanners();
   MYP = await api("user/" + ME.id);
-  const ed = { bio: MYP.bio || "", banner: MYP.banner || "", pinned: MYP.pinned.map(g => g.id), notif: ME.notif !== false, img: MYP.bannerImg || "", newImg: null,
+  const ed = { bio: MYP.bio || "", banner: MYP.banner || "", pinned: MYP.pinned.map(g => g.id).concat((MYP.pinnedReal || []).map(x => -x.id)), notif: ME.notif !== false, img: MYP.bannerImg || "", newImg: null,
     nick: MYP.nick || "", ava: MYP.avatarImg || "", newAva: null };
   const el = openSheet(`<h2 class="gtitle">Профиль</h2>
     <div class="eprev" id="e-prev"></div>
@@ -716,15 +716,18 @@ async function editProfile() {
       ${BANNERS.map(b => `<button data-v="${esc(b.name)}" class="${b.name === ed.banner ? "on" : ""}" style="--c1:${b.c[0]};--c2:${b.c[1]}" title="${esc(b.name)}"></button>`).join("")}</div>
     <div class="sec-t">Витрина · до 6 подарков <span id="e-pc"></span></div>
     <div class="epins" id="e-pins"></div>
+    <div id="e-real"></div>
     <div class="sec-t">Уведомления</div>
     <div class="box"><div class="row"><span class="pic b">${ic("send")}</span><div class="grow"><div class="t">Напоминания от бота</div>
       <div class="s">бесплатный кейс, серия бонусов, твой ход</div></div><button class="sw${ed.notif ? " on" : ""}" id="e-notif"></button></div></div>
     <div class="esave"><button class="btn cta" data-act="save-profile">${ic("check")}Сохранить</button></div>`, "edit-s");
   const all = new Map(MYP.gifts.map(g => [g.id, g]));
+  const realAll = MYP.real || [];   // подарки из кейсов: на витрине они идут с отрицательным номером
+  for (const x of realAll) all.set(-x.id, { ...x, _real: true });
   const draw = () => {
     const curAva = ed.newAva !== null ? ed.newAva : ed.ava;       // "" — вернуть аватар из Telegram
     const pu = { ...MYP, name: ed.nick.trim() || MYP.tgName || "Игрок", photo: curAva || MYP.tgPhoto || "" };
-    const prev = { ...pu, banner: ed.banner, bio: ed.bio, pinned: ed.pinned.map(i => all.get(i)).filter(Boolean), bannerImg: ed.newImg ?? ed.img };
+    const prev = { ...pu, banner: ed.banner, bio: ed.bio, pinned: ed.pinned.map(i => all.get(i)).filter(g => g && !g._real), bannerImg: ed.newImg ?? ed.img };
     el.querySelector("#e-prev").innerHTML = bannerHTML(prev) + `<div class="eprev-u">${avaHTML(pu, 56)}<div><b>${esc(pu.name)}</b><span>${esc(ed.bio) || "без описания"}</span></div></div>`;
     el.querySelector("#e-ava").outerHTML = `<span id="e-ava">${avaHTML(pu, 52)}</span>`;
     const custom = ed.nick.trim() || curAva;
@@ -732,8 +735,11 @@ async function editProfile() {
     el.querySelector("#e-defrow").style.display = custom ? "" : "none";
     el.querySelector("#e-cnt").textContent = `${ed.bio.length}/140`;
     el.querySelector("#e-pc").textContent = `${ed.pinned.length}/6`;
-    el.querySelector("#e-pins").innerHTML = ed.pinned.map(i => all.get(i)).filter(Boolean).map(g => `<div class="gcell" data-unpin="${g.id}">${giftHTML(g, { lite: true, plain: true })}<span class="sel">${ic("x")}</span></div>`).join("")
-      + (ed.pinned.length < 6 ? `<button class="eadd" data-act="e-pick">${ic("plus")}<span>Добавить</span></button>` : "");
+    el.querySelector("#e-pins").innerHTML = ed.pinned.map(i => [i, all.get(i)]).filter(p => p[1]).map(([i, g]) => `<div class="gcell${g._real ? " rgpin" : ""}" data-unpin="${i}">${g._real ? rgArt(g) : giftHTML(g, { lite: true, plain: true })}<span class="sel">${ic("x")}</span></div>`).join("")
+      + (ed.pinned.length < 6 && MYP.gifts.length ? `<button class="eadd" data-act="e-pick">${ic("plus")}<span>Добавить</span></button>` : "");
+    const free = realAll.filter(x => !ed.pinned.includes(-x.id));
+    el.querySelector("#e-real").innerHTML = free.length ? `<div class="hint" style="margin:10px 0 6px;font-size:12.5px">Подарки из кейсов — нажми, чтобы поставить на витрину</div>
+      <div class="rg-grid">${free.map(x => `<button class="rg-cell k-${x.kind}" data-pinreal="${x.id}">${rgArt(x)}<b>${esc(x.title)}</b><small>⭐ ${short(x.value)}</small></button>`).join("")}</div>` : "";
   };
   el.querySelector("#ebio").oninput = e => { ed.bio = e.target.value; draw(); };
   el.querySelector("#ebn").onclick = e => {
@@ -741,6 +747,11 @@ async function editProfile() {
     ed.banner = b.dataset.v; H.sel();
     el.querySelectorAll("#ebn button").forEach(x => x.classList.toggle("on", x === b)); draw();
   };
+  el.querySelector("#e-real").addEventListener("click", e => {
+    const c = e.target.closest("[data-pinreal]"); if (!c) return;
+    if (ed.pinned.length >= 6) return toast("На витрине максимум 6 подарков");
+    ed.pinned.push(-c.dataset.pinreal); H.sel(); draw();
+  });
   el.querySelector("#e-pins").addEventListener("click", e => {
     const c = e.target.closest("[data-unpin]"); if (!c) return;
     ed.pinned = ed.pinned.filter(i => i !== +c.dataset.unpin); H.sel(); draw();
@@ -989,7 +1000,7 @@ const ACT = {
     if (!MYP) MYP = await api("user/" + ME.id);
     const id = +el.dataset.id; let ids = MYP.pinned.map(g => g.id);
     if (ids.includes(id)) ids = ids.filter(x => x !== id); else { if (ids.length >= 6) return toast("Можно закрепить до 6 подарков"); ids.push(id); }
-    await post("profile", { bio: MYP.bio, banner: MYP.banner, pinned: ids }); H.ok(); toast(ids.includes(id) ? "Закреплено" : "Откреплено", "ok");
+    await post("profile", { bio: MYP.bio, banner: MYP.banner, pinned: ids.concat((MYP.pinnedReal || []).map(x => -x.id)) }); H.ok(); toast(ids.includes(id) ? "Закреплено" : "Откреплено", "ok");
     giftChanged();
   },
   "edit-profile": () => editProfile(),
