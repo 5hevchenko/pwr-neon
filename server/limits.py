@@ -149,7 +149,7 @@ def _report():
             text += "\nЕсли хочешь притормозить, в настройках есть дневной лимит проигрыша и перерыв от суток."
         with tx():
             db.execute("INSERT OR IGNORE INTO week_report(week,user,ts) VALUES(?,?,?)", (week, u["id"], now()))
-        notify(u["id"], text)
+        notify(u["id"], text, promo="week")
         sent += 1
     with tx():
         db.execute("INSERT OR IGNORE INTO week_report(week,user,ts) VALUES(?,0,?)", (week, now()))

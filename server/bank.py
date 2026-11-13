@@ -389,7 +389,7 @@ def _pay(day):
                 o = q1("SELECT owner FROM clans WHERE id=?", cid)
                 clans.feed(cid, o["owner"] if o else 0, "sharediv", a)
     for u, a in paid:
-        notify(u, f"Дивиденды банка: +{S(a)} ⭐ (игровых) за вчера.")
+        notify(u, f"Дивиденды банка: +{S(a)} ⭐ (игровых) за вчера.", promo="report")
     return paid
 
 

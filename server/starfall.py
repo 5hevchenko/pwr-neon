@@ -117,5 +117,5 @@ async def starfall_bet(req: Request, uid=Depends(auth)):
         name = q1("SELECT name FROM users WHERE id=?", win)["name"]
         for u in st:
             notify(u, f"🌠 <b>Звездопад!</b> Шкала заполнена — <b>{esc(name)}</b> забирает {esc(col)} ценностью ⭐ {S(value)}"
-                      + (" — это ты! Подарок уже в сумке." if u == win else ". Новый раунд уже начался."))
+                      + (" — это ты! Подарок уже в сумке." if u == win else ". Новый раунд уже начался."), promo=None if u == win else "starfall_done")
     return {**result, "added": amount, "stars": bal(uid), "levelup": lvl}

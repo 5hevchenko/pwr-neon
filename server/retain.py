@@ -108,7 +108,7 @@ def _comeback():
             if len(msgs) >= 40:
                 break
     for u, text in msgs:
-        notify(u, text)
+        notify(u, text, promo="comeback", force=True, card=("gift", "Тебе подарок", "Ключ от кейса", False))   # внутри подарок — уходит всегда, но в счёт дня идёт
 
 
 async def _loop():

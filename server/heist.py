@@ -94,7 +94,7 @@ def _pass():
                 msgs.append((u["id"], _text(due, name, loot, kept, days)))
             db.execute("INSERT OR REPLACE INTO heist(user,seen,stage,loot,kept,days,ts) VALUES(?,?,?,?,?,?,?)", (u["id"], u["seen"], due, loot, kept, days, t))
     for uid, text in msgs:
-        notify(uid, text)
+        notify(uid, text, promo="heist")
 
 
 @app.get(R + "/heist")

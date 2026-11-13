@@ -601,12 +601,13 @@ def bot_name():
     return franchise.username(b) if b else franchise.face_name()   # «лицо» игры назначается в админке
 
 
-def notif_card(text):
-    """JPEG-карточка к уведомлению или None. Выключается в kv: notif_cards = off. Подпись к фото — до 1024 символов."""
+def notif_card(text, card=None):
+    """JPEG-карточка к уведомлению или None. Выключается в kv: notif_cards = off. Подпись к фото — до 1024 символов.
+    card — готовые (вид, заголовок, значение, со_звездой); без него вид подбирается по тексту."""
     if kv_get("notif_cards", "on") == "off" or len(text) > 1000:
         return None
     import notifimg
-    return notifimg.card(text)
+    return notifimg.make(*card) if card else notifimg.card(text)
 
 
 async def tg_photo(tok, chat_id, img, caption, kb):
@@ -621,22 +622,71 @@ async def tg_photo(tok, chat_id, img, caption, kb):
         return {}
 
 
-def notify(uid, text, url=None):
-    """Сообщение игроку от бота (из любого потока, без ожидания) + копия во «входящие» (колокольчик в игре)."""
+# ---- лимит пушей: напоминания, анонсы и рассылки («рекламные») — не больше PUSH_DAY_MAX в сутки (по Москве) и не чаще PUSH_GAP.
+# Служебные сообщения (оплата, вывод, перевод, вызов от игрока, поддержка, приз) идут всегда и в лимит не входят.
+PUSH_DAY_MAX = int(conf("push.day_max", 2))
+PUSH_GAP = int(conf("push.gap_hours", 4) * 3600)
+db.executescript("""
+CREATE TABLE IF NOT EXISTS push_log(id INTEGER PRIMARY KEY, user INTEGER, ev TEXT, var INTEGER DEFAULT 0, ts INTEGER, back INTEGER DEFAULT 0);
+CREATE INDEX IF NOT EXISTS push_log_user ON push_log(user, ts);
+CREATE INDEX IF NOT EXISTS push_log_ts ON push_log(ts);
+""")
+
+
+def push_day(t=None):
+    """Начало текущих суток по Москве."""
+    t = int(time.time()) if t is None else t
+    return (t + 10800) // 86400 * 86400 - 10800
+
+
+def push_free(uid, t=None):
+    """Можно ли сейчас отправить игроку рекламный пуш: уведомления включены, сегодня было меньше лимита, с прошлого прошло PUSH_GAP."""
+    t = int(time.time()) if t is None else t
+    r = q1("SELECT COUNT(*) n, COALESCE(MAX(ts),0) last FROM push_log WHERE user=? AND ts>=?", uid, push_day(t))
+    if r["n"] >= PUSH_DAY_MAX or t - r["last"] < PUSH_GAP:
+        return False
+    u = q1("SELECT notif, banned FROM users WHERE id=?", uid)
+    return bool(u and not u["banned"] and (u["notif"] is None or u["notif"]))
+
+
+def push_take(uid, ev, var=0, force=False):
+    """Занять место под рекламный пуш (или отказ). force — пуш с подарком внутри: уходит всегда, но в счёт дня идёт."""
+    with LOCK:
+        if not force and not push_free(uid):
+            return False
+        db.execute("INSERT INTO push_log(user,ev,var,ts) VALUES(?,?,?,?)", (uid, ev, var, int(time.time())))
+    return True
+
+
+def notify(uid, text, url=None, promo=None, card=None, force=False, inbox=True):
+    """Сообщение игроку от бота (из любого потока, без ожидания) + копия во «входящие» (колокольчик в игре).
+    promo — название события для рекламного пуша: такие идут через дневной лимит (push_take); не влез — остаётся только во входящих.
+    card — (вид, заголовок, значение, со_звездой) для картинки; без него вид подбирается по тексту."""
+    if inbox:
+        _inbox(uid, text)
+    if promo and not push_take(uid, promo, force=force):
+        return False
+    return _send(uid, text, url, card)
+
+
+def _inbox(uid, text):
     try:
         with LOCK:   # внутри tx() вставка станет частью транзакции, снаружи — отдельной записью
             db.execute("INSERT INTO inbox(user,text,ts) VALUES(?,?,?)", (uid, html_lib.unescape(re.sub(r"<[^>]+>", "", text)), int(time.time())))
     except Exception as e:
         print("inbox", e, flush=True)
+
+
+def _send(uid, text, url=None, card=None):
     if LOOP is None:
-        return
+        return False
     kb = {"inline_keyboard": [[{"text": "Открыть", "web_app": {"url": url or APP_URL}}]]}
 
     async def send():
         try:
             tok = franchise.token_for(uid)
             # красивая карточка к сообщению (notifimg.py); не распознали тип / выключено / длинный текст — обычное сообщение
-            img = await asyncio.get_running_loop().run_in_executor(None, notif_card, text)
+            img = await asyncio.get_running_loop().run_in_executor(None, notif_card, text, card)
             r = await tg_photo(tok, uid, img, text, kb) if img else {}
             if img and not r.get("ok") and tok != TOKEN:
                 r = await tg_photo(TOKEN, uid, img, text, kb)
@@ -649,6 +699,7 @@ def notify(uid, text, url=None):
         except Exception as e:
             print("notify error", uid, e, flush=True)
     asyncio.run_coroutine_threadsafe(send(), LOOP)
+    return True
 
 
 async def bot_description(token=None):
@@ -669,6 +720,13 @@ async def bot_setup(token=None):
     await tg_call("setMyCommands", _token=token, commands=[{"command": "start", "description": "Играть"},
                                                            {"command": "ref", "description": "Моя реф-ссылка"}]
                   + ([] if token else [{"command": "franchise", "description": "Свой бот с этой игрой"}]))
+    if not token:   # надпись в углу карточек-картинок — имя главного бота (или BRAND из окружения)
+        try:
+            import notifimg
+            me = await tg_call("getMe")
+            notifimg.BRAND = notifimg.BRAND or str((me.get("result") or {}).get("first_name") or "").upper()[:22]
+        except Exception as e:
+            print("brand:", e, flush=True)
     await bot_description(token)
     await tg_call("setMyShortDescription", _token=token, short_description="Кейсы с подарками и скинами CS, краш, слоты, маркет 🎁")
 
@@ -779,7 +837,10 @@ async def on_command(m):
                f"Старт: <b>{S(START_STARS)} ⭐</b>" + (f" + <b>{S(refs.cfg('new_bonus'))} ⭐</b> за приглашение" if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("new_bonus") else "")
                + ("\nИ ключ от кейса в подарок от друга, он уже ждёт в игре." if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("gift_on") else "")
                + f"\n\n<i>⚠️ {esc(disclaimer())}</i>")
-        await tg_call("sendMessage", chat_id=uid, text=txt, parse_mode="HTML", reply_markup=kb)
+        img = await asyncio.get_running_loop().run_in_executor(None, notif_card, txt, ("gift", "Добро пожаловать", f"+{S(START_STARS)}", True))
+        r = await tg_photo(None, uid, img, txt, kb) if img else {}
+        if not r.get("ok"):
+            await tg_call("sendMessage", chat_id=uid, text=txt, parse_mode="HTML", reply_markup=kb)
     elif cmd.startswith("/ref"):
         link = f"https://t.me/{bot_name()}?start=ref_{uid}"
         c = refs.cfg
@@ -2593,6 +2654,7 @@ REMIND_GAP = 3 * 3600   # не чаще раза в 3 часа на игрока
 
 
 def _reminders():
+    return   # напоминания про бесплатный кейс и серию теперь шлёт pushes.py (общий лимит и разные тексты)
     t = now()
     for u in q("SELECT id, last_free, last_daily, streak, rem_free, rem_daily, rem_last, seen FROM users "
                "WHERE notif=1 AND seen>? AND rem_last<?", t - 7 * 86400, t - REMIND_GAP):
@@ -2905,6 +2967,7 @@ import realgifts  # noqa: E402,F401 — кейсы с настоящими по�
 import cryptopay  # noqa: E402,F401 — пополнение криптой через Crypto Pay (@CryptoBot)
 import csprices  # noqa: E402,F401 — живые цены скинов CS с площадки и пересчёт шансов кейсов под них
 import heist  # noqa: E402,F401 — «ограбление сейфа»: не заходишь неделю — сгорают звёзды, кроме купленных
+import pushes  # noqa: E402,F401 — пуши по событиям в игре (лимит в сутки, разные тексты, картинки)
 
 
 # ---------------- картинки подарков (api.changes.tg); на проде перед этим стоит кэш nginx ----------------

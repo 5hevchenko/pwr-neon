@@ -38,7 +38,7 @@ DEFAULTS = {
     "drop_max": 100,           # сколько игроков успеют забрать
     "drop_level": 3,           # с какого уровня
     "notify": True,            # бот пишет о начале ивента
-    "notify_gap_h": 6,         # одному игроку — не чаще раза в N часов
+    "notify_gap_h": 48,        # одному игроку — не чаще раза в N часов (и в общий лимит пушей на сутки)
 }
 LIMITS = {"every_min": (15, 1440), "jitter_min": (0, 120), "dur_min": (5, 180), "w_luck3": (0, 100), "w_luck5": (0, 100),
           "w_drop": (0, 100), "drop_amount": (0, 100000), "drop_max": (1, 10000), "drop_level": (1, 100), "notify_gap_h": (1, 168)}
@@ -125,22 +125,18 @@ async def _notify(fid, kind):
         return
     t = now()
     ids = [r[0] for r in q("SELECT u.id FROM users u LEFT JOIN flash_notify n ON n.user=u.id WHERE u.banned=0 AND COALESCE(u.notif,1)=1 "
-                           "AND u.seen>? AND (n.ts IS NULL OR n.ts<?) ORDER BY u.seen DESC LIMIT 2000", t - 3 * 86400, t - cfg("notify_gap_h") * 3600)]
+                           "AND u.seen>? AND (n.ts IS NULL OR n.ts<?) ORDER BY u.seen DESC LIMIT 2000", t - 3 * 86400, t - max(20, cfg("notify_gap_h")) * 3600)]   # не чаще раза в сутки одному игроку
     text = f"⚡ <b>{KINDS[kind]['title']}</b> — {cfg('dur_min')} минут!\n\n{describe(kind)}"
     kb = {"inline_keyboard": [[{"text": "Играть", "web_app": {"url": A.APP_URL}}]]}
     fr = __import__("franchise")
     for uid in ids:
         if not current() or current()["id"] != fid:
             break   # ивент закончился — дальше не шлём
+        if not A.push_take(uid, "flash_" + kind):   # общий лимит рекламных пушей на сутки
+            continue
         with A.LOCK:
             db.execute("INSERT INTO flash_notify(user,ts) VALUES(?,?) ON CONFLICT(user) DO UPDATE SET ts=excluded.ts", (uid, now()))
-        try:
-            tok = fr.token_for(uid)
-            r = await A.tg_call("sendMessage", _token=tok, chat_id=uid, text=text, parse_mode="HTML", reply_markup=kb)
-            if not r.get("ok") and tok != A.TOKEN:
-                await A.tg_call("sendMessage", _token=A.TOKEN, chat_id=uid, text=text, parse_mode="HTML", reply_markup=kb)
-        except Exception as e:
-            print("flash notify", uid, e, flush=True)
+        A._send(uid, text, None, ("event", KINDS[kind]["title"].split(" ", 1)[1], f"{cfg('dur_min')} минут", False))
         await asyncio.sleep(0.05)
 
 

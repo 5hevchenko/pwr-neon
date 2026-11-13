@@ -103,7 +103,7 @@ async def react(wid: int, req: Request, uid=Depends(auth)):
         if n == NOTIFY_AT:
             note = (w["user"], f"Твой выигрыш ⭐ {S(w['amount'])} в игре «{esc(NAMES.get(w['kind'], w['kind']))}» оценили уже {n} игрока!")
     if note:
-        notify(*note)
+        notify(*note, promo="likes")
     return {"ok": True}
 
 

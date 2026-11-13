@@ -169,7 +169,7 @@ def run():
         _gd_start(out)
         _newcomers(out)
     for u, text in out:
-        notify(u, text)
+        notify(u, text, promo="nudge")
     if out:
         print(f"nudge: sent {len(out)}", flush=True)
 

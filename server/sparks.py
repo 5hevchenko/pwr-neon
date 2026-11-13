@@ -125,7 +125,7 @@ def _remind():
                 continue
             o = q1("SELECT name FROM users WHERE id=?", other)
             if o:
-                notify(me_, f"⏳ Серия огоньков с <b>{esc(o['name'])}</b> ({r['count']} дн.) сгорит в полночь — отправь огонёк!")
+                notify(me_, f"⏳ Серия огоньков с <b>{esc(o['name'])}</b> ({r['count']} дн.) сгорит в полночь — отправь огонёк!", promo="sparks")
 
 
 async def sparks_loop():

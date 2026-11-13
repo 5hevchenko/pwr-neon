@@ -64,7 +64,7 @@ def _award():
                               f"Комиссия маркета для тебя — {round(market_fee(uid, 0.05) * 100)}%."))
         db.execute("INSERT INTO rich_days(day,result,ts) VALUES(?,?,?)", (day, json.dumps(res), now()))
     for uid, text in msgs:
-        notify(uid, text)
+        notify(uid, text, promo="report")
 
 
 async def rich_loop():

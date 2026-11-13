@@ -15,6 +15,7 @@ except Exception:   # без Pillow просто нет карточек
 _HERE = os.path.dirname(os.path.abspath(__file__))
 DIRS = [os.environ.get("NOTIF_DIR", ""), "/var/www/nepridymal", os.path.join(_HERE, "..", "web")]
 BASE = next((d for d in DIRS if d and os.path.isfile(os.path.join(d, "notif", "stars.png"))), None)
+BRAND = os.environ.get("BRAND", "").strip().upper()[:22]   # надпись в углу карточки: своё название игры
 _CACHE = OrderedDict()
 _FONTS = {}
 
@@ -100,7 +101,7 @@ def render(kind, title, value, star):
     d = ImageDraw.Draw(im)
     x0 = 76
     # бренд
-    d.text((x0, 58), "GIFT CASES", font=_font("DelaGothicOne-Regular.ttf", 34), fill=(255, 214, 102))
+    d.text((x0, 58), BRAND or "GIFT CASES", font=_font("DelaGothicOne-Regular.ttf", 34), fill=(255, 214, 102))
     # заголовок
     ft = _font("Manrope.ttf", 50, "ExtraBold")
     d.text((x0, 190), title.upper(), font=ft, fill=(236, 226, 255))
@@ -150,6 +151,17 @@ def render(kind, title, value, star):
     if len(_CACHE) > 300:
         _CACHE.popitem(last=False)
     return data
+
+
+def make(kind, title, value, star=False):
+    """Карточка с заданными заголовком и значением (пуши по событиям, приветствие бота)."""
+    if not BASE or Image is None or not os.path.isfile(os.path.join(BASE, "notif", f"{kind}.png")):
+        return None
+    try:
+        return render(kind, title, str(value)[:28], bool(star))
+    except Exception as e:
+        print("notifimg:", e, flush=True)
+        return None
 
 
 def card(text):
