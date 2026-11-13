@@ -143,7 +143,8 @@ html .btn.gold,html .btn.cta:not(.green):not(.red):not(.ghost):not(.wait),html .
 .gcell{border:0!important;box-shadow:none!important}
 .gcell .chance{border-radius:999px!important}
 .album-bar,.inv-album,[data-act=album]{border:0!important;box-shadow:none!important}
-html .ghub .gcard .gfav{top:8px!important;right:8px!important;bottom:auto!important}
+/* сердечко «в избранное» — всегда в правом верхнем углу плитки (старое правило ставило его на середину высоты) */
+html .ghub .gcard .gfav,html .ghub .gcard.gl .gfav{inset:8px 8px auto auto!important;translate:none!important;transform:none!important}
 /* окно пропуска: обложки дорожек — квадратные картинки со своим фоном */
 .pp-tier img,.pp-t-art img,.pp-hero img{border-radius:18px}
 /* скрытые карточки остаются скрытыми (вкладки витрины, отложенная отрисовка) */
