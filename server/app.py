@@ -84,6 +84,13 @@ def gifts_real():
     return bool(r and r.enabled())
 
 
+def real_cases():
+    """Какие кейсы открываются с настоящими призами (realgifts.py)."""
+    import sys
+    r = sys.modules.get("realgifts")
+    return r.IDS if r and r.enabled() else ()
+
+
 def disclaimer():
     """Что в игре настоящее, а что нет. Про покупку за Telegram Stars — только пока включена продажа (админка → «Продажи»),
     про скины — только пока работает вывод в Steam, про настоящие подарки — пока включены их кейсы."""
@@ -1010,7 +1017,12 @@ def cases(uid=Depends(auth)):
     keys = {r["cid"]: r["n"] for r in q("SELECT cid, n FROM case_keys WHERE user=? AND n>0", uid)}
     out = []
     tier = __import__("pwr").tier_of(q1("SELECT * FROM users WHERE id=?", uid))   # шансы кейсов SKINBOX зависят от пропуска
+    import sys
+    real = real_cases()
+    hide = getattr(sys.modules.get("realgifts"), "HIDE", ()) if real else ()
     for c in E.CASES.values():
+        if c["id"] in hide:
+            continue
         odds = E.pwr_odds(c["id"], tier) if c["id"] in E.PWR_CASES else c["odds"]
         top = max(odds, key=lambda x: E.base(x))
         items = []
@@ -1018,7 +1030,7 @@ def cases(uid=Depends(auth)):
             items.append({"col": k, "p": round(v * 100, 3 if v >= 0.00001 else 8), "base": E.base(k), "ev": round(c["evs"][k]), **look_of(k, "shop")})
         items.sort(key=lambda x: -x["ev"])
         out.append({"id": c["id"], "title": E.case_title(c["id"], uid), "price": case_price(c), "full": c["price"], "keys": keys.get(c["id"], 0),
-                    "level": c["level"], "cover": E.case_cover(c["id"], uid), **_case_limit(c["id"]),
+                    "level": c["level"], "cover": E.case_cover(c["id"], uid), **_case_limit(c["id"]), "real": c["id"] in real,
                     "group": E.CASE_GROUP.get(c["id"], "tg"), "k": E.case_colors(c["id"]), "floor": bool(c["floor"]), "src": c.get("src"),
                     **({"gifts": _ru_gifts(c["id"]), "freeIn": max(0, (_ru_free_at(uid) + E.RU_FREE_EVERY) - now()) if not c["price"] else 0, "freeEvery": E.RU_FREE_EVERY} if c["id"] in E.RU_CASES else {}),
                     "top": top, "pat": look_of(E.case_cover(c["id"], uid), c["id"])["symbol"],
@@ -1029,6 +1041,8 @@ def cases(uid=Depends(auth)):
 @app.post(R + "/case/{cid}/open")
 def open_case(cid: str, n: int = 1, uid=Depends(auth)):
     c = E.CASES.get(cid) or err("нет такого кейса")
+    if cid in real_cases():   # кейсы подарков открываются в realgifts.py: внутри настоящие призы
+        err("Кейс обновился — перезапусти игру")
     n = 1 if cid == "free" or not c["price"] else max(1, min(10, n))
     t = now()
     with tx():

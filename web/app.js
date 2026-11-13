@@ -417,7 +417,7 @@ async function renderCases() {
     <div class="promo">
       <button data-act="case" data-id="free" class="${ME.freeIn ? "" : "ready"}"><span class="pic g">${ic("gift")}</span><div><b>Бесплатный</b><span id="free-t">${ME.freeIn ? "через " + clock(ME.freeIn) : "можно открыть!"}</span></div></button>
       <button data-act="daily" class="${ME.dailyIn ? "" : "ready"}"><span class="pic y">${ic("calendar")}</span><div><b>Бонус дня</b><span>${ME.dailyIn ? "через " + clock(ME.dailyIn) : "забери звёзды"}</span></div></button>
-      <button data-act="rg-open"><span class="pic b">${ic("gift")}</span><div><b>Настоящие</b><span>подарки Telegram</span></div></button>
+      <button data-act="rg-open"><span class="pic b">${ic("gift")}</span><div><b>Мои подарки</b><span>вывод и продажа</span></div></button>
     </div>
     <div class="sec-t">Кейсы</div>
     <div class="cases">${CASES.filter(c => c.id !== "free").sort((a, b) => a.price - b.price).map((c, ci) => {
