@@ -309,13 +309,25 @@ async function crashBtn() {
   }
 }
 
+// Подарки из кейсов (настоящие, выводятся в Telegram) — отдельный вид подарков: в старых играх на подарках (обменник, крафт,
+// джекпот, столы, сейф, маркет игроков) ставятся только скины и коллекционные. Чтобы окно выбора не выглядело пустым,
+// показываем подарки из кейсов тут же: в апгрейде нажатие открывает их апгрейд, в остальных — карточку подарка.
+function pickRealHTML(upg, hasFree) {
+  const real = (MYP && MYP.real) || [];
+  if (!real.length) return "";
+  return `<div class="sec-t" style="margin-top:0">Подарки из кейсов</div>
+    ${upg ? "" : `<p class="hint" style="margin:-4px 0 10px;font-size:12.5px">В этой игре участвуют скины и коллекционные подарки. Подарок из кейса можно вывести, продать или апгрейдить — нажми на него.</p>`}
+    <div class="rg-grid" style="margin-bottom:14px">${real.map(x => `<button class="rg-cell k-${x.kind}" data-act="${upg ? "rg-upg" : "rg-item"}" data-id="${x.id}">${rgArt(x)}<b>${esc(x.title)}</b><small>⭐ ${short(x.value)}</small></button>`).join("")}</div>
+    ${hasFree ? `<div class="sec-t">Скины и коллекции</div>` : ""}`;
+}
 // выбор своего подарка (апгрейд, обменник, маркет)
 async function pickGift(title, cb) {
   MYP = await api("user/" + ME.id);
   const free = MYP.gifts.filter(g => g.price == null).sort((a, b) => b.value - a.value);
-  openSheet(`<h2 class="gtitle">${title}</h2>${free.length
+  const realHTML = pickRealHTML(false, free.length > 0);
+  openSheet(`<h2 class="gtitle">${title}</h2>${realHTML}${free.length
     ? `<div class="ggrid">${free.map(g => `<div class="gcell" data-act="pick-gift" data-k="${reg({ g, cb })}">${giftHTML(g, { lite: true })}<div class="cap">${giftName(g)}<br><small>⭐ ${fmt(g.value)}</small></div></div>`).join("")}</div>`
-    : emptyHTML("gift", "Нет свободных подарков — открой кейс")}`);
+    : realHTML ? "" : emptyHTML("gift", "Нет свободных подарков — открой кейс")}`, "pgs1");
 }
 
 // мультивыбор своих подарков (апгрейд пачкой, подарочные столы)
@@ -323,10 +335,7 @@ async function pickGifts(title, o, cb) {
   MYP = await api("user/" + ME.id);
   const free = MYP.gifts.filter(x => x.price == null).sort((a, b) => b.value - a.value);
   const sel = new Set((o.pre || []).map(x => x.id).filter(id => free.some(f => f.id === id)));
-  // подарки из кейсов (настоящие) апгрейдятся своим экраном: показываем их тут же, нажатие сразу открывает их апгрейд
-  const real = o.real ? (MYP.real || []) : [];
-  const realHTML = real.length ? `<div class="sec-t" style="margin-top:0">Подарки из кейсов</div><div class="rg-grid" style="margin-bottom:14px">${real.map(x =>
-    `<button class="rg-cell k-${x.kind}" data-act="rg-upg" data-id="${x.id}">${rgArt(x)}<b>${esc(x.title)}</b><small>⭐ ${short(x.value)}</small></button>`).join("")}</div>${free.length ? `<div class="sec-t">Скины и коллекции</div>` : ""}` : "";
+  const realHTML = pickRealHTML(!!o.real, free.length > 0), real = realHTML ? [1] : [];
   const el = openSheet(`<h2 class="gtitle">${title}</h2>${realHTML}${o.min ? `<div class="hint" style="margin:-6px 0 10px;font-size:13px">Нужно подарков минимум на ⭐ ${fmt(o.min)}</div>` : ""}
     ${free.length ? `<div class="ggrid" id="pg-grid">${free.map(x => `<div class="gcell" data-pg="${x.id}">${giftHTML(x, { lite: true, tag: "⭐ " + short(x.value) })}<span class="sel"></span><div class="cap">${giftName(x)}</div></div>`).join("")}</div>
       <div class="pgbar"><div><b id="pg-n"></b><span id="pg-v"></span></div><button class="btn sm ghost" data-act="pg-all">Все</button><button class="btn sm" data-act="pg-ok">Готово</button></div>`
