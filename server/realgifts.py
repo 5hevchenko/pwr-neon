@@ -60,6 +60,8 @@ FILL = conf("realgifts.fill", [[0.1, 47.0], [0.3, 29.0], [0.6, 14.0], [1.2, 8.0]
 FREE_EV = conf("realgifts.free_ev", 300)                # средний приз бесплатного кейса, ⭐
 HIDE = set(conf("realgifts.hide", ["csgo", "csgo2", "brawl", "mc"]))   # игровые кейсы без настоящих призов — убраны с витрины
 FEE = T.FEE                                             # комиссия площадки, закладывается в цену коллекционного подарка
+FREE_GIFTS = conf("realgifts.free_gifts", True)         # в бесплатном кейсе только подарки, без звёзд: средний приз = самый дешёвый подарок × free_over
+FREE_OVER = conf("realgifts.free_over", 1.08)
 MIN_REAL = 3                                            # меньше настоящих призов — кейс на паузе
 TG_API = os.environ.get("TG_API_URL", "https://api.telegram.org")   # TG_API_URL, TON_RATE_URL, PORTALS_URL — только для тестов
 TON_URLS = [u for u in [os.environ.get("TON_RATE_URL", "")] if u] or [
@@ -407,6 +409,9 @@ def _build(c):
         return dict(base, why="нет цен подарков")
     nominal = price or FREE_EV / RTP               # от чего считаются призы звёздами
     target = RTP * nominal
+    if not price and FREE_GIFTS:                    # бесплатный кейс без звёзд: почти всегда самый дешёвый подарок, изредка дороже
+        target = items[0]["value"] * FREE_OVER
+        nominal = target / RTP
     if target >= items[0]["value"]:                 # только подарки
         full = items                                # дешёвые призы убираем, но самый дешёвый из оставшихся всегда дешевле среднего приза —
                                                     # иначе кейс возвращал бы больше своей цены
