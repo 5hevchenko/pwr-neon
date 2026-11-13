@@ -90,7 +90,7 @@ function fillFut(v) {
       <div class="fx-levs">${FX.levs.map(l => `<button data-act="fx-lev" data-v="${l}" class="${l === fxLev ? "on" : ""}${l >= 25 ? " hot" : ""}">x${l}</button>`).join("")}</div>
       <div class="fx-lbl">Маржа</div>
       <div class="ca-in fx-in"><span>⭐</span><input id="fx-m" inputmode="decimal" value="${starOut(fxMargin)}"><small id="fx-sz"></small></div>
-      <div class="quick">${[100, 500, 1000, 5000].map(n => `<button data-act="fx-m" data-v="${n}">${short(n)}</button>`).join("")}<button data-act="fx-m" data-v="max">MAX</button></div>
+      <div class="quick">${[100, 500, 1000, 5000].map(n => `<button data-act="fx-m" data-v="${n}">${shortStar(n)}</button>`).join("")}<button data-act="fx-m" data-v="max">MAX</button></div>
       <div class="fx-info" id="fx-info"></div>
       <div class="fx-btns"><button class="btn fx-long" data-act="fx-open" data-v="long">${ic("up")}<span><b>Лонг</b><small>на рост</small></span></button>
         <button class="btn fx-short" data-act="fx-open" data-v="short">${ic("down")}<span><b>Шорт</b><small>на падение</small></span></button></div>

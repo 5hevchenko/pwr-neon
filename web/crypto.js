@@ -148,7 +148,7 @@ function caForm(el, soft) {
     if (!soft) cxAmt = Math.min(cxAmt, max) || Math.min(1000, max);
     const get = cxAmt * (1 - a.fee) / (a.price || 1);
     f.innerHTML = `<div class="ca-in"><span>⭐</span><input id="ca-amt" inputmode="decimal" value="${starOut(cxAmt)}"><small>≈ ${qtyFmt(get)} ${a.id}</small></div>
-      <div class="quick">${[100, 1000, 10000].map(v => `<button data-act="ca-amt" data-v="${v}">${short(v)}</button>`).join("")}<button data-act="ca-amt" data-v="max">MAX</button></div>
+      <div class="quick">${[100, 1000, 10000].map(v => `<button data-act="ca-amt" data-v="${v}">${shortStar(v)}</button>`).join("")}<button data-act="ca-amt" data-v="max">MAX</button></div>
       <button class="btn cta green ca-go" data-act="ca-buy" ${cxAmt < a.min ? "disabled" : ""}>Купить ${a.id} за ⭐ ${fmt(cxAmt)}</button>`;
     const inp = f.querySelector("#ca-amt");
     inp.oninput = () => { cxAmt = Math.max(0, starIn(inp.value)); const b = f.querySelector(".ca-go"); b.disabled = cxAmt < a.min; b.innerHTML = `Купить ${a.id} за ⭐ ${fmt(cxAmt)}`; f.querySelector(".ca-in small").textContent = `≈ ${qtyFmt(cxAmt * (1 - a.fee) / (a.price || 1))} ${a.id}`; };

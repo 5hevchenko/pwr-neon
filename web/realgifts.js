@@ -271,3 +271,6 @@ if (typeof i18nAdd === "function" && typeof LANG === "string" && LANG === "en") 
   "Залетай открывать кейсы с подарками Telegram": "Come open cases with Telegram gifts",
   "Вывод": "Withdraw", "Легенда": "Legend", "Эпик": "Epic", "подарки и скины": "gifts and skins",
 });
+
+// переключатель «звёзды / доллары» в окне баланса
+ACT.cur = el => { if ((el.dataset.v === "usd") === CUR_USD) return; H.sel(); setCur(el.dataset.v === "usd"); };

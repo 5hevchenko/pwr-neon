@@ -92,7 +92,7 @@ const betHTML = (id, val = 100, qs = [100, 500, 1000, 5000, "max"]) => `
   <div class="amt"><button data-act="gamt" data-for="${id}" data-v="half">½</button>
     <label class="amtf"><span>⭐</span><input id="${id}" inputmode="decimal" value="${starOut(val)}"></label>
     <button data-act="gamt" data-for="${id}" data-v="dbl">×2</button></div>
-  <div class="quick">${qs.map(x => `<button data-act="gamt" data-for="${id}" data-v="${x}">${x === "max" ? "MAX" : short(+x)}</button>`).join("")}</div>`;
+  <div class="quick">${qs.map(x => `<button data-act="gamt" data-for="${id}" data-v="${x}">${x === "max" ? "MAX" : shortStar(+x)}</button>`).join("")}</div>`;
 const betVal = id => starIn(document.getElementById(id).value);
 
 // ============================================================ КРАШ

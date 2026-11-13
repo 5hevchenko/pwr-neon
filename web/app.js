@@ -75,9 +75,20 @@ const starTxt = v => {
   let t = v.toFixed(a >= 10 ? 1 : a >= 0.1 || !a ? 2 : 3); if (t.includes(".")) t = t.replace(/0+$/, "").replace(/\.$/, "");
   return (t === "-0" ? "0" : t).replace(".", ",");
 };
-const fmt = n => starTxt((+n || 0) / STAR_K);
+// показ сумм в долларах вместо звёзд (переключатель в окне баланса): 1 ⭐ = STAR_USD; поля ввода всегда в звёздах
+const STAR_USD = 0.0125;
+let CUR_USD = (() => { try { return localStorage.getItem("np_cur") === "usd"; } catch (e) { return false; } })();
+if (CUR_USD) document.documentElement.classList.add("cur-usd");
+const usdTxt = v => { const a = Math.abs(v); return a >= 100 ? num(v) : (a >= 0.01 || !a ? v.toFixed(2) : v.toFixed(3)).replace(".", ","); };
+const fmt = n => CUR_USD ? usdTxt((+n || 0) / STAR_K * STAR_USD) : starTxt((+n || 0) / STAR_K);
+function setCur(usd) {   // весь интерфейс собран из готовых кусков с суммами — проще и надёжнее перечитать игру целиком
+  try { localStorage.setItem("np_cur", usd ? "usd" : "star"); } catch (e) {}
+  location.reload();
+}
+// сумма всегда в звёздах, как бы ни был настроен показ: подписи кнопок рядом с полем ввода
+const shortStar = n => { const was = CUR_USD; CUR_USD = false; try { return short(n); } finally { CUR_USD = was; } };
 // 12 345 ⭐ → «12,3K», 2 500 000 ⭐ → «2,5M»
-const short = n => { const v = (+n || 0) / STAR_K, a = Math.abs(v), f = (x, d) => x.toFixed(d).replace(/\.0$/, "").replace(".", ","); return a >= 1e6 ? f(v / 1e6, a >= 1e7 ? 0 : 1) + "M" : a >= 1e4 ? f(v / 1e3, a >= 1e5 ? 0 : 1) + "K" : starTxt(v); };
+const short = n => { const v = (+n || 0) / STAR_K * (CUR_USD ? STAR_USD : 1), a = Math.abs(v), f = (x, d) => x.toFixed(d).replace(/\.0$/, "").replace(".", ","); return a >= 1e6 ? f(v / 1e6, a >= 1e7 ? 0 : 1) + "M" : a >= 1e4 ? f(v / 1e3, a >= 1e5 ? 0 : 1) + "K" : CUR_USD ? usdTxt(v) : starTxt(v); };
 // поле ввода суммы: «12,5» → 12500 единиц; обратно — число без пробелов
 const starIn = t => Math.round((parseFloat(String(t ?? "").replace(/[\s\u00a0]/g, "").replace(",", ".")) || 0) * STAR_K);
 const starOut = n => String(+((+n || 0) / STAR_K).toFixed(3)).replace(".", ",");
@@ -574,6 +585,7 @@ function openDaily(tab) {
   const el = openSheet(`<div class="st-hero">
       <div class="st-hero-ic">${STAR_SVG}<i></i></div>
       <h2>Звёзды</h2>
+      <div class="seg sm cur-seg"><button data-act="cur" data-v="star" class="${CUR_USD ? "" : "on"}">В звёздах</button><button data-act="cur" data-v="usd" class="${CUR_USD ? "on" : ""}">В долларах</button></div>
       <div class="seg st-tabs"><button data-act="st-tab" data-v="shop">${ic("tgplane")}Пополнить</button>
         <button data-act="st-tab" data-v="daily">${ic("calendar")}Бонус дня${ME.dailyIn ? "" : `<i class="st-dot"></i>`}</button></div>
     </div>

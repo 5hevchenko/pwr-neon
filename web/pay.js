@@ -192,7 +192,7 @@ async function openPaySend(id, amt = 0, addr = "") {
     <div class="pay-amt"><label>Сумма перевода</label>
       <div class="pay-ai"><span class="pay-st">⭐</span><input class="pay-a" inputmode="decimal" placeholder="0" value="${amt ? starOut(amt) : ""}" autocomplete="off" maxlength="15"></div>
       <div class="pay-ab">Баланс: <b class="bal-live">${fmt(ME.stars)}</b> ⭐</div></div>
-    <div class="pay-chips">${[100, 1000, 10000, 100000].map(v => `<button data-act="pay-chip" data-v="${v}">+${short(v)}</button>`).join("")}<button data-act="pay-chip" data-v="all">Всё</button></div>
+    <div class="pay-chips">${[100, 1000, 10000, 100000].map(v => `<button data-act="pay-chip" data-v="${v}">+${shortStar(v)}</button>`).join("")}<button data-act="pay-chip" data-v="all">Всё</button></div>
     <div class="pay-sum"></div>
     <input class="pay-memo" maxlength="60" placeholder="Комментарий (необязательно)" autocomplete="off">
     <button class="btn gold pay-go" data-act="pay-go">${ic("send")}Перевести</button>`, "pay-x");

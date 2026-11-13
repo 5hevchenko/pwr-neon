@@ -132,3 +132,12 @@ button.rg-cell{border:0;color:var(--tx);font-family:var(--body)}
 .hs-box b{font-family:var(--disp);font-size:17px;font-weight:600}
 .hs-box p{margin:0;font-size:13.5px;line-height:1.45;color:var(--mu)}
 .shop-note.hs-rule{margin-top:8px}
+
+/* показ в долларах: значок звезды у сумм заменяется на $; в полях ввода остаётся звезда — вводят всегда звёзды */
+html.cur-usd .xtr svg{display:none}
+html.cur-usd .xtr{width:auto;height:auto;margin:0 .04em 0 0;vertical-align:baseline}
+html.cur-usd .xtr::before{content:"$";font-weight:inherit}
+html.cur-usd :is(.amtf,.ca-in,.pay-ai,.pay-st,.lim-own,.cur-keep) .xtr svg{display:block}
+html.cur-usd :is(.amtf,.ca-in,.pay-ai,.pay-st,.lim-own,.cur-keep) .xtr{width:1.1em;height:1.1em;vertical-align:-.2em;margin:0 .06em}
+html.cur-usd :is(.amtf,.ca-in,.pay-ai,.pay-st,.lim-own,.cur-keep) .xtr::before{content:none}
+.cur-seg{margin:8px auto 4px;max-width:260px}

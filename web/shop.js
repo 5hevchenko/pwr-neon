@@ -24,12 +24,12 @@ async function shopFill() {
       <div class="shop-list">${SHOP.packs.map((p, i) => `<button class="pk${i === last ? " best" : ""}${p.bonus ? " hot" : ""}" data-act="buy-pack" data-x="${p.xtr}" style="--lv:${i}">
           ${i === last ? `<i class="pk-tag best">Лучший курс</i>` : p.bonus ? `<i class="pk-tag">+${p.bonus}%</i>` : ""}
           <span class="pk-art">${STAR_SVG}${i >= 2 ? STAR_SVG : ""}${i >= 4 ? STAR_SVG : ""}</span>
-          <span class="pk-v"><b>${short(p.stars)}</b><small>игровых ⭐</small>${p.stars > p.base ? `<s>${short(p.base)}</s>` : ""}</span>
+          <span class="pk-v"><b>${short(p.stars)}</b><small>⭐ в игре</small>${p.stars > p.base ? `<s>${short(p.base)}</s>` : ""}</span>
           ${tgPrice(p.xtr)}</button>`).join("")}</div>
       <div class="shop-cust">
         <div class="shop-cust-h">Своя сумма</div>
         <div class="shop-c"><span class="tgi">${ic("tgplane")}</span><input id="shop-x" inputmode="numeric" placeholder="От 1 до ${num(SHOP.max)} Telegram Stars"></div>
-        <div class="shop-cv" id="shop-cv">Введи количество — покажем, сколько игровых ⭐ получишь</div>
+        <div class="shop-cv" id="shop-cv">Введи количество — покажем, сколько ⭐ получишь</div>
         <button class="btn shop-buy" data-act="buy-custom" id="shop-cb" disabled>${ic("tgplane")}Оплатить</button>
       </div>
       <div class="shop-note">${ic("lock")}<span>Оплата проходит в Telegram, цены — в Telegram Stars. Сами ⭐ не выводятся: на них открывают кейсы и играют.</span></div></div>`;
@@ -37,7 +37,7 @@ async function shopFill() {
   const inp = box.querySelector("#shop-x"), cv = box.querySelector("#shop-cv"), cb = box.querySelector("#shop-cb");
   inp.oninput = () => {
     const x = Math.floor(+inp.value || 0), ok = x >= 1 && x <= SHOP.max, b = shopBonus(x);
-    cv.innerHTML = ok ? `Получишь <b>${fmt(shopStars(x))} ⭐</b>${b ? ` (+${b}% бонус)` : ""}${SHOP.first ? " · ×2 первая покупка" : ""}` : x ? `От 1 до ${num(SHOP.max)} Telegram Stars` : "Введи количество — покажем, сколько игровых ⭐ получишь";
+    cv.innerHTML = ok ? `Получишь <b>${fmt(shopStars(x))} ⭐</b>${b ? ` (+${b}% бонус)` : ""}${SHOP.first ? " · ×2 первая покупка" : ""}` : x ? `От 1 до ${num(SHOP.max)} Telegram Stars` : "Введи количество — покажем, сколько ⭐ получишь";
     cb.disabled = !ok; cb.innerHTML = `${ic("tgplane")}${ok ? `Оплатить ${num(x)}` : "Оплатить"}`;
     starify(cv);
   };
@@ -113,7 +113,7 @@ async function openGiftStars(to) {
   if (!fr.friends.length) return toast("Сначала добавь друзей — дарить можно только им");
   GF_TO = fr.friends.some(f => f.id === to) ? to : null;
   const el = openSheet(`<div class="qb-h"><span class="shop-ic gf-ic">${ic("giftbox")}</span><h2>Звёзды в подарок</h2>
-      <p>Платишь ты в Telegram Stars — игровые ⭐ сразу уходят другу</p><small class="qb-cur">${ic("tgplane")}цены в Telegram Stars</small></div>
+      <p>Платишь ты в Telegram Stars — ⭐ сразу уходят другу</p><small class="qb-cur">${ic("tgplane")}цены в Telegram Stars</small></div>
     <div class="gf-step">1. Кому</div>
     <div class="gf-fr">${fr.friends.map(f => `<button class="gf-f${f.id === GF_TO ? " on" : ""}" data-act="gf-pick" data-id="${f.id}">${avaHTML(f, 44)}<span>${esc(f.name)}</span></button>`).join("")}</div>
     <div class="gf-step">2. Сколько</div>
