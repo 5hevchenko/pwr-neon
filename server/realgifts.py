@@ -516,6 +516,11 @@ def _item(r):
     return d
 
 
+def public_bag(uid):
+    """Подарки из кейсов, которые лежат у игрока в сумке, — для его профиля (дорогие первыми)."""
+    return [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status='bag' ORDER BY value DESC, id DESC LIMIT 60", uid)]
+
+
 def _pub(x):
     return {"key": x["key"], "kind": x["kind"], "ref": x["ref"], "title": x["title"], "value": x["value"], "emoji": x["emoji"], "img": x["img"]}
 

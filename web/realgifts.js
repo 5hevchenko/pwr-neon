@@ -177,7 +177,8 @@ renderInventory = async function () {
 };
 ACT["rg-kind"] = el => { INVK = el.dataset.v; H.sel(); drawInventory(); };
 // карточка подарка из кейса: вывести в Telegram или продать — как у скина CS
-ACT["rg-item"] = el => {
+ACT["rg-item"] = async el => {
+  if (!RG) { try { await rgLoad(); } catch (e) { return; } }   // из профиля сюда можно попасть раньше, чем открыт экран кейсов
   const x = RG && RG.bag.find(i => i.id === +el.dataset.id); if (!x) return;
   H.imp("light");
   const busy = x.status !== "bag", usd = rgCost(x), can = RG.left + 1e-9 >= usd;

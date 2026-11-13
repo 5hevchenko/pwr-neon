@@ -232,9 +232,13 @@ function profileHTML(p, tab = "show") {
   const byValue = [...p.gifts].sort((a, b) => b.value - a.value);
   const show = p.pinned.length ? p.pinned : byValue.slice(0, 3);
   const cell = (g, o = {}) => `<div class="gcell" data-act="gift" data-k="${reg({ g, mine: isMe, owner: p })}">${giftHTML(g, o)}${g.price != null ? `<span class="onm">${ic("tag")}${short(g.price)}</span>` : ""}<div class="cap">${giftName(g)}</div></div>`;
+  // подарки из кейсов (настоящие) лежат отдельно от скинов и коллекций — в профиле показываем и те, и другие
+  const real = p.real || [], rcell = x => `<${isMe ? `button data-act="rg-item" data-id="${x.id}"` : "div"} class="rg-cell k-${x.kind}">${rgArt(x)}<b>${esc(x.title)}</b><small>⭐ ${short(x.value)}</small></${isMe ? "button" : "div"}>`;
   let body;
   if (tab === "legacy") body = lgBody(p);
-  else if (tab === "gifts") body = p.gifts.length ? `<div class="ggrid">${byValue.map(g => cell(g, { lite: true })).join("")}</div>` : emptyHTML("gift", isMe ? "Открой первый кейс!" : "Подарков пока нет");
+  else if (tab === "gifts") body = (real.length ? `<div class="rg-grid">${real.map(rcell).join("")}</div>` : "")
+    + (p.gifts.length ? `${real.length ? `<div class="sec-t">Скины и коллекции</div>` : ""}<div class="ggrid">${byValue.map(g => cell(g, { lite: true })).join("")}</div>` : "")
+    || emptyHTML("gift", isMe ? "Открой первый кейс!" : "Подарков пока нет");
   else if (tab === "ach") body = `<div class="achs">${p.ach.map(a => `<div class="ach${a.got ? " got" : ""}"><span class="ai">${ic(ACH_IC[a.t] || "award")}</span><b>${esc(a.t)}</b><span>${esc(a.d)}</span>${achPct(a)}${a.got ? `<i>${ic("check")}</i>` : ""}</div>`).join("")}</div>`;
   else if (tab === "stats") {
     const list = Object.entries(st.games).sort((a, b) => b[1] - a[1]), max = list.length ? list[0][1] : 1, net = st.won - st.lost;
@@ -253,6 +257,7 @@ function profileHTML(p, tab = "show") {
       }).join("")}</div>` : emptyHTML("games", "Ещё не играл")}`;
   } else body = show.length ? `<div class="showcase">${show.map((g, i) => `<div class="sc${i === 0 ? " main" : ""}" data-act="gift" data-k="${reg({ g, mine: isMe, owner: p })}">${giftHTML(g)}<div class="cap">${giftName(g)}<span>⭐ ${short(g.value)}</span></div></div>`).join("")}</div>
       ${!p.pinned.length && isMe ? `<button class="btn ghost" style="margin-top:12px" data-act="edit-profile">${ic("pin")}Выбрать подарки для витрины</button>` : ""}`
+    : real.length ? `<div class="rg-grid">${real.slice(0, 3).map(rcell).join("")}</div>`
     : emptyHTML("gift", isMe ? "Открой первый кейс — тут будет витрина" : "Витрина пуста");
   // шапка профиля в духе X / Telegram / Discord: обложка во всю ширину; аватар слева наполовину на обложке (в «вырезе» цвета фона);
   // справа от аватара на обложке — теги; ниже слева имя, @ник, описание и цифры строкой. Свои классы pf-* — старые .phead-правила не влияют.
@@ -270,7 +275,7 @@ function profileHTML(p, tab = "show") {
     ${p.bio ? `<div class="pf-bio">${esc(p.bio)}</div>` : ""}
     <div class="pf-stats">
       <span><b>⭐ ${short(p.worth)}</b> состояние</span>
-      <span><b>${num(p.gifts.length)}</b> ${plural(p.gifts.length, ["подарок", "подарка", "подарков"])}</span>
+      <span><b>${num(p.gifts.length + (p.real || []).length)}</b> ${plural(p.gifts.length + (p.real || []).length, ["подарок", "подарка", "подарков"])}</span>
       <span><b>${num(p.cols)}</b> ${plural(p.cols, ["коллекция", "коллекции", "коллекций"])}</span>
       <span ${isMe ? 'data-act="friends"' : ""}><b>${num(p.friends)}</b> ${plural(p.friends, ["друг", "друга", "друзей"])}</span>
     </div>

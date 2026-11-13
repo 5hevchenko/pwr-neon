@@ -201,3 +201,5 @@ html .ghub .gcard .gl-dayb{top:12px;left:12px;height:24px;padding:0 11px;font-si
 @media (min-width:560px){html .ghub{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 /* вертикальный арт игры в маленьких значках (шапка игры, «Недавние») — без искажений, по верхней части картинки */
 .ghead img[src*="gen/"],.grecent img[src*="gen/"]{object-fit:cover!important;object-position:50% 28%!important;border-radius:26%;filter:none!important}
+/* профиль: три кнопки в ряд («Изменить», «Оформление», «Позвать») — текст помещается на узких экранах */
+html .pacts .btn{font-size:12.5px!important;letter-spacing:0!important;padding-left:4px!important;padding-right:4px!important;min-width:0;white-space:nowrap}

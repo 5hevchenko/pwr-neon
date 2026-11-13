@@ -1260,6 +1260,7 @@ def profile(tid: int, uid=Depends(auth)):
             "avatarImg": u["avatar"] if "avatar" in u.keys() else "", "tgPhoto": u["photo"] or "",
             "stats": {"games": games, "won": won, "lost": lost, "best": best, "rounds": sum(games.values())}, **user_brief(u), "lv": level_info(u["xp"]), "bio": u["bio"], "banner": u["banner"],
             "pinned": pinned, "gifts": gifts, "worth": worth, "opened": u["opened"],
+            "real": __import__("sys").modules["realgifts"].public_bag(tid) if "realgifts" in __import__("sys").modules else [],   # подарки из кейсов (настоящие)
             "badges": json.loads(u["p_badges"] or "[]") if "p_badges" in u.keys() else [], "cover": u["p_cover"] if "p_cover" in u.keys() else 0,
             "bestCrash": u["best_crash"], "friends": fr, "refs": u["refs"], "since": u["created"],
             "seen": u["seen"] or 0, "now": now(),   # последний онлайн (seen обновляется при входе, не чаще раза в минуту)
