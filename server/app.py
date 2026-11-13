@@ -1021,7 +1021,7 @@ def cases(uid=Depends(auth)):
     rg = sys.modules.get("realgifts")
     hide = rg.HIDE if real else ()
     for c in E.CASES.values():
-        if c["id"] in hide:
+        if c["id"] in hide or (rg and rg.hidden(c["id"])):
             continue
         odds = E.pwr_odds(c["id"], tier) if c["id"] in E.PWR_CASES else c["odds"]
         top = max(odds, key=lambda x: E.base(x))

@@ -342,9 +342,11 @@ def _build(c):
         while len(items) > MIN_REAL and _ev(items, 0.5) < target:   # дорогому кейсу дешёвые призы не нужны
             items = items[1:]
         if _ev(items, 0.0) < target:                # призы не тянут такую цену — снижаем её
-            have = sum(1 for x in full if x["kind"] == "nft")
-            if have < 0.8 * len(c["gifts"]):        # цены есть не у всего состава (старт, сбой площадки): цену не трогаем, ждём
-                return dict(base, why="не хватает цен подарков")
+            known = sum(1 for n in c["gifts"] if n in _NFT and _fresh(_NFT[n]["ts"]))
+            if not nft_ready() or known < 0.8 * len(c["gifts"]):   # цены есть не у всего состава (старт, сбой площадки): цену не трогаем, ждём
+                return dict(base, why="нет цен подарков")
+            if sum(1 for x in full if x["kind"] == "nft") < 3:      # почти весь состав дороже max_usd — такой кейс нечем обеспечить
+                return dict(base, why="не хватает дорогих призов", hide=True)
             keep = min(5, len(full))                    # сколько призов оставляем самое меньшее: самые дорогие из состава
             price = _nice(max(_ev(full[i:], 0.5) for i in range(len(full) - keep + 1)) / RTP)
             target = RTP * price
@@ -379,6 +381,11 @@ def _build(c):
     return dict(base, paused=False, items=items, w=w, ev=ev, nominal=nominal,
                 gift=sum(x["p"] for x in items if x["kind"] != "star"), nft=any(x["kind"] == "nft" for x in items),
                 top=max(items, key=lambda x: x["value"]))
+
+
+def hidden(cid):
+    """Кейс убран с витрины: его призы дороже того, что игра может выдать (max_usd)."""
+    return bool(_BUILT.get(cid, {}).get("hide"))
 
 
 def _rebuild():
