@@ -24,11 +24,7 @@ renderCases = async function () {
     const pr = el.querySelector(".pr");
     if (pr && c.full > c.price && !pr.querySelector("s")) { pr.insertAdjacentHTML("afterbegin", `<s>${short(c.full)}</s>`); el.classList.add("sale"); }
     if (NEW_CASES.has(c.id) && Date.now() < NEW_UNTIL && !el.querySelector(".newtag")) el.insertAdjacentHTML("beforeend", `<span class="newtag">NEW</span>`);
-    if ((c.id.endsWith("hunt") || c.id === "coin") && !el.querySelector(".hunttag")) {   // кейсы-охоты: шанс на топ-подарок прямо на карточке
-      const top = c.items.find(x => x.col === c.cover);
-      el.classList.add("hunt");
-      if (top) el.insertAdjacentHTML("beforeend", `<span class="hunttag">${ic("target")}${top.p < .1 ? "1 к " + num(Math.round(100 / top.p)) : String(top.p).replace(".", ",") + "%"}</span>`);
-    }
+    // плашку с шансом и обводку у кейсов-«охот» убрали: шансы игрокам не показываем
     if (c.keys && !el.querySelector(".keytag")) el.insertAdjacentHTML("beforeend", `<span class="keytag">${ic("lock")}${c.keys}</span>`);
   });
 };

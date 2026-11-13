@@ -21,7 +21,7 @@ function premHTML() {
       <button class="btn gold" data-act="prem-buy" data-k="offer">Купить за ${tgPrice(o.xtr)}</button></div>`}
     <div class="pr-chest"><div class="pr-c-top"><div class="pr-c-ic"><img src="${A.orig("Plush Pepe", 128)}" alt=""></div><div class="grow"><b>Звёздный сундук</b>
       <span>Только за Telegram Stars. Подарок из топ-коллекций с редкой моделью — в среднем ⭐ ${short(c.ev)}</span></div></div>
-      <div class="pr-c-cols">${c.cols.map(x => `<div><img src="${A.orig(x.col, 64)}" alt=""><b>${Math.round(x.p * 100)}%</b><span>~${short(x.ev)}</span></div>`).join("")}</div>
+      <div class="pr-c-cols">${c.cols.map(x => `<div><img src="${A.orig(x.col, 64)}" alt=""><span>~${short(x.ev)}</span></div>`).join("")}</div>
       <button class="btn pr-c-btn" data-act="prem-buy" data-k="chest">Открыть за ${tgPrice(c.xtr)}</button></div>
     <div class="pr-vip${v.until ? " on" : ""}"><span class="pr-v-badge">VIP</span><div class="grow"><b>${v.until ? `VIP активен ещё ${vipLeft(v.until)}` : `VIP на ${v.days} дней`}</b>
       <span>Бонус дня ×2 · бесплатный кейс вдвое чаще · комиссия маркета −50% · золотая рамка и значок</span></div>
