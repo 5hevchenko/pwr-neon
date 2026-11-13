@@ -57,7 +57,7 @@ function applyCaseFilter() {
 
 // ------------------------------------------------------------ хаб игр по разделам
 const GAME_SECTIONS = [
-  ["Хиты", "flame", ["crash", "dogs", "slots", "jroul"]],
+  ["Хиты", "flame", ["crash", "arena", "dogs", "slots", "jroul"]],
   ["С друзьями", "users", ["duels", "101", "blackjack"]],
   ["Подарки", "gift", ["upgrade", "swap"]],
   ["Классика", "coins", ["rlt", "tower", "mines", "wheel", "dice", "limbo"]],

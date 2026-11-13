@@ -433,7 +433,7 @@ TAXABLE = {"crash", "mines", "wheel", "duel", "dice", "limbo", "plinko", "tower"
 
 BIGWIN_MIN = conf("economy.bigwin_min", 3000)   # выигрыш от этой суммы попадает в живую ленту крупных выигрышей (live.py)
 BIG_KINDS = {"carousel", "safe", "ladder", "bankbet", "forecast", "crash", "mines", "wheel", "duel", "dice", "limbo", "plinko", "tower", "slots", "blackjack", "dogs", "roulette", "hilo",
-             "chicken", "avia", "scratch", "battle", "starfall", "upgrade", "jroul", "cards", "craft", "claw", "pump", "drill", "darts", "fish", "keno", "penalty"}
+             "chicken", "avia", "scratch", "battle", "starfall", "upgrade", "jroul", "arena", "cards", "craft", "claw", "pump", "drill", "darts", "fish", "keno", "penalty"}
 db.executescript("""
 CREATE TABLE IF NOT EXISTS bigwins(id INTEGER PRIMARY KEY, user INTEGER, kind TEXT, amount INTEGER, ts INTEGER);
 """)
@@ -2707,7 +2707,7 @@ def week_start():
     return t - t % 86400 - time.gmtime(t).tm_wday * 86400
 
 
-GAME_KINDS = "('carousel','safe','ladder','bankbet','forecast','case','crash','upgrade','mines','wheel','duel','dice','limbo','plinko','tower','slots','blackjack','cards','dogs','roulette','jroul','hilo','craft','chicken','starfall','avia','battle','scratch','claw','pump','drill','darts','fish','keno','penalty')"
+GAME_KINDS = "('arena','carousel','safe','ladder','bankbet','forecast','case','crash','upgrade','mines','wheel','duel','dice','limbo','plinko','tower','slots','blackjack','cards','dogs','roulette','jroul','hilo','craft','chicken','starfall','avia','battle','scratch','claw','pump','drill','darts','fish','keno','penalty')"
 
 
 def pnl(uids, since=0):
@@ -2971,6 +2971,7 @@ import guess  # noqa: E402,F401 — «Угадай дроп» на тир-кей
 import realgifts  # noqa: E402,F401 — кейсы с настоящими подарками Telegram: продать игре или вывести на аккаунт
 import cryptopay  # noqa: E402,F401 — пополнение криптой через Crypto Pay (@CryptoBot)
 import csprices  # noqa: E402,F401 — живые цены скинов CS с площадки и пересчёт шансов кейсов под них
+import arena  # noqa: E402,F401 — «Арена»: общий раунд на звёзды, сектор по размеру ставки, мяч выбирает победителя
 import heist  # noqa: E402,F401 — «ограбление сейфа»: не заходишь неделю — сгорают звёзды, кроме купленных
 import pushes  # noqa: E402,F401 — пуши по событиям в игре (лимит в сутки, разные тексты, картинки)
 

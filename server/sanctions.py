@@ -28,7 +28,7 @@ FROZEN = {r[0] for r in db.execute("SELECT user FROM frozen")}
 BLOCK = [re.compile("^" + re.escape(R) + p + "$") for p in (
     r"/pay/send", r"/pay/qr/send", r"/gift/\d+/send", r"/gift/\d+/link", r"/gift/\d+/list", r"/market/\d+/buy",
     r"/trades", r"/trades/\d+/accept", r"/duels", r"/duels/\d+/accept", r"/cduel/\d+/accept", r"/rooms", r"/rooms/\d+/join",
-    r"/jroul/bet", r"/battles", r"/battles/\d+/join", r"/clans/donate", r"/clans/spend", r"/clans/tax")]
+    r"/jroul/bet", r"/arena/bet", r"/battles", r"/battles/\d+/join", r"/clans/donate", r"/clans/spend", r"/clans/tax")]
 FROZEN_MSG = "Кошелёк заморожен администрацией на время проверки: переводы, маркет, обмены и игры с другими игроками недоступны. Играть можно как обычно"
 COMP_MAX = 1_000_000   # больше за одну компенсацию — только владелец
 
@@ -193,6 +193,6 @@ def comp_meta(aid=Depends(admin)):
     import live
     ks = _kinds("any")
     return {"games": [[k, live.NAMES.get(k, {"case": "Кейсы", "upgrade": "Апгрейд", "battle": "Битва кейсов", "craft": "Крафт", "cards": "21 с друзьями",
-                                           "jroul": "Джекпот", "starfall": "Звездопад", "duel": "Дуэли"}.get(k, k))] for k in ks],
+                                           "jroul": "Джекпот", "arena": "Арена", "starfall": "Звездопад", "duel": "Дуэли"}.get(k, k))] for k in ks],
             "cases": [[cid, c["title"]] for cid, c in E.CASES.items()], "max": COMP_MAX, "owner": aid in OWNERS, "now": now(),
             "frozen": len(FROZEN)}

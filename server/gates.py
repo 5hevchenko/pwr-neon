@@ -15,7 +15,7 @@ STARTS = {   # id карточки в «Играх» → какие POST нач�
     "crash": [r"/crash/bet"], "duels": [r"/duels", r"/duels/\d+/accept", r"/cduel/\d+/accept"], "upgrade": [r"/upgrade"],
     "mines": [r"/mines/start"], "wheel": [r"/wheel"], "swap": [r"/swap"], "dogs": [r"/dogs", r"/dogs/buy"], "scratch": [r"/scratch"],
     "battle": [r"/battles", r"/battles/\d+/join", r"/battles/\d+/bot"], "avia": [r"/avia"], "chicken": [r"/chicken/start"],
-    "jroul": [r"/jroul/bet"], "rlt": [r"/rlt"], "tower": [r"/tower/start"], "slots": [r"/slots"], "dice": [r"/dice"], "limbo": [r"/limbo"],
+    "jroul": [r"/jroul/bet"], "arena": [r"/arena/bet"], "rlt": [r"/rlt"], "tower": [r"/tower/start"], "slots": [r"/slots"], "dice": [r"/dice"], "limbo": [r"/limbo"],
     "101": [r"/rooms", r"/rooms/\d+/join"], "blackjack": [r"/bj/start"], "starfall": [r"/starfall/bet"], "hilo": [r"/hilo/start"],
     "craft": [r"/craft"], "stack": [r"/stack/start"], "claw": [r"/claw/play"],
     "plinko": [r"/plinko"], "pump": [r"/pump/start"], "drill": [r"/drill/play"], "darts": [r"/darts/throw"], "fish": [r"/fish/cast"],

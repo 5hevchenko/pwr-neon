@@ -118,7 +118,7 @@ GAME_NAMES = {"crash": "Краш", "mines": "Мины", "wheel": "Колесо",
               "slots": "Слоты", "blackjack": "Блэкджек", "dogs": "Пёсики", "roulette": "Рулетка", "hilo": "Больше/меньше", "chicken": "Курица",
               "avia": "Самолётик", "battle": "Битва кейсов", "scratch": "Скретч", "claw": "Кран", "pump": "Насос", "drill": "Бур",
               "darts": "Дартс", "fish": "Рыбалка", "keno": "Кено", "penalty": "Пенальти", "case": "Кейсы", "upgrade": "Апгрейд",
-              "duel": "Дуэли", "jroul": "Джекпот-рулетка", "starfall": "Звездопад", "cards": "Карты", "forecast": "Прогнозы",
+              "duel": "Дуэли", "jroul": "Джекпот-рулетка", "arena": "Арена", "starfall": "Звездопад", "cards": "Карты", "forecast": "Прогнозы",
               "carousel": "Карусель", "safe": "Сейф", "ladder": "Лестница", "craft": "Крафт", "bankbet": "Ставка на банк"}
 
 

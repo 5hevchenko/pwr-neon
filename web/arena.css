@@ -1,0 +1,20 @@
+/* Арена: кольцо с секторами игроков и мяч */
+.ar-stage{position:relative;width:min(78vw,320px);aspect-ratio:1/1;margin:6px auto 10px}
+.ar-stage svg{width:100%;height:100%;display:block;overflow:visible}
+.ar-track{fill:none;stroke:rgba(255,255,255,.07);stroke-width:20}
+.ar-sec{fill:none;stroke-width:20;transition:stroke-dasharray .45s ease,stroke-dashoffset .45s ease,opacity .3s}
+.ar-sec.dim{opacity:.28}.ar-sec.win{filter:drop-shadow(0 0 6px currentColor);stroke-width:23}
+#ar-ball{transform-origin:100px 100px;transform-box:view-box;will-change:transform}
+.ar-b{fill:#fff;stroke:#0d0b1f;stroke-width:2;filter:drop-shadow(0 0 5px rgba(255,255,255,.9))}
+.ar-hub{position:absolute;inset:23%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;
+  background:radial-gradient(circle at 50% 35%,#231c4d,#0f0c24);box-shadow:inset 0 0 0 1px rgba(139,120,255,.25)}
+.ar-hub small{font-size:11.5px;color:var(--hint)}
+.ar-hub b{font-family:var(--disp);font-size:22px;font-weight:800;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ar-hub span{font-size:12.5px;color:var(--hint)}
+.ar-hist{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 12px;padding:0 16px;scrollbar-width:none}
+.ar-hist span{flex:none;display:flex;align-items:center;gap:5px;padding:4px 10px 4px 4px;border-radius:999px;background:var(--sf);font-size:12px}
+.ar-hist b{font-weight:700}
+.ar-row{align-items:center;gap:10px}.ar-row.win{background:color-mix(in srgb,#ffc53d 12%,transparent)}
+.ar-dot{flex:none;width:10px;height:10px;border-radius:50%}
+.ar-ch{font-family:var(--disp);font-size:15px}
+.ar-cb{width:100%;margin-top:8px}

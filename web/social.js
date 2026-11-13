@@ -207,7 +207,7 @@ async function refreshProfileSheets() {
 const GAME_NAMES = { case: ["box", "Кейсы"], crash: ["rocket", "Краш"], upgrade: ["trend", "Апгрейд"], mines: ["bomb", "Мины"], wheel: ["refresh", "Колесо"],
   duel: ["target", "Дуэли"], dice: ["box", "Кубик"], limbo: ["activity", "Лимбо"], plinko: ["grid", "Плинко"], tower: ["layers", "Башня"],
   slots: ["coins", "Слоты"], blackjack: ["award", "Блэкджек"], cards: ["users", "Столы"], dogs: ["paw", "Пёсики"],
-  roulette: ["target", "Рулетка"], jroul: ["trophy", "Джекпот"], hilo: ["trend", "Больше/меньше"], craft: ["layers", "Крафт"] };
+  roulette: ["target", "Рулетка"], jroul: ["trophy", "Джекпот"], arena: ["target", "Арена"], hilo: ["trend", "Больше/меньше"], craft: ["layers", "Крафт"] };
 // последний онлайн: seen — время последнего запроса к API (сервер обновляет раз в минуту); now — серверное время, чтобы не зависеть от часов телефона
 function seenHTML(p) {
   if (!p.seen) return "";
