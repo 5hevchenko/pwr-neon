@@ -9,6 +9,7 @@
   · подписка на группу — 100 коинов разово; реклама — 5 / 5 / 15 / 20 / 10 коинов за пять просмотров в сутки.
 Не перенесено намеренно: вывод скинов в Steam (отдельный этап) и две ошибки оригинала — награда за рекламу по запросу клиента без подтверждения
 просмотра (здесь её начисляет только обратный вызов Adsgram с секретом ADS_SECRET) и выбор «улучшенного» кейса клиентом (здесь его решает серия)."""
+import sys
 import hmac
 import math
 
@@ -144,7 +145,8 @@ def pass_open(tier: str, uid=Depends(auth)):
             out["reward"] = got
         else:
             d = E.roll(it["col"], rng)
-            d["value"] = E.usd_coins(it["usd"])
+            live = sys.modules.get("csprices")   # скин из кейса пропуска оценивается по живой цене площадки, если она есть
+            d["value"] = E.usd_coins(live.cur(it["col"], it["usd"]) if live else it["usd"])
             cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created,src) VALUES(?,?,?,?,?,?,?,?,'cs')",
                              (uid, d["col"], d["model"], d["backdrop"], d["symbol"], d["num"], d["value"], t))
             event(uid, "gift", d["value"])

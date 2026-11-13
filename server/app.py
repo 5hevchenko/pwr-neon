@@ -1021,7 +1021,7 @@ def cases(uid=Depends(auth)):
     rg = sys.modules.get("realgifts")
     hide = rg.HIDE if real else ()
     for c in E.CASES.values():
-        if c["id"] in hide or (rg and rg.hidden(c["id"])):
+        if c["id"] in hide or (rg and rg.hidden(c["id"])) or c.get("paused"):
             continue
         odds = E.pwr_odds(c["id"], tier) if c["id"] in E.PWR_CASES else c["odds"]
         top = max(odds, key=lambda x: E.base(x))
@@ -1044,6 +1044,8 @@ def open_case(cid: str, n: int = 1, uid=Depends(auth)):
     c = E.CASES.get(cid) or err("нет такого кейса")
     if cid in real_cases():   # кейсы подарков открываются в realgifts.py: внутри настоящие призы
         err("Кейс обновился — перезапусти игру")
+    if c.get("paused"):   # кейс скинов: цены на площадке не дают собрать его без убытка (csprices.py)
+        err("Кейс на паузе: обновляем цены скинов. Загляни чуть позже")
     n = 1 if cid == "free" or not c["price"] else max(1, min(10, n))
     t = now()
     with tx():
@@ -2895,6 +2897,7 @@ import withdraw  # noqa: E402,F401 — вывод скинов CS в Steam че�
 import guess  # noqa: E402,F401 — «Угадай дроп» на тир-кейсах
 import realgifts  # noqa: E402,F401 — кейсы с настоящими подарками Telegram: продать игре или вывести на аккаунт
 import cryptopay  # noqa: E402,F401 — пополнение криптой через Crypto Pay (@CryptoBot)
+import csprices  # noqa: E402,F401 — живые цены скинов CS с площадки и пересчёт шансов кейсов под них
 import heist  # noqa: E402,F401 — «ограбление сейфа»: не заходишь неделю — сгорают звёзды, кроме купленных
 
 
