@@ -141,3 +141,15 @@ html.cur-usd :is(.amtf,.ca-in,.pay-ai,.pay-st,.lim-own,.cur-keep) .xtr svg{displ
 html.cur-usd :is(.amtf,.ca-in,.pay-ai,.pay-st,.lim-own,.cur-keep) .xtr{width:1.1em;height:1.1em;vertical-align:-.2em;margin:0 .06em}
 html.cur-usd :is(.amtf,.ca-in,.pay-ai,.pay-st,.lim-own,.cur-keep) .xtr::before{content:none}
 .cur-seg{margin:8px auto 4px;max-width:260px}
+
+/* условия бесплатного кейса */
+.rg-gate{display:flex;flex-direction:column;gap:8px;margin:12px 0 14px}
+.rg-gs{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.rg-gs>i{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;font-style:normal;font-weight:800;font-size:14px;border:1.5px solid color-mix(in srgb,var(--text) 28%,transparent)}
+.rg-gs>i .ic{width:18px;height:18px}
+.rg-gs.done>i{border-color:transparent;background:#35c46a;color:#04210f}
+.rg-gs>b{flex:1;min-width:0;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rg-gs .btn{flex:none;width:auto!important;min-width:112px;height:36px;padding:0 12px!important;font-size:13px!important;box-shadow:none!important}
+.rg-gate-go{width:100%}
+.rg-gate-t{margin:6px 2px 0;font-size:13px;line-height:1.4;text-align:center}
+.rg-gate-s .gtitle{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;font-size:19px!important;line-height:1.2;max-width:calc(100% - 128px)}

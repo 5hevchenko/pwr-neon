@@ -563,6 +563,66 @@ async def realgifts_img(gid: str):
     return FileResponse(f, media_type="image/webp", headers=IMMUTABLE) if f else Response(status_code=404, headers={"Cache-Control": "no-store"})
 
 
+# ---------------- условия бесплатного кейса ----------------
+# Первый бесплатный прокрут — за подписку на каналы (FREE_CHANNELS), каждый следующий — за нового приглашённого друга.
+# FREE_CHANNELS — через запятую: «@канал» или «id|ссылка|название» (для закрытых чатов). Бот должен быть админом в каждом,
+# иначе Telegram не отвечает, подписан ли игрок. Список пуст — первый прокрут без условий.
+db.execute("CREATE TABLE IF NOT EXISTS free_gate(user INTEGER, cid TEXT, opens INTEGER DEFAULT 0, refs_at INTEGER DEFAULT 0, "
+           "PRIMARY KEY(user, cid))")
+FREE_FRIENDS = conf("realgifts.free_friends", 1)        # сколько новых друзей нужно на каждый следующий бесплатный прокрут; 0 — условие снято
+_SUB_OK = {}                                            # (игрок, канал) → время последней удачной проверки подписки
+
+
+def _channels():
+    out = []
+    raw = os.environ.get("FREE_CHANNELS", "").strip() or os.environ.get("PWR_CHANNEL", "").strip()
+    for part in [x.strip() for x in raw.split(",") if x.strip()]:
+        bits = [x.strip() for x in part.split("|")]
+        cid = bits[0]
+        url = bits[1] if len(bits) > 1 else ("https://t.me/" + cid.lstrip("@") if cid.startswith("@") else "")
+        out.append({"id": cid, "url": url, "title": bits[2] if len(bits) > 2 else cid})
+    return out
+
+
+async def _subscribed(uid, ch):
+    """Подписан ли игрок на канал. Удачный ответ помним 10 минут, чтобы не дёргать Telegram на каждый прокрут."""
+    if time.time() - _SUB_OK.get((uid, ch["id"]), 0) < 600:
+        return True
+    try:
+        r = await A.tg_call("getChatMember", chat_id=ch["id"], user_id=uid)
+    except Exception:
+        return False
+    res = r.get("result")
+    ok = bool(r.get("ok")) and isinstance(res, dict) and res.get("status") in ("creator", "administrator", "member", "restricted")
+    if not r.get("ok"):
+        alert("free-ch" + ch["id"], f"Бесплатный кейс: бот не может проверить подписку на {esc(ch['id'])} "
+                                    f"({esc(str(r.get('description') or 'нет ответа'))}). Сделай бота админом этого канала.")
+    if ok:
+        _SUB_OK[(uid, ch["id"])] = time.time()
+    return ok
+
+
+async def free_gate(uid, cid):
+    """Что нужно сделать перед бесплатным прокрутом: {ok, kind: subs|friend, steps|need/have}."""
+    row = q1("SELECT * FROM free_gate WHERE user=? AND cid=?", uid, cid)
+    if not row or not row["opens"]:
+        chans = [] if DEV and "TG_API_URL" not in os.environ else _channels()
+        steps = [{"title": ch["title"], "url": ch["url"], "done": await _subscribed(uid, ch)} for ch in chans]
+        return {"ok": all(x["done"] for x in steps), "kind": "subs", "steps": steps}
+    if FREE_FRIENDS <= 0:
+        return {"ok": True, "kind": "friend", "need": 0, "have": 0}
+    have = max(0, (q1("SELECT refs FROM users WHERE id=?", uid)["refs"] or 0) - row["refs_at"])
+    return {"ok": have >= FREE_FRIENDS, "kind": "friend", "need": FREE_FRIENDS, "have": have}
+
+
+@app.get(R + "/realgifts/free/{cid}")
+async def realgifts_free(cid: str, uid=Depends(auth)):
+    b = _BUILT.get(cid)
+    if not b or b["price"]:
+        err("нет такого кейса")
+    return await free_gate(uid, cid)
+
+
 # ---------------- открыть / продать ----------------
 @app.get(R + "/realgifts/case/{cid}")
 def realgifts_case(cid: str, uid=Depends(auth)):
@@ -604,6 +664,9 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
     price = b["price"]
     if seen != price:
         err("Цена кейса обновилась — проверь её и открой ещё раз", 409)
+    gated = not price and not q1("SELECT 1 FROM case_keys WHERE user=? AND cid=? AND n>0", uid, cid)
+    if gated and not (await free_gate(uid, cid))["ok"]:
+        err("Сначала выполни условия бесплатного кейса", 428)
     t = now()
     with tx():
         u = q1("SELECT * FROM users WHERE id=?", uid)
@@ -620,6 +683,8 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
                 err(f"Следующий бесплатный кейс — через {left // 3600} ч {left % 3600 // 60} мин" if left >= 3600 else f"Следующий бесплатный кейс — через {max(1, left // 60)} мин")
             if not price:
                 db.execute("UPDATE users SET ru_free_at=? WHERE id=?" if cid in E.RU_CASES else "UPDATE users SET last_free=? WHERE id=?", (t, uid))
+                db.execute("INSERT INTO free_gate(user,cid,opens,refs_at) VALUES(?,?,1,?) ON CONFLICT(user,cid) DO UPDATE SET opens=opens+1, refs_at=excluded.refs_at",
+                           (uid, cid, u["refs"] or 0))
             paid = price
             if u["stars"] < paid:
                 err("Не хватает звёзд")

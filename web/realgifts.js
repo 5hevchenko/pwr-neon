@@ -94,6 +94,10 @@ async function rgSpin(el) {
   if (RG_BUSY) return;
   const c = RG_CASE, sheet = el.closest(".sheet"); if (!c || c.id !== el.dataset.id || !sheet) return;
   const pay = c.keys ? 0 : c.price;
+  if (!c.price && !c.keys && !el._gateOk) {   // бесплатный кейс: сначала условия (подписка или новый друг)
+    let g; try { g = await api(`realgifts/free/${c.id}`); } catch (e) { return; }
+    if (!g.ok) return rgGate(c, g);
+  }
   if (pay > ME.stars) { H.err(); return typeof openQuickBuy === "function" ? openQuickBuy(pay - ME.stars) : toast("Не хватает звёзд ⭐"); }
   const roul = sheet.querySelector("#rg-roul"), won = sheet.querySelector("#rg-won"), btns = sheet.querySelector("#rg-btns");
   RG_BUSY = true; btns.querySelectorAll("button").forEach(b => b.disabled = true); won.innerHTML = "";
@@ -274,3 +278,36 @@ if (typeof i18nAdd === "function" && typeof LANG === "string" && LANG === "en") 
 
 // переключатель «звёзды / доллары» в окне баланса
 ACT.cur = el => { if ((el.dataset.v === "usd") === CUR_USD) return; H.sel(); setCur(el.dataset.v === "usd"); };
+
+// ---------------- условия бесплатного кейса: подписки в первый раз, дальше — новый друг ----------------
+function rgGateHTML(c, g) {
+  const check = `<button class="btn cta rg-gate-go" data-act="rg-gate-check" data-id="${c.id}">Проверить и крутить</button>`;
+  if (g.kind === "subs") {
+    const n = g.steps.length, w = n === 1 ? "Один шаг" : n === 2 ? "Два шага" : n === 3 ? "Три шага" : `${n} ${plural(n, ["шаг", "шага", "шагов"])}`;
+    return `<h2 class="gtitle">${w} до прокрута</h2>
+      <div class="rg-gate">${g.steps.map((x, i) => `<div class="rg-gs${x.done ? " done" : ""}"><i>${x.done ? ic("check") : i + 1}</i><b>${esc(x.title)}</b>
+        ${x.url ? `<button class="btn sm gold" data-act="rg-gate-link" data-url="${esc(x.url)}">${x.done ? "Открыть" : "Подписаться"}</button>` : ""}</div>`).join("")}</div>${check}`;
+  }
+  return `<h2 class="gtitle">Друг за прокрут</h2>
+    <p class="hint rg-gate-t">Первый бесплатный кейс был за подписку. Каждый следующий открывается за нового друга: он заходит в игру по твоей ссылке — и кейс твой.</p>
+    <div class="rg-gate"><div class="rg-gs${g.have >= g.need ? " done" : ""}"><i>${g.have >= g.need ? ic("check") : ic("userPlus")}</i><b>Друзей: ${Math.min(g.have, g.need)} из ${g.need}</b>
+      <button class="btn sm gold" data-act="rg-gate-inv">Пригласить</button></div></div>${check}`;
+}
+function rgGate(c, g) { H.sel(); const el = openSheet(rgGateHTML(c, g), "rg-s rg-gate-s"); el._case = c; }
+Object.assign(ACT, {
+  "rg-gate-link": el => { const u = el.dataset.url; if (inTg && /^https:\/\/t\.me\//.test(u)) tg.openTelegramLink(u); else window.open(u, "_blank"); },
+  "rg-gate-inv": () => {
+    const text = "Залетай в игру — открывай кейсы с настоящими подарками Telegram 🎁";
+    const url = `https://t.me/share/url?url=${enc(ME.refLink)}&text=${enc(text)}`;
+    if (inTg) tg.openTelegramLink(url); else copyText(ME.refLink);
+  },
+  "rg-gate-check": async el => {
+    const sheet = el.closest(".sheet"), c = sheet && sheet._case; if (!c) return;
+    el.disabled = true;
+    let g; try { g = await api(`realgifts/free/${c.id}`); } catch (e) { el.disabled = false; return; }
+    if (!g.ok) { H.err(); replaceSheet(sheet, rgGateHTML(c, g)); topSheet()._case = c; return toast(g.kind === "subs" ? "Подпишись на все каналы из списка" : "Друг ещё не зашёл в игру по твоей ссылке"); }
+    closeSheet();
+    const btn = document.querySelector(`.sheet [data-act="rg-spin"][data-id="${c.id}"]`);
+    if (btn) { btn._gateOk = true; rgSpin(btn); }
+  },
+});
