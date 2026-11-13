@@ -30,7 +30,8 @@ const G_NEW = new Set(["carousel", "ladder", "safe", "bankbet", "auction"]);
 const G_EDGE = { duels: "duel", "101": "cards", blackjack: "cards" };
 function gCardHTML(g) {
   const fav = GFAV.has(g.id), rtp = ME && ME.edges && ME.edges[G_EDGE[g.id] || g.id];
-  const sub = g.id === "crash" ? `<span class="gc-live" id="hub-crash"><i></i>LIVE</span>` : rtp ? `<span class="gc-rtp">Возврат ${(rtp * 100).toFixed(rtp * 100 % 1 ? 1 : 0)}%</span>` : `<span class="gc-rtp">Игроки между собой</span>`;
+  // цифру возврата на карточке не показываем: только «LIVE» у краша и пометка у игр между игроками
+  const sub = g.id === "crash" ? `<span class="gc-live" id="hub-crash"><i></i>LIVE</span>` : rtp ? "" : `<span class="gc-rtp">Игроки между собой</span>`;
   return `<div class="gcard gl" data-act="game" data-id="${g.id}" style="--k1:${g.k[0]};--k2:${g.k[1]}">
     <span class="gl-art"><img class="gc-img" src="${g.imgUrl || A.orig(g.img, 128)}" alt="" loading="lazy"></span>
     <span class="gl-txt"><span class="gc-t">${g.t}${G_NEW.has(g.id) ? `<i class="gl-new">NEW</i>` : ""}</span>${sub}</span>

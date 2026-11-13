@@ -1,6 +1,7 @@
 """Арт и ролики, сгенерированные в Higgsfield: скачиваются при сборке в web/gen/ (картинки — в webp нужного размера, ролики — как есть).
 Список готовых файлов пишется в web/genart.js (window.GEN_ART) — интерфейс использует только то, что реально скачалось.
 Запускается из build.py; нет сети или файла — сборка идёт дальше, интерфейс остаётся на прежнем оформлении."""
+import hashlib
 import io
 import json
 import os
@@ -119,7 +120,8 @@ def main():
     covers()
     ready = {}
     for name, (src, width) in ART.items():
-        out = os.path.join(GEN, name + (".webp" if width else ".mp4"))
+        # в имени файла — метка исходника: перерисовали картинку → новое имя, старая из кэша телефона не подставится
+        out = os.path.join(GEN, f"{name}.{hashlib.md5(f'{src}:{width}'.encode()).hexdigest()[:8]}" + (".webp" if width else ".mp4"))
         if not os.path.exists(out):
             try:
                 data = urllib.request.urlopen(urllib.request.Request((CDN_USER if src.startswith("hf_") else CDN) + src, headers={"User-Agent": "Mozilla/5.0"}), timeout=40).read()
