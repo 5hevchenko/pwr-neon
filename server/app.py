@@ -101,7 +101,7 @@ def disclaimer():
     if skins_real():
         t += " Скины CS тоже настоящие — их можно вывести в Steam."
     t += " Звёзды ⭐ — валюта игры: на них открывают кейсы и играют" + (", купить их можно за Telegram Stars." if shop.shop_on() else ".")
-    return t + " Картинки подарков — @GiftChanges (api.changes.tg)."
+    return t
 
 # ============================== БД ==============================
 LOCK = threading.RLock()
@@ -654,7 +654,8 @@ def notify(uid, text, url=None):
 async def bot_description(token=None):
     await tg_call("setMyDescription", _token=token, description=(
         "🎁 Кейсы с подарками и скинами CS и 30+ игр: краш, мины, слоты, плинко, битва кейсов, дуэли с друзьями. "
-        "Боевой пропуск, задания, маркет, кланы и турниры.\n\n" + disclaimer()))
+        "Боевой пропуск, маркет, кланы и турниры.\n\n"
+        "💰 Зарабатывай звёзды прямо в приложении: выполняй задания, заходи каждый день и зови друзей.\n\n" + disclaimer()))
 
 
 async def bot_setup(token=None):
@@ -773,7 +774,8 @@ async def on_command(m):
                 if not q1("SELECT 1 FROM users WHERE id=?", uid):
                     db.execute("INSERT OR REPLACE INTO pending_refs VALUES(?,?,?)", (uid, int(arg[4:]), now()))
         txt = ("🎁 <b>Кейсы с подарками и скинами CS</b>\n\nОткрывай кейсы, лови редкие модели и скины, играй в краш, плинко, башню и слоты, "
-               "вызывай друзей на дуэли, торгуй на маркете и выполняй задания.\n\n"
+               "вызывай друзей на дуэли и торгуй на маркете.\n\n"
+               "💰 <b>Зарабатывай звёзды</b> прямо в приложении: выполняй задания, заходи каждый день и зови друзей.\n\n"
                f"Старт: <b>{S(START_STARS)} ⭐</b>" + (f" + <b>{S(refs.cfg('new_bonus'))} ⭐</b> за приглашение" if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("new_bonus") else "")
                + ("\nИ ключ от кейса в подарок от друга, он уже ждёт в игре." if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("gift_on") else "")
                + f"\n\n<i>⚠️ {esc(disclaimer())}</i>")
