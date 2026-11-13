@@ -521,6 +521,22 @@ def realgifts_case(cid: str, uid=Depends(auth)):
             "items": [_pub(x) for x in sorted(b["items"], key=lambda x: (x["kind"] == "star", -x["value"]))]}   # шансы наружу не отдаём
 
 
+def _strip(b, n):
+    """Лента рулетки — витрина кейса, а не его шансы: по настоящим шансам в дешёвом кейсе на ней были бы одни звёзды.
+    Больше половины ячеек — подарки (редкие тоже мелькают), остальное — звёзды. Приз в ячейку выигрыша ставит open()."""
+    gifts = [(x, w) for x, w in zip(b["items"], b["w"]) if x["kind"] != "star"]
+    stars = [(x, w) for x, w in zip(b["items"], b["w"]) if x["kind"] == "star"]
+    if not gifts or not stars:
+        pool = gifts or stars
+        return [_pub(x) for x in random.choices([x for x, _ in pool], weights=[w ** 0.5 for _, w in pool], k=n)]
+    gw = [w ** 0.3 for _, w in gifts]   # сглаженные веса: дешёвые чаще, но дорогие тоже видны
+    out = []
+    for _ in range(n):
+        pool, w = (gifts, gw) if random.random() < 0.6 else (stars, [w for _, w in stars])
+        out.append(_pub(random.choices([x for x, _ in pool], weights=w)[0]))
+    return out
+
+
 @app.post(R + "/realgifts/case/{cid}/open")
 async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
     seen = int((await req.json()).get("price") or 0)
@@ -576,7 +592,7 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
         fair.record(uid, "case", paid, it["value"], {"case": cid, "drops": [it["value"]], "prize": it["title"]}, fair.close_stream(rng))
         lvl = A.add_xp(uid, max(20, price // 10))
     WIN = 42
-    strip = [_pub(x) for x in random.choices(b["items"], weights=b["w"], k=50)]
+    strip = _strip(b, 50)
     strip[WIN] = _pub(it)
     return {"prize": _pub(it), "item": _item(row) if row else None, "strip": strip, "win": WIN, "levelup": lvl,
             "case": realgifts_case(cid, uid), **state(uid)}
