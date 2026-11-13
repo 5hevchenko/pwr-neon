@@ -1,4 +1,4 @@
-"""NePridymal — игровой кейс-симулятор подарков Telegram. Подарки и звёзды ненастоящие.
+"""NePridymal — кейсы с подарками Telegram и скинами CS и игры на звёзды ⭐ (валюта игры).
 
 FastAPI + SQLite. Внутри же: игровой цикл краша и long polling бота.
 """
@@ -92,15 +92,13 @@ def real_cases():
 
 
 def disclaimer():
-    """Что в игре настоящее, а что нет. Про покупку за Telegram Stars — только пока включена продажа (админка → «Продажи»),
-    про скины — только пока работает вывод в Steam, про настоящие подарки — пока включены их кейсы."""
+    """Короткая справка для игрока: что можно вывести. Про покупку звёзд — только пока включена продажа (админка → «Продажи»)."""
     import shop
-    t = "Звёзды ⭐ и подарки из обычных кейсов — игровые"
-    t += ": звёзды можно купить за Telegram Stars, но вывести нельзя." if shop.shop_on() else ": вывести их нельзя."
-    if gifts_real():
-        t += " Настоящие подарки Telegram лежат в кейсах «Настоящие подарки»: выигранный подарок можно вывести на свой аккаунт или продать игре."
+    t = ("Подарки в кейсах настоящие: выигранный подарок можно вывести на свой аккаунт Telegram или продать игре." if gifts_real()
+         else "Подарки из кейсов можно продавать, улучшать и обменивать.")
     if skins_real():
-        t += " Скины CS настоящие: их можно вывести в Steam."
+        t += " Скины CS тоже настоящие — их можно вывести в Steam."
+    t += " Звёзды ⭐ — валюта игры: на них открывают кейсы и играют" + (", купить их можно за Telegram Stars." if shop.shop_on() else ".")
     return t + " Картинки подарков — @GiftChanges (api.changes.tg)."
 
 # ============================== БД ==============================
@@ -654,7 +652,7 @@ def notify(uid, text, url=None):
 async def bot_description(token=None):
     await tg_call("setMyDescription", _token=token, description=(
         "🎁 Кейсы с подарками и скинами CS и 30+ игр: краш, мины, слоты, плинко, битва кейсов, дуэли с друзьями. "
-        "Боевой пропуск, задания, маркет, кланы и турниры.\n\n⚠️ " + disclaimer()))
+        "Боевой пропуск, задания, маркет, кланы и турниры.\n\n" + disclaimer()))
 
 
 async def bot_setup(token=None):
@@ -1019,7 +1017,8 @@ def cases(uid=Depends(auth)):
     tier = __import__("pwr").tier_of(q1("SELECT * FROM users WHERE id=?", uid))   # шансы кейсов SKINBOX зависят от пропуска
     import sys
     real = real_cases()
-    hide = getattr(sys.modules.get("realgifts"), "HIDE", ()) if real else ()
+    rg = sys.modules.get("realgifts")
+    hide = rg.HIDE if real else ()
     for c in E.CASES.values():
         if c["id"] in hide:
             continue
@@ -1031,7 +1030,8 @@ def cases(uid=Depends(auth)):
         items.sort(key=lambda x: -x["ev"])
         out.append({"id": c["id"], "title": E.case_title(c["id"], uid), "price": case_price(c), "full": c["price"], "keys": keys.get(c["id"], 0),
                     "level": c["level"], "cover": E.case_cover(c["id"], uid), **_case_limit(c["id"]), "real": c["id"] in real,
-                    "group": E.CASE_GROUP.get(c["id"], "tg"), "k": E.case_colors(c["id"]), "floor": bool(c["floor"]), "src": c.get("src"),
+                    "group": "tg" if c["id"] in real else E.CASE_GROUP.get(c["id"], "tg"), "tops": rg.tops(c["id"]) if c["id"] in real else [],   # кейсы подарков — одна вкладка
+                    "k": E.case_colors(c["id"]), "floor": bool(c["floor"]), "src": c.get("src"),
                     **({"gifts": _ru_gifts(c["id"]), "freeIn": max(0, (_ru_free_at(uid) + E.RU_FREE_EVERY) - now()) if not c["price"] else 0, "freeEvery": E.RU_FREE_EVERY} if c["id"] in E.RU_CASES else {}),
                     "top": top, "pat": look_of(E.case_cover(c["id"], uid), c["id"])["symbol"],
                     "previews": [x["col"] for x in items[:3]], "items": items})

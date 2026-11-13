@@ -83,7 +83,7 @@ Object.assign(ACT, {
   "inv-copy": () => copyText(ME.refLink),
   "inv-bag": () => { closeSheet(); setTab("inv"); setTimeout(() => toast("Открой подарок: «Подарить другу», затем «Подарок по ссылке»"), 400); },
   "inv-share": () => {
-    const text = ME.refBonus ? `Залетай в кейс-симулятор подарков 🎁 По моей ссылке получишь +${ME.refBonus} ⭐ на старт (игровых)` : "Залетай в кейс-симулятор подарков 🎁";
+    const text = ME.refBonus ? `Залетай открывать кейсы с подарками Telegram 🎁 По моей ссылке получишь +${ME.refBonus} ⭐ на старт (игровых)` : "Залетай открывать кейсы с подарками Telegram 🎁";
     const url = `https://t.me/share/url?url=${enc(ME.refLink)}&text=${enc(text)}`;
     if (inTg) tg.openTelegramLink(url); else copyText(ME.refLink);
   },

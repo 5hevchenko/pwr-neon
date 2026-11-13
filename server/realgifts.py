@@ -373,6 +373,14 @@ def _pub(x):
     return {"key": x["key"], "kind": x["kind"], "ref": x["ref"], "title": x["title"], "value": x["value"], "emoji": x["emoji"], "img": x["img"]}
 
 
+def tops(cid, n=3):
+    """Лучшие подарки кейса — для обложки."""
+    b = _BUILT.get(cid)
+    if not b or b["paused"]:
+        return []
+    return [_pub(x) for x in sorted((x for x in b["items"] if x["kind"] != "star"), key=lambda x: -x["value"])[:n]]
+
+
 def _free_in(c, u):
     """Сколько секунд до следующего бесплатного открытия (у платных кейсов — 0)."""
     if c["price"]:
@@ -388,7 +396,7 @@ def state(uid):
     for c in CASES:
         b = _BUILT.get(c["id"])
         if b and not b["paused"]:
-            cases[b["id"]] = {"price": b["price"], "gift": round(b["gift"] * 100, 4), "top": _pub(b["top"])}
+            cases[b["id"]] = {"price": b["price"], "gift": round(b["gift"] * 100, 4), "tops": tops(b["id"])}
     bag = [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status IN ('bag','sending','pending') ORDER BY id DESC LIMIT 200", uid)]
     hist = [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status IN ('sent','sold') ORDER BY upd DESC LIMIT 15", uid)]
     return {"on": enabled(), "cases": cases, "ids": sorted(IDS), "bag": bag, "history": hist, "stars": bal(uid), "limit": limit, "used": used,

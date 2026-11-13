@@ -46,12 +46,30 @@ function rgStrip() {
   if (old) { if (old.outerHTML !== html) old.outerHTML = html; }
   else { const at = v.querySelector(".pp-banner") || v.querySelector(".ctabs") || v.querySelector(".cases"); if (at) at.insertAdjacentHTML("beforebegin", html); }
   v.querySelectorAll(".case[data-id]").forEach(e => e.classList.toggle("rg-wait", RG.ids.includes(e.dataset.id) && !RG.cases[e.dataset.id]));
+  rgCovers();
+}
+// обложка кейса: три лучших подарка кейса парят над цветным фоном (движутся только те, что видны на экране)
+let RG_IO = null;
+function rgCovers() {
+  const v = $("#v-cases"); if (!v) return;
+  if (!RG_IO && "IntersectionObserver" in window) RG_IO = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle("in", e.isIntersecting)), { rootMargin: "80px" });
+  v.querySelectorAll(".case[data-id]").forEach(el => {
+    const c = CASES.find(x => x.id === el.dataset.id); if (!c || !c.real) return;
+    const tops = (RG && RG.cases[c.id] ? RG.cases[c.id].tops : c.tops) || [], art = el.querySelector(".gl-art");
+    if (!art || !tops.length) return;
+    const key = tops.map(x => x.key).join("|"); if (art.dataset.rg === key) return;
+    art.dataset.rg = key; art.classList.add("rg");
+    art.innerHTML = `<span class="rg-cv">${tops.map((x, i) => rgArt(x, "f" + i)).join("")}</span>`;
+    const m = el.querySelector(".minis"); if (m) m.outerHTML = `<span class="rg-upto">до ⭐ ${short(tops[0].value)}</span>`;
+    else { const u = el.querySelector(".rg-upto"); if (u) u.innerHTML = `до ⭐ ${short(tops[0].value)}`; }
+    if (RG_IO) RG_IO.observe(art); else art.classList.add("in");
+  });
 }
 const _rcRg = renderCases;
 renderCases = async function () {
   await _rcRg();
-  rgStrip();
-  if (!RG) rgLoad().then(rgStrip).catch(() => {});
+  rgCovers(); rgStrip();
+  if (!RG) rgLoad().then(() => { rgCovers(); rgStrip(); }).catch(() => {});
 };
 
 // ---------------- кейс ----------------
@@ -224,3 +242,8 @@ ACT["cp-buy"] = async el => {
     }
   } catch (e) {} finally { el.disabled = false; }
 };
+if (typeof i18nAdd === "function" && typeof LANG === "string" && LANG === "en") i18nAdd({
+  "Подарок можно продать, улучшить или выставить на маркет.": "You can sell this gift, upgrade it or list it on the market.",
+  "Залетай открывать кейсы с подарками Telegram": "Come open cases with Telegram gifts",
+  "Мои подарки": "My gifts", "вывод и продажа": "withdraw and sell",
+});

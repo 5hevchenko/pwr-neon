@@ -1,6 +1,6 @@
 "use strict";
 // ============================================================
-//  Gift Cases — игра-симулятор подарков Telegram (всё ненастоящее)
+//  Gift Cases — кейсы с подарками Telegram и игры на звёзды
 // ============================================================
 const tg = window.Telegram && Telegram.WebApp;
 const inTg = !!(tg && tg.initData);
@@ -817,7 +817,7 @@ function giftSheetHTML(o, mine) {
       ${g.price != null ? `<div class="row kv"><span class="k">На маркете</span><span class="v star">⭐ ${fmt(g.price)}</span></div>` : ""}
       ${seller ? `<div class="row kv tap" data-act="profile" data-id="${seller.id}"><span class="k">Владелец</span><span class="v" style="display:flex;align-items:center;gap:8px">${avaHTML(seller, 24)}${esc(seller.name)}</span><span class="hint">›</span></div>` : ""}
     </div>${acts}
-    <div class="disc">${g.src === "cs" ? "Скин CS. Его можно продать за полную ценность или вывести в Steam, когда вывод включён." : "Игровой предмет. Это не настоящий подарок Telegram."}</div>`;
+    <div class="disc">${g.src === "cs" ? "Скин CS. Его можно продать за полную ценность или вывести в Steam, когда вывод включён." : "Подарок можно продать, улучшить или выставить на маркет."}</div>`;
 }
 async function giftChanged() {
   closeSheet();

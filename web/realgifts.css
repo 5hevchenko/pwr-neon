@@ -84,4 +84,26 @@
 .cp-pk em{font-style:normal;margin-top:4px;padding:4px 10px;border-radius:999px;background:rgba(60,231,255,.16);font-size:12px;font-weight:600}
 .cp-pk:disabled{opacity:.5}
 .cp .hint{font-size:12px;line-height:1.4;margin:10px 2px 0}
-@media (prefers-reduced-motion:reduce){.rg-case:active{transform:none}}
+
+/* обложка кейса: три лучших подарка парят над фоном кейса */
+.case .gl-art.rg{position:relative;overflow:hidden}
+.rg-cv{position:absolute;inset:0;display:block}
+.rg-cv::before{content:"";position:absolute;left:50%;top:57%;width:86%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.26),rgba(255,255,255,.06) 55%,transparent 72%)}
+.rg-cv .rg-art{position:absolute;height:auto;aspect-ratio:1;animation:6s ease-in-out infinite paused}
+.rg-cv .rg-art img{filter:drop-shadow(0 10px 14px rgba(0,0,0,.42))}
+.rg-cv .rg-art i{font-size:clamp(30px,13vw,70px)}
+.rg-cv .f0{left:21%;top:28%;width:58%;z-index:3;animation-name:rgf0;animation-duration:5.2s}
+.rg-cv .f1{left:3%;top:45%;width:38%;z-index:2;transform:rotate(-13deg);animation-name:rgf1;animation-duration:6.6s;animation-delay:-2.1s}
+.rg-cv .f2{left:57%;top:24%;width:36%;z-index:1;transform:rotate(13deg);animation-name:rgf2;animation-duration:7.4s;animation-delay:-4.3s}
+.rg-cv .f1 img,.rg-cv .f2 img{filter:drop-shadow(0 8px 10px rgba(0,0,0,.4)) saturate(.92)}
+.gl-art.in .rg-cv .rg-art{animation-play-state:running}
+@keyframes rgf0{0%,100%{transform:translateY(2%) rotate(-2deg)}50%{transform:translateY(-6%) rotate(2deg)}}
+@keyframes rgf1{0%,100%{transform:translateY(-3%) rotate(-15deg)}50%{transform:translateY(5%) rotate(-9deg)}}
+@keyframes rgf2{0%,100%{transform:translateY(3%) rotate(10deg)}50%{transform:translateY(-6%) rotate(17deg)}}
+.rg-upto{font-size:11.5px;font-weight:500;color:var(--mu)}
+.rg-fan.big .rg-art{animation:6s ease-in-out infinite}
+.rg-fan.big .rg-art:nth-child(1){animation-name:rgf0;animation-duration:5.2s}
+.rg-fan.big .rg-art:nth-child(2){animation-name:rgf1;animation-duration:6.6s;animation-delay:-2.1s}
+.rg-fan.big .rg-art:nth-child(3){animation-name:rgf2;animation-duration:7.4s;animation-delay:-4.3s}
+@media (prefers-reduced-motion:reduce){.rg-case:active{transform:none}.rg-cv .rg-art,.rg-fan.big .rg-art{animation:none}}
+

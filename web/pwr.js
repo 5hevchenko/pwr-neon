@@ -5,7 +5,7 @@
 // Подключается последним: оборачивает renderCases / openCase / fillQuests, как это делают остальные модули.
 let PWR = null;
 let CTAB = (() => { try { return localStorage.getItem("np_ctab") || "all"; } catch (e) { return "all"; } })();
-const CTABS = [["all", "Все"], ["tg", "Подарки"], ["cs", "CS"], ["ru", "Тиры"]];
+const CTABS = [["all", "Все"], ["tg", "Подарки"], ["cs", "CS"]];
 const pwrLoad = async () => { try { PWR = await api("pwr"); } catch (e) {} return PWR; };
 const pwrImg = (name, s = 256) => A.orig(name, s);
 // арт и ролики из Higgsfield (tools/fetch_art.py → web/gen/): используем только то, что скачалось при сборке

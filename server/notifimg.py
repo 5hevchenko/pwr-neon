@@ -142,7 +142,7 @@ def render(kind, title, value, star):
         im.alpha_composite(s, (int(x0 + tw + 22), int(top + (th - sz) / 2)))
     # подпись
     d = ImageDraw.Draw(im)
-    d.text((x0, 488), "Звёзды и подарки Telegram здесь игровые", font=_font("Manrope.ttf", 26, "SemiBold"), fill=(203, 186, 255))
+    d.text((x0, 488), "Подарки настоящие — выводи их в Telegram", font=_font("Manrope.ttf", 26, "SemiBold"), fill=(203, 186, 255))
     buf = io.BytesIO()
     im.convert("RGB").save(buf, "JPEG", quality=90, optimize=True)
     data = buf.getvalue()
