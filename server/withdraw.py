@@ -2,7 +2,8 @@
 
 Как в оригинале:
   · игрок сохраняет трейд-ссылку Steam (…/tradeoffer/new/?partner=…&token=…);
-  · заявка: ищем предмет на площадке по торговому имени (search-item-by-hash-name), берём первую цену;
+  · заявка: ищем предмет на площадке по торговому имени (search-item-by-hash-name), берём самую низкую цену (в тысячных доллара:
+    аккаунт площадки должен быть в USD, иначе вывод останавливается);
     если она выше нашей цены скина в PRICE_CAP раз (в оригинале ×3) — отказ, скин остаётся у игрока;
   · покупаем предмет сразу на трейд-ссылку игрока (buy-for, chance_to_transfer=40, custom_id — номер заявки);
   · раз в минуту спрашиваем этап (get-buy-info-by-custom-id): 1 — в работе, 2 — передан, 5 и 6 — сорвалось:
@@ -10,6 +11,7 @@
 Добавлено под единую валюту (в оригинале коины были отдельным кошельком и раздавались скупо):
   · вывод открыт только тем, кто покупал за Telegram Stars; сумма выводов в долларах не больше
     оплаченные XTR × xtr_usd × limit_k — бесплатные ⭐ в скины сверх оплаченного не превращаются.
+Площадка удаляет ключ за 5 и больше запросов в секунду, поэтому все запросы идут по одному с паузой GAP.
 Ключ площадки — переменная окружения MARKET_KEY (в коде и в базе его нет). Без ключа вывод выключен."""
 import asyncio
 import json
@@ -76,8 +78,21 @@ def held(uid):
     return round(fresh * XTR_USD * LIMIT_K, 2)
 
 
+GAP = 0.35            # пауза между запросами к площадке: за 5 и больше запросов в секунду она удаляет ключ
+_LOCK = asyncio.Lock()
+_LAST = [0.0]
+
+
 async def _market(method, **params):
-    r = await A.http.get(MARKET + method, params={"key": KEY, **params}, timeout=30)
+    """Запрос к площадке. Все запросы идут строго по одному и не чаще раза в GAP секунд — и от игроков, и от проверки этапов."""
+    async with _LOCK:
+        wait = _LAST[0] + GAP - time.monotonic()
+        if wait > 0:
+            await asyncio.sleep(wait)
+        try:
+            r = await A.http.get(MARKET + method, params={"key": KEY, **params}, timeout=30)
+        finally:
+            _LAST[0] = time.monotonic()
     if r.status_code != 200:
         return None
     return r.json()
@@ -157,10 +172,15 @@ async def withdraw(gid: int, uid=Depends(auth)):
         found = await _market("search-item-by-hash-name", hash_name=mh)
     except Exception as e:
         fail("Площадка не отвечает — попробуй позже", type(e).__name__)
-    items = (found or {}).get("data") or []
+    cur = str((found or {}).get("currency") or "USD").upper()
+    if cur != "USD":   # цены считаем в тысячных доллара; у аккаунта в рублях или евро единицы другие — покупать нельзя
+        for aid in A.ADMINS:
+            notify(aid, f"🛠 Вывод скинов остановлен: аккаунт площадки в валюте {A.esc(cur)}, а игра считает в долларах. Переключи валюту аккаунта market.csgo.com на USD.")
+        fail("Вывод скинов временно недоступен — попробуй позже", f"currency {cur}")
+    items = [x for x in (found or {}).get("data") or [] if int(x.get("count", 1) or 0) > 0 and x.get("price")]
     if not items:
         fail("Этого скина сейчас нет на площадке — попробуй позже", "no item")
-    price = items[0]["price"]   # в тысячных доллара
+    price = min(int(x["price"]) for x in items)   # в тысячных доллара; список площадка не обязана отдавать по возрастанию
     if price / 1000 > usd * PRICE_CAP:
         fail("Скин сейчас слишком дорог на площадке — попробуй позже", f"market {price / 1000} > {usd}×{PRICE_CAP}")
     if price / 1000 > usd and used + price / 1000 > limit + 1e-9:
