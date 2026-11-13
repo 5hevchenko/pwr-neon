@@ -203,3 +203,7 @@ html .ghub .gcard .gl-dayb{top:12px;left:12px;height:24px;padding:0 11px;font-si
 .ghead img[src*="gen/"],.grecent img[src*="gen/"]{object-fit:cover!important;object-position:50% 28%!important;border-radius:26%;filter:none!important}
 /* профиль: три кнопки в ряд («Изменить», «Оформление», «Позвать») — текст помещается на узких экранах */
 html .pacts .btn{font-size:12.5px!important;letter-spacing:0!important;padding-left:4px!important;padding-right:4px!important;min-width:0;white-space:nowrap}
+/* скупка: плашка «N% ценности» всегда у правого края строки, длинное название обрезается */
+html .mk2-oh .grow{flex:1 1 0!important;min-width:0!important}
+html .mk2-oh .grow b,html .mk2-oh .grow span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html .mk2-oh .mk2-pct{margin-left:auto!important;min-width:84px}

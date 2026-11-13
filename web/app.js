@@ -291,12 +291,16 @@ function burstAt(el, g) {
 
 // ------------------------------------------------------------ шторки (стек + BackButton телеги)
 const SHEETS = [];
+// шапка любого окна: закрыть, звук вкл/выкл, баланс
+const sndIc = () => ic(typeof PREF !== "undefined" && PREF.noSound ? "volumeOff" : "volume");
+const sheetHead = () => `<button class="x" data-act="close">${ic("x")}</button><div class="shd"><button class="ssnd${typeof PREF !== "undefined" && PREF.noSound ? " off" : ""}" data-act="snd" aria-label="Звук">${sndIc()}</button><button class="sbal" data-act="daily"><span>⭐</span><b class="bal-live">${ME ? fmt(ME.stars) : "—"}</b></button></div>`;
+function sndPaint() { document.querySelectorAll(".ssnd").forEach(b => { b.classList.toggle("off", !!PREF.noSound); b.innerHTML = sndIc(); }); }
 function openSheet(html, cls = "") {
   document.documentElement.classList.add("has-sheet");
   if (SHEETS.length) SHEETS[SHEETS.length - 1].classList.add("under");
   const el = document.createElement("div");
   el.className = "sheet " + cls;
-  el.innerHTML = `<button class="x" data-act="close">${ic("x")}</button><button class="sbal" data-act="daily"><span>⭐</span><b class="bal-live">${ME ? fmt(ME.stars) : "—"}</b></button>` + html;
+  el.innerHTML = sheetHead() + html;
   document.body.appendChild(el);
   SHEETS.push(el);
   requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
@@ -313,7 +317,7 @@ function closeSheet() {
   if (!SHEETS.length && inTg) tg.BackButton.hide();
   if (el._onClose) el._onClose();
 }
-function replaceSheet(el, html) { stopLottie(el); el.innerHTML = `<button class="x" data-act="close">${ic("x")}</button><button class="sbal" data-act="daily"><span>⭐</span><b class="bal-live">${ME ? fmt(ME.stars) : "—"}</b></button>` + html; startLottie(el); }
+function replaceSheet(el, html) { stopLottie(el); el.innerHTML = sheetHead() + html; startLottie(el); }
 if (inTg) tg.BackButton.onClick(closeSheet);
 
 // ------------------------------------------------------------ состояние

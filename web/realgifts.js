@@ -111,6 +111,7 @@ async function rgSpin(el) {
     return;
   }
   const prize = r.prize, item = r.item; RG = r; RG_CASE = r.case; RG_WON = item ? item.id : 0;
+  if (typeof SND !== "undefined") SND.whoosh();   // рулетка поехала
   const before = ME.stars - pay;   // звёзды-приз покажем после рулетки
   setStars(prize.kind === "star" ? before : r.stars);
   if (!c.price) loadMe().catch(() => {});

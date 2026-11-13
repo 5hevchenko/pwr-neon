@@ -14,8 +14,23 @@ const SND = (() => {
     } catch (e) { ctx = null; }
     return ctx;
   }
+  // iPhone с выключенным звонком (переключатель сбоку) глушит WebAudio целиком — из-за этого игра была «немой».
+  // Пока звук в игре включён, просим у системы режим воспроизведения (как у видео): тогда звуки слышны и в беззвучном режиме.
+  // Выключил звук кнопкой — режим возвращаем, чтобы не мешать музыке на телефоне.
+  const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  let hush = null;
+  function route() {
+    const want = on();
+    try { if (navigator.audioSession) navigator.audioSession.type = want ? "playback" : "auto"; } catch (e) {}
+    if (IOS && !navigator.audioSession) {   // старые iOS: тот же эффект даёт тихая дорожка в обычном плеере
+      try {
+        if (want) { if (!hush) { hush = new Audio("data:audio/wav;base64,UklGRvQHAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YdAHAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA=="); hush.loop = true; hush.volume = .01; hush.setAttribute("playsinline", ""); } hush.play().catch(() => {}); }
+        else if (hush) hush.pause();
+      } catch (e) {}
+    }
+  }
   // браузеры разрешают звук только после касания — будим контекст на первом тапе
-  addEventListener("pointerdown", () => { const c = init(); if (c && c.state === "suspended") c.resume(); }, { passive: true });
+  addEventListener("pointerdown", () => { route(); const c = init(); if (c && c.state === "suspended") c.resume(); }, { passive: true });
   function tone(freq, dur, { type = "sine", gain = .08, at = 0, slide = 0, attack = .004 } = {}) {
     if (!on() || !init() || ctx.state !== "running") return;
     const t = ctx.currentTime + at, o = ctx.createOscillator(), g = ctx.createGain();
@@ -36,6 +51,7 @@ const SND = (() => {
     s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + dur + .02);
   }
   return {
+    route,
     // новые игры: шар, бур, дартс, рыбалка
     pump(k = 0) { noise(.22, { gain: .05, type: "bandpass", freq: 900 + k * 60, q: 1.2, sweep: 1.6, attack: .05 }); tone(140 + k * 9, .12, { gain: .05, slide: 1.3 }); },
     pop() { noise(.35, { gain: .32, freq: 3200, sweep: .2 }); tone(120, .25, { gain: .2, slide: .4 }); noise(.08, { gain: .2, type: "highpass", freq: 4000 }); },
@@ -88,3 +104,10 @@ document.addEventListener("pointerdown", e => {
   if (getComputedStyle(b).position === "static") b.style.position = "relative";
   b.style.overflow = "hidden"; b.appendChild(w); setTimeout(() => w.remove(), 600);
 }, { passive: true });
+
+// кнопка звука в шапке каждого окна (кейс, игра, сумка…): одно нажатие — звук выключен везде, ещё одно — включён
+ACT.snd = () => {
+  PREF.noSound = !PREF.noSound; prefSave(); SND.route(); sndPaint();
+  if (!PREF.noSound) SND.win();
+  toast(PREF.noSound ? "Звук выключен" : "Звук включён", "ok");
+};

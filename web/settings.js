@@ -72,7 +72,7 @@ Object.assign(ACT, {
     el.classList.toggle("on", on);
     if (k === "lite") { PREF.lite = on; prefSave(); }
     else if (k === "vibro") { PREF.noVibro = !on; prefSave(); }
-    else if (k === "sound") { PREF.noSound = !on; prefSave(); }
+    else if (k === "sound") { PREF.noSound = !on; prefSave(); if (typeof SND !== "undefined") SND.route(); sndPaint(); }
     else if (k === "notif") { await post("settings", { notif: on }); ME.notif = on; }
     H.sel();
   },
