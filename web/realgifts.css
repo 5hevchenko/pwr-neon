@@ -153,3 +153,7 @@ html.cur-usd :is(.amtf,.ca-in,.pay-ai,.pay-st,.lim-own,.cur-keep) .xtr::before{c
 .rg-gate-go{width:100%}
 .rg-gate-t{margin:6px 2px 0;font-size:13px;line-height:1.4;text-align:center}
 .rg-gate-s .gtitle{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;font-size:19px!important;line-height:1.2;max-width:calc(100% - 128px)}
+
+/* открытое правило: шансы выше у игроков с пополнением */
+.rg-tier{display:flex;align-items:center;gap:10px;width:100%;margin:10px 0 2px;padding:10px 12px;border-radius:14px;text-align:left;color:var(--text);background:color-mix(in srgb,#3ce7ff 10%,var(--card));border:1px solid color-mix(in srgb,#3ce7ff 28%,transparent);font-size:12.5px;line-height:1.35}
+.rg-tier .ic{flex:none;width:18px;height:18px;color:#3ce7ff}

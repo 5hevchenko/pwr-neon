@@ -49,6 +49,8 @@ REFRESH = int(conf("realgifts.refresh_min", 10) * 60)   # как часто об
 MAX_AGE = int(conf("realgifts.max_age_min", 40) * 60)   # цена старше — приз убирается из кейса
 SLIP = conf("realgifts.slip", 1.15)                     # на выводе приз может стоить не больше цены выигрыша × slip
 NFT_MODE = conf("realgifts.nft_mode", "auto")           # коллекционные: auto — покупает сервер (нет сессии площадки — заявка админу), manual — всегда админ, off — выключены
+RTP_FREE = conf("realgifts.rtp_free", 0.70)             # тот же возврат для игроков без единого пополнения. Правило открытое: оно написано
+                                                        # в окне кейса и в справке («у игроков с пополнением шансы на дорогие призы выше»)
 PRICE_K = conf("realgifts.price_k", 1000)                # цены кейсов в описаниях — в целых ⭐ (1 ⭐ = 1 Telegram Star); в игре звёзды хранятся в тысячных
 MARKUP = conf("realgifts.markup", 1.45)                 # приз оценивается в ⭐ дороже, чем стоит нам в Telegram Stars: подарок за 15 Stars — 22 ⭐
 STARS = conf("realgifts.stars", [15, 100])              # какие обычные подарки кладём в кейсы: цена в Telegram Stars, от и до
@@ -406,8 +408,9 @@ def _build(c):
     nominal = price or FREE_EV / RTP               # от чего считаются призы звёздами
     target = RTP * nominal
     if target >= items[0]["value"]:                 # только подарки
-        full = items
-        while len(items) > MIN_REAL and _ev(items, 0.5) < target:   # дорогому кейсу дешёвые призы не нужны
+        full = items                                # дешёвые призы убираем, но самый дешёвый из оставшихся всегда дешевле среднего приза —
+                                                    # иначе кейс возвращал бы больше своей цены
+        while len(items) > MIN_REAL and _ev(items, 0.5) < target and items[1]["value"] < target:   # дорогому кейсу дешёвые призы не нужны
             items = items[1:]
         if _ev(items, 0.0) < target:                # призы не тянут такую цену — снижаем её
             known = sum(1 for n in c["gifts"] if n in _NFT and _fresh(_NFT[n]["ts"]))
@@ -425,7 +428,7 @@ def _build(c):
             base["price"] = nominal = PRICES[c["id"]] = price
             _keep_price(c["id"], price)
             items = full
-            while len(items) > MIN_REAL and _ev(items, 0.5) < target:
+            while len(items) > MIN_REAL and _ev(items, 0.5) < target and items[1]["value"] < target:
                 items = items[1:]
             if _ev(items, 0.0) < target:
                 return dict(base, why="не хватает дорогих призов")
@@ -433,6 +436,9 @@ def _build(c):
         w = _weights(items, k)
         tw = sum(w)
         w = [x / tw for x in w]
+        if price and RTP_FREE < RTP:   # шансы для игроков без пополнений: тот же состав, дорогие призы реже
+            wf = _weights(items, _solve(items, max(RTP_FREE * price, items[0]["value"] * 1.03)))
+            base["wf"] = [x / sum(wf) for x in wf]
     else:                                           # частый приз — звёзды, подарки — редкие
         fw = sum(x[1] for x in FILL)
         stars = [{"key": f"star:{i}", "kind": "star", "ref": "", "title": "Звёзды", "xtr": 0, "usd": 0.0, "value": max(1, int(m * nominal)), "emoji": "⭐", "img": False}
@@ -453,6 +459,11 @@ def _build(c):
                 top=max(items, key=lambda x: x["value"]))
 
 
+def payer(uid):
+    """Пополнял ли игрок баланс хоть раз (Telegram Stars или крипта). От этого зависят шансы в кейсах подарков — правило открытое."""
+    return bool(q1("SELECT 1 FROM payments WHERE user=? AND xtr>0 LIMIT 1", uid))
+
+
 def hidden(cid):
     """Кейс убран с витрины: его призы дороже того, что игра может выдать (max_usd)."""
     return bool(_BUILT.get(cid, {}).get("hide"))
@@ -465,6 +476,9 @@ def _rebuild():
     line = (f"realgifts: обычных подарков {len(_CAT['items'])}, цен коллекционных {sum(1 for n in NAMES if n in _NFT and _fresh(_NFT[n]['ts']))} из {len(NAMES)} "
             f"(Portals: {_FEED.get('portals', 0)}), TON ${_TON['usd']:.3f}, кейсов работает {len(_BUILT) - len(paused)} из {len(_BUILT)}"
             + (f", на паузе: {', '.join(paused[:8])}" if paused else ""))
+    over = [f"{b['title']} {b['ev'] / b['nominal'] * 100:.0f}%" for b in _BUILT.values() if not b["paused"] and b["ev"] > RTP * b["nominal"] * 1.01]
+    if over:                        # такого быть не должно: кейс возвращает больше задуманного
+        line += f", возврат выше нормы: {', '.join(over[:8])}"
     if _FEED.get("log") != line:   # в журнал — только когда картина изменилась
         _FEED["log"] = line
         print(line, flush=True)
@@ -530,7 +544,8 @@ def state(uid):
     hist = [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status IN ('sent','sold') ORDER BY upd DESC LIMIT 15", uid)]
     return {"on": enabled(), "cases": cases, "ids": sorted(IDS), "bag": bag, "history": hist, "stars": bal(uid), "limit": limit, "used": used,
             "left": round(max(0, limit - used), 2), "held": W.held(uid), "holdHours": W.HOLD_H,
-            "rtp": int(RTP * 100), "limitK": int(W.LIMIT_K * 100), "usdK": W.XTR_USD / shop.RATE / MARKUP}
+            "rtp": int(RTP * 100), "limitK": int(W.LIMIT_K * 100), "usdK": W.XTR_USD / shop.RATE / MARKUP,
+            "payer": payer(uid)}
 
 
 @app.get(R + "/realgifts")
@@ -777,7 +792,7 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
                 err("Тираж закончился")
             db.execute("UPDATE case_limit SET n=n-1 WHERE cid=?", (cid,))
         rng = fair.stream(uid, "case", cid)
-        it = rng.choices(b["items"], weights=b["w"])[0]
+        it = rng.choices(b["items"], weights=b["w"] if not b.get("wf") or payer(uid) else b["wf"])[0]
         row = None
         if it["kind"] == "star":   # звёзды сразу на баланс
             db.execute("UPDATE users SET stars=stars+? WHERE id=?", (it["value"], uid))

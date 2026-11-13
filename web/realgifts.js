@@ -71,6 +71,7 @@ function rgCaseHTML(c) {
     <div class="rg-hero"><span class="rg-fan big">${gifts.slice(0, 3).map(x => rgArt(x)).join("")}</span></div>
     <div id="rg-roul"></div><div id="rg-won"></div>
     <div class="btns" id="rg-btns">${rgBtnHTML(c)}</div>
+    ${c.price && RG && RG.payer === false ? `<button class="rg-tier" data-act="rg-topup">${ic("trend")}<span>Шансы на дорогие призы выше у игроков с пополнением. Пополни баланс — и они вырастут.</span></button>` : ""}
     <div class="sec-t">Что внутри</div>
     <div class="rg-grid">${c.items.map(tile).join("")}</div>
     <p class="hint">Подарки настоящие: выигранный можно вывести на свой аккаунт Telegram или продать игре за полную цену. Звёзды приходят сразу на баланс.
@@ -277,6 +278,7 @@ if (typeof i18nAdd === "function" && typeof LANG === "string" && LANG === "en") 
 });
 
 // переключатель «звёзды / доллары» в окне баланса
+ACT["rg-topup"] = () => { H.sel(); openDaily("shop"); };
 ACT.cur = el => { if ((el.dataset.v === "usd") === CUR_USD) return; H.sel(); setCur(el.dataset.v === "usd"); };
 
 // ---------------- условия бесплатного кейса: подписки в первый раз, дальше — новый друг ----------------
