@@ -90,7 +90,7 @@ function fillInc(el) {
       <div class="s">${v.ready ? `готово · +⭐ ${fmt(v.reward)}` : `+⭐ ${fmt(v.reward)} через ${hrs(v.until - t)}`}</div>
       <div class="cbar"><div style="width:${Math.min(100, (t - v.start) / (v.until - v.start) * 100)}%"></div></div></div>
       <button class="btn sm ${v.ready ? "green" : "ghost"}" data-act="vault-take" data-id="${v.gift.id}" data-ready="${v.ready ? 1 : 0}">${v.ready ? "Забрать" : "Досрочно"}</button></div>`).join("")}</div>` : ""}
-    <div class="disc">Доход начисляется игровыми звёздами. ${esc(ME.disclaimer)}</div>`;
+    <div class="disc">Доход начисляется игровыми звёздами.</div>`;
 }
 const _rc2 = renderCases;
 renderCases = async function () {

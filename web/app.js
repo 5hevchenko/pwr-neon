@@ -454,8 +454,7 @@ async function renderCases() {
         <div class="cfoot"><div class="nm">${esc(c.title)}</div>${c.limit ? `<span class="c-limit">${c.left ? `Осталось ${num(c.left)} из ${num(c.limit)}` : "Тираж закончился"}</span>` : ""}<span class="minis">${c.previews.slice(0, 3).map(x => `<img src="${A.orig(x, 64)}" alt="" loading="lazy">`).join("")}</span></div>
         ${lvl < c.level ? `<div class="lock">${ic("lock")}${c.level} ур.</div>` : `<span class="pr">⭐ ${fmt(c.price)}</span>`}</div>`;
     }).join("")}</div>
-    <div class="sec-t"><span class="live-dot"></span>Живая лента</div><div class="feed" id="feed"></div>
-    <div class="disc">${esc(ME.disclaimer)}</div>`;
+    <div class="sec-t"><span class="live-dot"></span>Живая лента</div><div class="feed" id="feed"></div>`;
   casesReveal(v);
   loadFeed();
 }
@@ -487,8 +486,7 @@ function openCase(id) {
     <div class="ggrid">${c.items.map(it => { const t = valTier({ value: it.ev }, ref);
       return `<div class="gcell item r-${t}">${giftHTML({ col: it.col, symbol: it.symbol, c: it.c, mp: 99 }, { img: A.orig(it.col), plain: true })}
       <div class="rbar b-${t}"></div>
-      <div class="cap">${esc(it.col)}<br><small>~⭐ ${short(it.ev)}</small></div></div>`; }).join("")}</div>
-    <div class="disc">${esc(ME.disclaimer)}</div>`);
+      <div class="cap">${esc(it.col)}<br><small>~⭐ ${short(it.ev)}</small></div></div>`; }).join("")}</div>`);
   el._case = c; el._ref = ref;
 }
 const openBtn = (c, again) => c.keys ? `<button class="btn cta gold" data-act="open-case" data-id="${c.id}">${ic("lock")}Открыть ключом · ${c.keys} шт.</button>` : `<button class="btn cta gold" data-act="open-case" data-id="${c.id}">${!c.price ? "Открыть бесплатно" : again ? `Ещё${OPEN.n > 1 ? " x" + OPEN.n : ""} · ⭐ ${short(c.price * OPEN.n)}` : `Открыть${OPEN.n > 1 ? " x" + OPEN.n : ""} за ⭐ ${fmt(c.price * OPEN.n)}`}</button>`;
@@ -610,8 +608,7 @@ function openDaily(tab) {
         <div class="row tap" data-act="case" data-id="free"><span class="pic g">${ic("gift")}</span><div class="grow"><div class="t">Бесплатный кейс</div><div class="s">${ME.freeIn ? "через " + clock(ME.freeIn) : "готов"}</div></div></div>
         <div class="row"><span class="pic y">${ic("medal")}</span><div class="grow"><div class="t">Уровни</div><div class="s">За каждый новый уровень — бонус звёздами</div></div></div>
       </div>
-    </div>
-    <div class="disc">${esc(ME.disclaimer)}</div>`, "st-s");
+    </div>`, "st-s");
   stTab(el, t);
 }
 // переключение «Пополнить / Бонус дня»; без магазина (продажа выключена) — только бонус

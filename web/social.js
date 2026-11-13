@@ -280,7 +280,7 @@ function profileHTML(p, tab = "show") {
       : `<button class="btn ${REL[3]}" data-act="fr" data-id="${p.id}" data-v="${REL[2]}">${ic(REL[0])}${REL[1]}</button><button class="btn ghost" data-act="trade-new" data-id="${p.id}">${ic("swap")}Обмен</button><button class="btn ghost" data-act="duel-new" data-id="${p.id}">${ic("target")}Дуэль</button>${p.rel === "friend" && typeof SHOP !== "undefined" && SHOP && SHOP.on ? `<button class="btn ghost pset" data-act="gift-stars" data-to="${p.id}" aria-label="Подарить звёзды">${ic("giftbox")}</button>` : ""}`}</div>
     <div class="seg ptabs">${[["show", "sparkles", "Витрина"], ["gifts", "grid", "Подарки"], ["stats", "activity", "Стата"], ["legacy", "crown", "Наследие"], ["ach", "award", `${got}/${p.ach.length}`]].map(([k, i, t]) => `<button data-act="ptab" data-v="${k}" class="${tab === k ? "on" : ""}">${ic(i)}${t}</button>`).join("")}</div>
     ${body}
-    ${isMe ? `<div class="disc">${esc(ME.disclaimer)}</div>` : ""}`;
+    `;
 }
 
 const ACH_IC = { "Первый кейс": "gift", "Охотник за пасхалками": "award", "Кейсоман": "box", "Легенда": "crown", "Космонавт": "rocket", "На Луну": "moon", "Магнат": "wallet",

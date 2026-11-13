@@ -139,7 +139,7 @@ function fillBK(el) {
 
     <div class="seg bk-tabs">${[["holders", "Акционеры"], ["robbers", "Обыграли"], ["sponsors", "Спонсоры"], ["donors", "Меценаты"], ...((BK.crisis || {}).on || ((BK.crisis || {}).saviors || []).length ? [["saviors", "Спасители"]] : [])].map(([k, t]) => `<button data-act="bk-top" data-v="${k}" class="${k === bkTop ? "on" : ""}">${t}</button>`).join("")}</div>
     <div class="box" id="bk-top">${bkTopHTML()}</div>
-    <div class="disc">Банк = 50 млн стартового резерва + всё, что игроки проиграли, − всё, что выиграли, − розыгрыши и дивиденды. ${esc(ME.disclaimer)}</div>`;
+    <div class="disc">Банк = 50 млн стартового резерва + всё, что игроки проиграли, − всё, что выиграли, − розыгрыши и дивиденды.</div>`;
   bkBindChart(el);
 }
 
@@ -191,8 +191,7 @@ async function openVault() {
     </div>
     <p class="vl-how">Сюда попадают подарки, проигранные в апгрейде. Через ${Math.round(d.ttl / 3600)} часов банк перерабатывает их в звёзды.
       ${d.recycled.n ? `За неделю переработано ${num(d.recycled.n)} ${plural(d.recycled.n, ["подарок", "подарка", "подарков"])} на ⭐ ${short(d.recycled.value)}.` : ""}</p>
-    ${d.items.length ? `<div class="vl-grid">${cells}</div>` : emptyHTML("lock", "Хранилище пустое — апгрейды пока все удачные")}
-    <div class="disc">${esc(ME.disclaimer)}</div>`;
+    ${d.items.length ? `<div class="vl-grid">${cells}</div>` : emptyHTML("lock", "Хранилище пустое — апгрейды пока все удачные")}`;
   starify(el);
 }
 
@@ -207,7 +206,7 @@ function openBankGift() {
     </div>
     <div class="betp">${betHTML("bkg-amt", 1000)}
       <button class="btn cta gold" data-act="bk-gift-go">${ic("heart")}Перевести в банк</button></div>
-    <div class="disc">Перевод не отменить. ${esc(ME.disclaimer)}</div>`, "bkg-s");
+    <div class="disc">Перевод не отменить.</div>`, "bkg-s");
   starify(el);
 }
 Object.assign(ACT, {
@@ -303,8 +302,7 @@ function bkDepDraw() {
         <div class="cbar"><div style="width:${Math.max(2, 100 - x.left / (x.days * 864))}%"></div></div>
         <div class="dep-it-s"><span>${x.left ? "осталось " + depLeft(x.left) : "готов к выдаче"}</span><span>проценты +${fmt(x.accrued)}</span></div></div>`).join("")}</div>`
       : `<div class="dep-empty">Вкладов пока нет</div>`}
-    <p class="dep-note">Проценты платит банк, они начисляются равномерно и приходят вместе с вкладом в конце срока. Закрыть раньше можно с комиссией ${+(d.earlyFee * 100).toFixed(1)}%, проценты при этом сгорают.</p>
-    <div class="disc">${esc(ME.disclaimer)}</div>`;
+    <p class="dep-note">Проценты платит банк, они начисляются равномерно и приходят вместе с вкладом в конце срока. Закрыть раньше можно с комиссией ${+(d.earlyFee * 100).toFixed(1)}%, проценты при этом сгорают.</p>`;
   $("#dep-amt").addEventListener("input", bkDepSum);
   bkDepSum();
 }

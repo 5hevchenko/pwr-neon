@@ -64,8 +64,7 @@ let hubPoll = null;
 function renderGames() {
   const v = $("#v-games");
   v.innerHTML = `<div class="bankbar" id="bank"><span class="bk-i">${ic("wallet")}</span><div><span>Банк игры</span><b id="bank-v">—</b></div><em id="bank-d"></em></div>
-    <div id="gsec"></div>
-    <div class="disc">${esc(ME.disclaimer)}</div>`;
+    <div id="gsec"></div>`;
   gDrawSections();
   const live = async () => {
     if (TAB !== "games") return clearInterval(hubPoll);
@@ -117,8 +116,7 @@ function openCrash() {
         <label class="autof"><input id="cauto" inputmode="decimal" value="2.00"><span>x</span></label></div>
       <div class="cbtns"><button class="btn cta gold" id="cbtn" data-act="crash-btn">…</button><button class="allin" id="callin" data-act="crash-allin">${ic("flame")}<b>ALL IN</b></button></div>
     </div>
-    <div class="sec-t">Игроки раунда <span id="ccount"></span></div><div class="box" id="cbets"></div>
-    <div class="disc">${esc(ME.disclaimer)}</div>`, "crash-s");
+    <div class="sec-t">Игроки раунда <span id="ccount"></span></div><div class="box" id="cbets"></div>`, "crash-s");
   el._onClose = () => { CRASH_ON = false; stopCrash(); };
   // в полёте кэшаут срабатывает с касания, не дожидаясь отпускания пальца
   el.querySelector("#cbtn").addEventListener("pointerdown", () => { if (CS && CS.phase === "run" && CS.my && !CS.my.cashed) crashBtn(); });
