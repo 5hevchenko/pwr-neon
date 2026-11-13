@@ -1013,6 +1013,9 @@ def _ru_free_at(uid):
 
 @app.get(R + "/cases")
 def cases(uid=Depends(auth)):
+    _rg = __import__("sys").modules.get("realgifts")
+    if _rg:
+        _rg.fix_keys(uid)   # ключи от дорогих кейсов подарков → ключи от самого дешёвого
     keys = {r["cid"]: r["n"] for r in q("SELECT cid, n FROM case_keys WHERE user=? AND n>0", uid)}
     out = []
     tier = __import__("pwr").tier_of(q1("SELECT * FROM users WHERE id=?", uid))   # шансы кейсов SKINBOX зависят от пропуска

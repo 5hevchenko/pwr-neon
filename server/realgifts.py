@@ -93,6 +93,36 @@ def _keep_price(cid, price):
         db.execute("INSERT OR REPLACE INTO real_case_price(cid,price,ts) VALUES(?,?,?)", (cid, price, now()))
 
 
+# ---- ключи. Ключ открывает кейс бесплатно, а призы в кейсах подарков настоящие, поэтому ключ действует только на дешёвые кейсы:
+# ключ от кейса дороже KEY_MAX превращается в ключ от самого дешёвого платного кейса (иначе награда «за серию входов»
+# стоила бы тысячи звёзд).
+KEY_MAX = conf("realgifts.key_max", 100) * shop.RATE
+
+
+def key_case():
+    work = [b for b in _BUILT.values() if not b["paused"] and b["price"] > 0]
+    return min(work, key=lambda b: b["price"])["id"] if work else "tier_01"
+
+
+def fix_keys(uid=None):
+    """Перевести ключи от дорогих кейсов подарков в ключи от самого дешёвого. uid=None — у всех игроков."""
+    big = [cid for cid in IDS if PRICES.get(cid, 0) > KEY_MAX]
+    if not big:
+        return
+    to = key_case()
+    if PRICES.get(to, 0) > KEY_MAX:
+        return
+    marks = ",".join("?" * len(big))
+    who = "" if uid is None else " AND user=?"
+    args = tuple(big) + (() if uid is None else (uid,))
+    if not q1(f"SELECT 1 FROM case_keys WHERE n>0 AND cid IN ({marks}){who} LIMIT 1", *args):
+        return
+    with tx():
+        for r in q(f"SELECT user, SUM(n) n FROM case_keys WHERE n>0 AND cid IN ({marks}){who} GROUP BY user", *args):
+            db.execute("INSERT INTO case_keys(user,cid,n) VALUES(?,?,?) ON CONFLICT(user,cid) DO UPDATE SET n=n+?", (r["user"], to, r["n"], r["n"]))
+        db.execute(f"UPDATE case_keys SET n=0 WHERE cid IN ({marks}){who}", args)
+
+
 def _nice(x):
     """Круглая цена кейса в единицах игры: до 100 ⭐ — шаг 5, до 1000 — 25, до 10 000 — 250, дальше — 2500."""
     v = x / shop.RATE
@@ -449,6 +479,7 @@ def _free_in(c, u):
 
 
 def state(uid):
+    fix_keys(uid)
     limit, used = W.budget(uid)
     cases = {}
     for c in CASES:
@@ -658,6 +689,7 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
     seen = int((await req.json()).get("price") or 0)
     if not enabled():
         err("Кейсы пока выключены")
+    fix_keys(uid)
     b = _BUILT.get(cid)
     if not b or b["paused"]:
         err("Кейс на паузе: обновляем цены подарков. Загляни чуть позже")
@@ -711,7 +743,7 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
         else:
             event(uid, "case", it["value"] - paid, stake=paid)
         fair.record(uid, "case", paid, it["value"], {"case": cid, "drops": [it["value"]], "prize": it["title"]}, fair.close_stream(rng))
-        lvl = A.add_xp(uid, max(20, price // (10 * PRICE_K)))
+        lvl = A.add_xp(uid, max(20, paid // 10))   # как у остальных кейсов: опыт от потраченного (ключом — минимум)
     WIN = 42
     strip = _strip(b, 50)
     strip[WIN] = _pub(it)

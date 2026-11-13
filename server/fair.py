@@ -919,4 +919,6 @@ def fair_case(cid: str):
         out.append({"col": col, "p": round((x - prev) / tot * 100, 3), "ev": round(E.expected_value(col))})
         prev = x
     out.sort(key=lambda r: -r["p"])
+    for r in out:   # шансы призов игрокам не показываем нигде; состав и ценность — можно
+        r.pop("p")
     return {"id": cid, "title": c.get("title"), "items": out}

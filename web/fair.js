@@ -433,7 +433,7 @@ Object.assign(ACT, {
   "pf-case": async el => {
     try {
       const d = await api("fair/case/" + encodeURIComponent(el.dataset.v));
-      PF.caseOdds.html = `<div class="box fcase">${d.items.map(r => `<div class="fsrc"><span>${esc(r.col)}</span><em>≈ ${short(r.ev)}</em><b>${r.p}%</b></div>`).join("")}</div>`;
+      PF.caseOdds.html = `<div class="box fcase">${d.items.map(r => `<div class="fsrc"><span>${esc(r.col)}</span><em>≈ ⭐ ${short(r.ev)}</em></div>`).join("")}</div>`;
       const b = $("#pf-case"); if (b) b.innerHTML = PF.caseOdds.html;
     } catch (e) {}
   },

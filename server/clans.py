@@ -34,6 +34,15 @@ for _c in ("emblem TEXT DEFAULT ''", "descr TEXT DEFAULT ''", "open INTEGER DEFA
     except Exception:
         pass
 CREATE_COST = conf("clans.create_cost", 5000)
+
+
+def _key_price(cid):
+    """Цена ключа для участника: настоящая цена кейса (у кейсов подарков она задаётся в realgifts.py)."""
+    rg = __import__("sys").modules.get("realgifts")
+    if not rg or cid not in rg.PRICES:
+        return E.CASES[cid]["price"]
+    p = rg.PRICES[cid]
+    return p if p <= rg.KEY_MAX else rg.PRICES.get(rg.key_case(), p)   # ключ от дорогого кейса становится ключом от дешёвого — столько и стоит
 MAX_MEMBERS = 20
 REJOIN = 12 * 3600
 LEVELS = [0, 25_000, 75_000, 200_000, 500_000, 1_000_000, 2_000_000, 3_500_000, 5_500_000, 8_000_000]   # казна для уровней 1–10
@@ -225,7 +234,7 @@ def clan(cid: int, uid=Depends(auth)):
             "invite": f"https://t.me/{bot_name()}?start=clan_{cid}",
             "spend": {"boost": boost_price(len(members)), "boostPct": int(BOOST[0] * 100), "slots": slots_price(c["slots"] or MAX_MEMBERS)
                       if (c["slots"] or MAX_MEMBERS) < SLOTS_MAX else None, "slotsStep": SLOTS_STEP,
-                      "keys": {k: E.CASES[k]["price"] * len(members) for k in ("luck", "lux", "cups")},
+                      "keys": {k: _key_price(k) * len(members) for k in ("luck", "lux", "cups")},
                       "keyTitles": {k: E.case_title(k, uid) for k in ("luck", "lux", "cups")}, "taxMax": TAX_MAX, "payTax": PAY_TAX, "donateTax": DONATE_TAX}}
 
 
@@ -582,7 +591,7 @@ async def clan_spend(req: Request, uid=Depends(auth)):
             k = str(b.get("cid", ""))
             if k not in ("luck", "lux", "cups"):
                 err("нет такого кейса")
-            need = E.CASES[k]["price"] * len(mem)
+            need = _key_price(k) * len(mem)
             if bank < need:
                 err(f"в казне не хватает: нужно ⭐ {S(need)}")
             for m in mem:
