@@ -17,6 +17,11 @@ CREATE TABLE IF NOT EXISTS battles(id INTEGER PRIMARY KEY, host INTEGER, cid TEX
 CREATE INDEX IF NOT EXISTS battles_status ON battles(status);
 """)
 ROUNDS = (1, 2, 3, 5)
+
+
+def _battle_case(c):
+    """В битвах — только кейсы скинов: у них настоящая цена и настоящие призы. Кейсы подарков открываются отдельно (realgifts.py)."""
+    return c.get("src") == "cs" and c["price"] and not c.get("paused") and c["id"] not in E.LIMITED
 SLOTS = (2, 3, 4)
 WAIT_TTL = 30 * 60       # ждём соперников 30 минут, потом возврат
 BOT = 0
@@ -73,8 +78,8 @@ def _resolve(b):
         for d in ds:
             gid = None
             if winner != BOT:            # все подарки битвы — победителю
-                cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created) VALUES(?,?,?,?,?,?,?,?)",
-                                 (winner, d["col"], d["model"], d["backdrop"], d["symbol"], d["num"], d["value"], t))
+                cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created,src) VALUES(?,?,?,?,?,?,?,?,'cs')",
+                                 (winner, d["col"], d["model"], d["backdrop"], d["symbol"], d["num"], d["value"], t))   # скины настоящие: продаются за полную цену и выводятся
                 gid = cur.lastrowid
             row.append({"id": gid, **{k: d[k] for k in ("col", "model", "backdrop", "symbol", "num", "value")}})
         out_drops.append(row)
@@ -106,7 +111,7 @@ def battles(uid=Depends(auth)):
     mine = [_out(_b(r["id"]), uid) for r in q("SELECT id FROM battles WHERE status='done' AND players LIKE ? ORDER BY id DESC LIMIT 8", f"%{uid}%")]
     mine = [m for m in mine if m["mine"]][:5]
     cases = [{"id": c["id"], "title": E.case_title(c["id"], uid), "cover": E.case_cover(c["id"], uid), "price": case_price(c), "level": c["level"]}
-             for c in E.CASES.values() if c["price"] and c["id"] not in E.LIMITED]
+             for c in E.CASES.values() if _battle_case(c)]
     cases.sort(key=lambda c: c["price"])
     return {"open": opn, "mine": mine, "cases": cases, "rounds": ROUNDS, "slots": SLOTS, "stars": bal(uid)}
 
@@ -126,9 +131,9 @@ async def battle_new(req: Request, uid=Depends(auth)):
     _pvp_guard(uid)
     bd = await req.json()
     cid, rounds, slots = str(bd.get("cid", "")), int(bd.get("rounds", 1)), int(bd.get("slots", 2))
-    c = E.CASES.get(cid) if cid not in E.LIMITED else None
-    if not c or not c["price"]:
-        err("выбери платный кейс")
+    c = E.CASES.get(cid)
+    if not c or not _battle_case(c):
+        err("выбери кейс из списка")
     if rounds not in ROUNDS or slots not in SLOTS:
         err("неверные параметры")
     price = case_price(c)

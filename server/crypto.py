@@ -20,7 +20,17 @@ CREATE TABLE IF NOT EXISTS crypto_pos(id INTEGER PRIMARY KEY, user INTEGER, asse
   entry REAL, qty REAL, ts INTEGER, status TEXT DEFAULT 'open', close REAL, pnl INTEGER, closed INTEGER);
 CREATE INDEX IF NOT EXISTS crypto_pos_open ON crypto_pos(status, user);
 """)
-STAR_USD = 0.015        # курс игровой звезды к доллару (примерно как Telegram Stars)
+STAR_USD = 0.0125 / 1000   # $ за единицу игры. 1 ⭐ (1 Telegram Star, 1000 единиц) = $0,0125 — тот же курс, что у скинов ($1 = 80 ⭐)
+# Раньше здесь стояло $0,015 за единицу, то есть $15 за звезду: за одну звезду на бирже покупалось монет на $15.
+# Один раз пересчитываем то, что у игроков уже лежит, чтобы стоимость их монет в звёздах не изменилась.
+if not q1("SELECT 1 FROM kv WHERE k='crypto_rate_v2'"):
+    _f = STAR_USD / 0.015
+    with tx():
+        db.execute("UPDATE crypto SET qty=qty*?", (_f,))
+        db.execute("UPDATE crypto_stake SET qty=qty*?, earned=earned*?, total=total*?", (_f, _f, _f))
+        db.execute("UPDATE crypto_pos SET qty=qty*?, entry=entry/?, close=close/?", (_f, _f, _f))
+        db.execute("UPDATE crypto_tx SET qty=qty*?, price=price/?", (_f, _f))
+        db.execute("INSERT OR REPLACE INTO kv(k,v) VALUES('crypto_rate_v2','1')")
 FEE = conf("economy.crypto_fee", 0.004)        # комиссия биржи с каждой сделки (настройка [economy] crypto_fee)
 MIN_TRADE = 10
 STALE = 90              # старше — торговать нельзя, курс не обновился

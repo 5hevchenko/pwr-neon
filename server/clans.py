@@ -60,6 +60,7 @@ def prizes():
     return [A.prize_k(p) for p in BASE_PRIZES]
 # цели недели по обороту клана: каждому участнику — ключ от кейса
 GOALS = [(250_000, "luck"), (1_000_000, "lux"), (3_000_000, "cups")]
+KEY_SHOP = ["luck", "lux", "cups"]   # ключи, которые клан покупает участникам из казны (realgifts.py сводит дорогие к дешёвому кейсу)
 STAFF = ("owner", "officer")
 TAX_MAX = 0.05                 # налог клана: 0–5% с чистого выигрыша участников
 PAY_TAX = 0.05                 # налог казино с раздачи из казны (с доли каждого участника) — меняется в админке, fees.py
@@ -234,8 +235,8 @@ def clan(cid: int, uid=Depends(auth)):
             "invite": f"https://t.me/{bot_name()}?start=clan_{cid}",
             "spend": {"boost": boost_price(len(members)), "boostPct": int(BOOST[0] * 100), "slots": slots_price(c["slots"] or MAX_MEMBERS)
                       if (c["slots"] or MAX_MEMBERS) < SLOTS_MAX else None, "slotsStep": SLOTS_STEP,
-                      "keys": {k: _key_price(k) * len(members) for k in ("luck", "lux", "cups")},
-                      "keyTitles": {k: E.case_title(k, uid) for k in ("luck", "lux", "cups")}, "taxMax": TAX_MAX, "payTax": PAY_TAX, "donateTax": DONATE_TAX}}
+                      "keys": {k: _key_price(k) * len(members) for k in KEY_SHOP},
+                      "keyTitles": {k: E.case_title(k, uid) for k in KEY_SHOP}, "taxMax": TAX_MAX, "payTax": PAY_TAX, "donateTax": DONATE_TAX}}
 
 
 @app.post(R + "/clans")
@@ -589,7 +590,7 @@ async def clan_spend(req: Request, uid=Depends(auth)):
             detail = need
         elif kind == "keys":
             k = str(b.get("cid", ""))
-            if k not in ("luck", "lux", "cups"):
+            if k not in KEY_SHOP:
                 err("нет такого кейса")
             need = _key_price(k) * len(mem)
             if bank < need:

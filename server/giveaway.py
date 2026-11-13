@@ -227,7 +227,7 @@ async def admin_gw_create(req: Request, aid=Depends(admin)):
         cur = db.execute("INSERT INTO gw(title,prize,winners,min_level,start,until,seed,hash,chat,by) VALUES(?,?,?,?,?,?,?,?,?,?)",
                          (title, prize, winners, lvl, t, t + hours * 3600, seed, hashlib.sha256(seed.encode()).hexdigest(), ch, aid))
         gid = cur.lastrowid
-        log(aid, "gw_create", None, f"#{gid} {title} {prize}/{winners} {hours}ч")
+        log(aid, "gw_create", None, f"#{gid} {title} ⭐ {S(prize)}/{winners} {hours}ч")
     g = q1("SELECT * FROM gw WHERE id=?", gid)
     r = await A.tg_call("sendMessage", chat_id=ch, text=_post_text(g), parse_mode="HTML",
                         reply_markup={"inline_keyboard": [[{"text": "Участвовать", "url": _link(gid)}]]})

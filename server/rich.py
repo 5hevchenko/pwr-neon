@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS rich_days(day INTEGER PRIMARY KEY, result TEXT, ts IN
 """)
 TOP = 10
 # место → кейс, ключ от которого выдаём каждый день
-DAILY_KEY = {1: "cups", 2: "lux", 3: "lux", **{i: "luck" for i in range(4, TOP + 1)}}
+DAILY_KEY = {1: "cups", 2: "lux", 3: "lux"}   # ключ дня — только первой тройке
 PERKS = [   # для экрана «Привилегии богачей»
     {"place": "1", "key": "Кубки", "fee": 1},
     {"place": "2–3", "key": "Роскошь", "fee": 2},
@@ -55,7 +55,9 @@ def _award():
             return
         res = []
         for place, uid in enumerate(top, 1):
-            cid = DAILY_KEY[place]
+            cid = DAILY_KEY.get(place)
+            if not cid:
+                continue
             db.execute("INSERT INTO case_keys(user,cid,n) VALUES(?,?,1) ON CONFLICT(user,cid) DO UPDATE SET n=n+1", (uid, cid))
             res.append({"place": place, "user": uid, "cid": cid})
             msgs.append((uid, f"👑 Ты {place} в топе богачей! Ежедневная награда: ключ от кейса «{esc(E.CASES[cid]['title'])}». "

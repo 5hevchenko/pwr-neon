@@ -10,7 +10,7 @@ from fastapi import Depends, Request
 
 import economy as E
 from app import R, add_xp, app, auth, bal, check_bet, db, edge, err, event, kv_get, now, preview_out, q, q1, tx
-from settings import conf, tuned
+from settings import S, conf, tuned
 
 db.executescript("""
 CREATE TABLE IF NOT EXISTS claw(user INTEGER PRIMARY KEY, lineup TEXT, ts INTEGER);
@@ -170,7 +170,7 @@ def _admin_routes():
         with tx():
             db.execute("INSERT INTO kv(k,v) VALUES('claw',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v", (json.dumps(new),))
             db.execute("DELETE FROM claw")   # у всех пересобрать автомат по новым правилам
-            log(aid, "claw", None, "сброс" if not new else f"x{new['mults'][0]}–x{new['mults'][-1]}, призов {new['size']}, ставка {new['min_bet']}–{new['max_bet']}")
+            log(aid, "claw", None, "сброс" if not new else f"x{new['mults'][0]}–x{new['mults'][-1]}, призов {new['size']}, ставка {S(new['min_bet'])}–{S(new['max_bet'])}")
         return {"ok": True, "cfg": cfg()}
 
 

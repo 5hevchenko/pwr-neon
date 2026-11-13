@@ -24,6 +24,7 @@ from settings import S
 import asyncio
 import hashlib
 import os
+import sys
 import random
 import statistics
 import time
@@ -99,9 +100,46 @@ def _keep_price(cid, price):
 KEY_MAX = conf("realgifts.key_max", 100) * shop.RATE
 
 
+KEY_CASE = conf("realgifts.key_case", "tier_01")   # кейс, который открывают все ключи-награды
+
+
 def key_case():
+    if KEY_CASE in PRICES and 0 < PRICES[KEY_CASE] <= KEY_MAX:
+        return KEY_CASE
     work = [b for b in _BUILT.values() if not b["paused"] and b["price"] > 0]
-    return min(work, key=lambda b: b["price"])["id"] if work else "tier_01"
+    return min(work, key=lambda b: b["price"])["id"] if work else KEY_CASE
+
+
+def key_cid(cid):
+    """Какой кейс на самом деле откроет ключ от кейса cid."""
+    return key_case() if cid in IDS and PRICES.get(cid, 0) > KEY_MAX else cid
+
+
+def remap_keys():
+    """Награды-ключи (серия входов, топ богачей, альбом, цели клана, возврат, подарок от друга, наборы) объявлены от дорогих кейсов.
+    Сводим их к кейсу, который ключ реально открывает, чтобы в текстах и в сумке был один и тот же кейс."""
+    m = sys.modules
+    try:
+        for d, c in list(A.STREAK_KEYS.items()):
+            A.STREAK_KEYS[d] = key_cid(c)
+        for d, (amt, c) in list(A.STREAK_MS.items()):
+            A.STREAK_MS[d] = (amt, key_cid(c))
+        if "rich" in m:
+            for k, c in list(m["rich"].DAILY_KEY.items()):
+                m["rich"].DAILY_KEY[k] = key_cid(c)
+        if "album" in m:
+            m["album"].TIERS[:] = [(a, b, key_cid(c) if c else c) for a, b, c in m["album"].TIERS]
+        if "clans" in m:
+            m["clans"].GOALS[:] = [(a, key_cid(c)) for a, c in m["clans"].GOALS]
+            m["clans"].KEY_SHOP[:] = list(dict.fromkeys(key_cid(c) for c in m["clans"].KEY_SHOP))
+        if "retain" in m:
+            m["retain"].TIERS[:] = [(a, b, key_cid(c), d, e) for a, b, c, d, e in m["retain"].TIERS]
+        if "refs" in m:
+            m["refs"].GIFT_CASE = key_cid(m["refs"].GIFT_CASE)
+        if "premium" in m:
+            m["premium"].OFFERS[:] = [(a, b, key_cid(c)) for a, b, c in m["premium"].OFFERS]
+    except Exception as e:
+        print("realgifts remap_keys:", type(e).__name__, e, flush=True)
 
 
 def fix_keys(uid=None):
@@ -373,8 +411,10 @@ def _build(c):
             items = items[1:]
         if _ev(items, 0.0) < target:                # призы не тянут такую цену — снижаем её
             known = sum(1 for n in c["gifts"] if n in _NFT and _fresh(_NFT[n]["ts"]))
-            if not nft_ready() or known < 0.8 * len(c["gifts"]):   # цены есть не у всего состава (старт, сбой площадки): цену не трогаем, ждём
+            if not nft_ready():                     # цен пока нет совсем (старт, сбой площадки): цену не трогаем, ждём
                 return dict(base, why="нет цен подарков")
+            if known < 0.8 * len(c["gifts"]):       # у части состава цен нет на рынке вовсе — кейс не собрать, с витрины он убран
+                return dict(base, why="нет цен у части подарков", hide=True)
             if sum(1 for x in full if x["kind"] == "nft") < 3:      # почти весь состав дороже max_usd — такой кейс нечем обеспечить
                 return dict(base, why="не хватает дорогих призов", hide=True)
             keep = min(5, len(full))                    # сколько призов оставляем самое меньшее: самые дорогие из состава
@@ -644,6 +684,15 @@ async def free_gate(uid, cid):
         return {"ok": True, "kind": "friend", "need": 0, "have": 0}
     have = max(0, (q1("SELECT refs FROM users WHERE id=?", uid)["refs"] or 0) - row["refs_at"])
     return {"ok": have >= FREE_FRIENDS, "kind": "friend", "need": FREE_FRIENDS, "have": have}
+
+
+@app.on_event("startup")
+async def _keys_start():
+    remap_keys()
+    try:
+        fix_keys()
+    except Exception as e:
+        print("realgifts fix_keys:", type(e).__name__, e, flush=True)
 
 
 @app.get(R + "/realgifts/free/{cid}")

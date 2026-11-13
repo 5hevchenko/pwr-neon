@@ -67,7 +67,7 @@ function fillCX() {
     ${CX.top.length ? `<div class="sec-t">${ic("crown")}Крупнейшие портфели</div>
       <div class="box">${CX.top.map((u, i) => `<div class="row tap" data-act="profile" data-id="${u.id}"><span class="place p${i + 1}">${i + 1}</span>${avaHTML(u, 34)}
         <div class="grow"><div class="t">${esc(u.name)}</div></div><b>⭐ ${short(u.value)}</b></div>`).join("")}</div>` : ""}
-    <div class="disc">Курсы реальные (OKX), обновляются каждые 10 секунд, графики — за 24 часа. 1 ⭐ = $${String(+(CX.starUsd * STAR_K).toFixed(2)).replace(".", ",")}. Комиссия ${String(CX.fee * 100).replace(".", ",")}% с каждой сделки. Монеты игровые: вывести или перевести их на настоящий кошелёк нельзя. ${esc(ME.disclaimer)}</div>`;
+    <div class="disc">Курсы реальные (OKX), обновляются каждые 10 секунд, графики — за 24 часа. 1 ⭐ = $${String(+(CX.starUsd * STAR_K).toFixed(4)).replace(".", ",")}. Комиссия ${String(CX.fee * 100).replace(".", ",")}% с каждой сделки. Монеты игровые: вывести или перевести их на настоящий кошелёк нельзя. ${esc(ME.disclaimer)}</div>`;
 }
 
 // ------------------------------------------------------------ монета
@@ -129,7 +129,7 @@ function fillCA(el) {
     ${a.tx.length ? `<div class="sec-t">${ic("clock")}Твои сделки</div><div class="box">${a.tx.map(t => `<div class="row"><span class="pic ${t.side === "buy" ? "g" : "r"}">${ic(t.side === "buy" ? "plus" : "coins")}</span>
       <div class="grow"><div class="t">${{ buy: "Покупка", sell: "Продажа", swap: "Обмен", swapin: "Получено обменом" }[t.side] || t.side} ${qtyFmt(t.qty)} ${a.id}</div><div class="s">по ⭐ ${pxFmt(t.price)} · ${new Date(t.ts * 1000).toLocaleString("ru", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</div></div>
       <b class="${t.side === "buy" ? "tl" : t.side === "sell" ? "tw" : ""}">${t.side === "buy" ? "−" : t.side === "sell" ? "+" : "≈ "}⭐ ${short(t.stars)}</b></div>`).join("")}</div>` : ""}
-    <div class="disc">Курс с биржи OKX, 1 ⭐ = $15. Комиссия ${String(a.fee * 100).replace(".", ",")}% при покупке и продаже. Монеты игровые, вывести нельзя.</div>`;
+    <div class="disc">Курс с биржи OKX, 1 ⭐ = $${CX ? String(+(CX.starUsd * STAR_K).toFixed(4)).replace(".", ",") : "0,0125"}. Комиссия ${String(a.fee * 100).replace(".", ",")}% при покупке и продаже. Монеты игровые, вывести нельзя.</div>`;
   caBindChart(el); caForm(el);
 }
 // тихое обновление раз в 10 с: цена, позиция, форма — без перерисовки графика

@@ -570,8 +570,8 @@ async function doOpenInner(sheet, id, c, n) {
 }
 
 // ============================================================ ЕЖЕДНЕВКА
-const DAILY_KEYS = { 2: "Охота на Пепе", 3: "Удача", 5: "Охота на Сердце", 7: "Роскошь" };
-// как на сервере (STREAK_KEYS): ключ на 2, 3, 5, 7 день, дальше «Роскошь» каждые 7 дней (14, 21, 28…)
+const DAILY_KEYS = { 7: "ключ" };
+// как на сервере (STREAK_KEYS): ключ на 7-й день и дальше каждые 7 дней (14, 21, 28…)
 const dailyKey = d => DAILY_KEYS[d] || (d > 7 && d % 7 === 0 ? DAILY_KEYS[7] : null);
 function openDaily(tab) {
   const next = ME.streakNext || ME.streak + 1, cur = ME.dailyIn ? ME.streak : next;
@@ -594,7 +594,7 @@ function openDaily(tab) {
       <div class="dl-hero">
         <div class="dl-h-t"><span>${ME.dailyIn ? "Сегодня уже забрал" : `День ${next} серии`}</span>
           <b>${ME.dailyIn ? `Следующий через ${clock(ME.dailyIn)}` : `⭐ ${fmt(pay(next))}${dailyKey(next) ? " + ключ" : ""}`}</b>
-          <small>Заходи каждый день — награда растёт до 7 дня. На 2, 3, 5 и 7 день — ключ от кейса, дальше ключ «Роскошь» каждые 7 дней${ME.promo ? " · сегодня ×2" : ""}</small></div>
+          <small>Заходи каждый день — награда растёт до 7 дня. На 7-й день и дальше каждые 7 дней — ключ от кейса с подарками${ME.promo ? " · сегодня ×2" : ""}</small></div>
         ${ME.streakBest > 1 ? `<div class="dl-best">${ic("flame")}Рекорд серии: ${ME.streakBest} дн.</div>` : ""}
       </div>
       <div class="dl-days">${days}</div>

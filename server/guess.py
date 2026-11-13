@@ -14,7 +14,8 @@ db.execute("CREATE TABLE IF NOT EXISTS guess_rounds(user INTEGER PRIMARY KEY, ci
 
 
 def _cases():
-    return [c for c in E.CASES.values() if c.get("src") == "ru" and c["price"]]
+    # кейсы скинов: настоящая цена и настоящие призы (кейсы подарков открываются отдельно, в realgifts.py)
+    return [c for c in E.CASES.values() if c.get("src") == "cs" and c["price"] and not c.get("paused")]
 
 
 def _view(r):
@@ -33,8 +34,8 @@ def guess_state(uid=Depends(auth)):
 async def guess_start(req: Request, uid=Depends(auth)):
     cid = str((await req.json()).get("cid", ""))
     c = E.CASES.get(cid)
-    if not c or c.get("src") != "ru" or not c["price"]:
-        err("Выбери тир-кейс")
+    if not c or c not in _cases():
+        err("Выбери кейс из списка")
     with tx():
         r = q1("SELECT * FROM guess_rounds WHERE user=?", uid)
         if r:   # незаконченный раунд: сначала выбери подарок
@@ -47,7 +48,7 @@ async def guess_start(req: Request, uid=Depends(auth)):
         rng = fair.stream(uid, "case", "guess:" + cid)
         drops, seen = [], set()
         for _ in range(200):
-            d = E.ru_open(cid, rng)
+            d = E.open_case(cid, rng)
             k = (d["col"], d["model"], d["backdrop"], d["symbol"])
             if k not in seen:
                 seen.add(k)
@@ -77,7 +78,7 @@ async def guess_pick(req: Request, uid=Depends(auth)):
         gifts, pay = [], 0
         if win:
             for d in drops:
-                cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created,src) VALUES(?,?,?,?,?,?,?,?,'ru')",
+                cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created,src) VALUES(?,?,?,?,?,?,?,?,'cs')",
                                  (uid, d["col"], d["model"], d["backdrop"], d["symbol"], d["num"], d["value"], now()))
                 gifts.append(gift_out(q1("SELECT * FROM gifts WHERE id=?", cur.lastrowid)))
                 pay += d["value"]
