@@ -174,3 +174,7 @@ html.cur-usd :is(.amtf,.ca-in,.pay-ai,.pay-st,.lim-own,.cur-keep) .xtr::before{c
 .rg-upg-s .rg-cell{cursor:pointer}
 .rgu-lost .rg-art{filter:grayscale(1);opacity:.55}
 .btns.rg-col .btn .ic{width:16px;height:16px;margin-right:6px;vertical-align:-3px}
+
+/* сумка с подарками из кейсов: от стартового блока остаются кнопка и три шага, без картинки и слов «пока пустая» */
+.invstart.has .is-art,.invstart.has h2,.invstart.has p{display:none}
+.invstart.has{padding-top:6px}

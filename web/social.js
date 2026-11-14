@@ -83,8 +83,8 @@ function invStartHTML() {
       : `<button class="btn cta gold" data-tab="cases">${ic("gift")}К кейсам</button>`}
     <div class="is-steps">
       <div><span>1</span><b>Открой кейс</b><small>${free ? "бесплатный доступен сейчас" : "бесплатный — каждые несколько часов"}</small></div>
-      <div><span>2</span><b>Забери подарок</b><small>вывод в Telegram или продажа игре</small></div>
-      <div><span>3</span><b>Рискни</b><small>апгрейд на подарок дороже</small></div>
+      <div><span>2</span><b>Выводи</b><small>подарок — на свой аккаунт Telegram</small></div>
+      <div><span>3</span><b>Прокачивай</b><small>апгрейд, обмен, коллекции</small></div>
     </div></div>`;
 }
 function drawSelBar() {
