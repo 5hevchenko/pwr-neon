@@ -707,10 +707,41 @@ def _send(uid, text, url=None, card=None):
 
 
 async def bot_description(token=None):
-    await tg_call("setMyDescription", _token=token, description=(
-        "🎁 Кейсы с подарками и скинами CS и 30+ игр: краш, мины, слоты, плинко, битва кейсов, дуэли с друзьями. "
-        "Боевой пропуск, маркет, кланы и турниры.\n\n"
-        "💰 Зарабатывай звёзды прямо в приложении: выполняй задания, заходи каждый день и зови друзей.\n\n" + disclaimer()))
+    """Описание на пустом экране чата (до «Старт»), не длиннее 512 символов. У главного бота — с его именем."""
+    import notifimg
+    brand = "" if token else (notifimg.BRAND or "").strip()
+    text = ((brand + " — кейсы и игры на звёзды. ") if brand else "Кейсы и игры на звёзды. ") + (
+        "Открывай кейсы и забирай настоящие подарки Telegram на свой аккаунт, а скины CS — в Steam. "
+        "Бесплатный кейс каждый день, звёзды за задания и друзей, маркет между игроками и два десятка игр.")
+    full = text + "\n\n" + disclaimer()
+    r = await tg_call("setMyDescription", _token=token, description=full if len(full) <= 512 else text)
+    if not r.get("ok"):
+        print("setMyDescription:", r.get("description"), flush=True)
+
+
+async def bot_avatar():
+    """Аватарка главного бота — картинка bot_avatar из tools/fetch_art.py (скачивается при сборке). Ставится один раз на каждую
+    новую картинку: имя файла с меткой исходника запоминается в kv."""
+    try:
+        import glob
+        files = sorted(glob.glob(os.path.join(WEB_DIR, "gen", "bot_avatar.*.webp")), key=os.path.getmtime)
+        if not files or kv_get("bot_avatar") == os.path.basename(files[-1]) or not TOKEN:
+            return
+        import io
+        from PIL import Image
+        im = Image.open(files[-1]).convert("RGB")
+        side = min(im.size)
+        im = im.crop(((im.width - side) // 2, (im.height - side) // 2, (im.width + side) // 2, (im.height + side) // 2)).resize((640, 640), Image.LANCZOS)
+        buf = io.BytesIO()
+        im.save(buf, "JPEG", quality=92)
+        r = (await http.post(API + "setMyProfilePhoto", timeout=70,
+                             data={"photo": json.dumps({"type": "static", "photo": "attach://ava"})},
+                             files={"ava": ("avatar.jpg", buf.getvalue(), "image/jpeg")})).json()
+        print("аватарка бота:", "поставлена" if r.get("ok") else r.get("description"), flush=True)
+        if r.get("ok"):
+            db.execute("INSERT OR REPLACE INTO kv(k,v) VALUES('bot_avatar',?)", (os.path.basename(files[-1]),))
+    except Exception as e:
+        print("аватарка бота:", type(e).__name__, e, flush=True)
 
 
 async def bot_setup(token=None):
@@ -732,7 +763,12 @@ async def bot_setup(token=None):
         except Exception as e:
             print("brand:", e, flush=True)
     await bot_description(token)
-    await tg_call("setMyShortDescription", _token=token, short_description="Кейсы с подарками и скинами CS, краш, слоты, маркет 🎁")
+    r = await tg_call("setMyShortDescription", _token=token, short_description=(   # «О боте» в профиле, до 120 символов
+        "Кейсы с настоящими подарками Telegram и скинами CS. Выводи на свой аккаунт, играй, зарабатывай звёзды на заданиях."))
+    if not r.get("ok"):
+        print("setMyShortDescription:", r.get("description"), flush=True)
+    if not token:
+        await bot_avatar()
 
 
 async def bot_loop():
