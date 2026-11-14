@@ -720,26 +720,22 @@ async def bot_description(token=None):
 
 
 async def bot_avatar():
-    """Аватарка главного бота — картинка bot_avatar из tools/fetch_art.py (скачивается при сборке). Ставится один раз на каждую
-    новую картинку: имя файла с меткой исходника запоминается в kv."""
+    """Аватарка главного бота — файл server/bot_avatar.jpg (квадратный JPEG). Ставится один раз на каждую новую картинку:
+    отпечаток файла запоминается в kv, при перезапусках Telegram зря не дёргаем."""
     try:
-        import glob
-        files = sorted(glob.glob(os.path.join(WEB_DIR, "gen", "bot_avatar.*.webp")), key=os.path.getmtime)
-        if not files or kv_get("bot_avatar") == os.path.basename(files[-1]) or not TOKEN:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bot_avatar.jpg")
+        if not TOKEN or not os.path.exists(path):
             return
-        import io
-        from PIL import Image
-        im = Image.open(files[-1]).convert("RGB")
-        side = min(im.size)
-        im = im.crop(((im.width - side) // 2, (im.height - side) // 2, (im.width + side) // 2, (im.height + side) // 2)).resize((640, 640), Image.LANCZOS)
-        buf = io.BytesIO()
-        im.save(buf, "JPEG", quality=92)
+        data = open(path, "rb").read()
+        mark = hashlib.md5(data).hexdigest()[:12]
+        if kv_get("bot_avatar") == mark:
+            return
         r = (await http.post(API + "setMyProfilePhoto", timeout=70,
                              data={"photo": json.dumps({"type": "static", "photo": "attach://ava"})},
-                             files={"ava": ("avatar.jpg", buf.getvalue(), "image/jpeg")})).json()
+                             files={"ava": ("avatar.jpg", data, "image/jpeg")})).json()
         print("аватарка бота:", "поставлена" if r.get("ok") else r.get("description"), flush=True)
         if r.get("ok"):
-            db.execute("INSERT OR REPLACE INTO kv(k,v) VALUES('bot_avatar',?)", (os.path.basename(files[-1]),))
+            db.execute("INSERT OR REPLACE INTO kv(k,v) VALUES('bot_avatar',?)", (mark,))
     except Exception as e:
         print("аватарка бота:", type(e).__name__, e, flush=True)
 
