@@ -163,6 +163,7 @@ drawInventory = function () {
   if (INVK !== "all") p.gifts = all.filter(g => rgIsCs(g) === (INVK === "cs"));
   try { _diRg(); } finally { p.gifts = all; }
   const v = $("#v-inv"); if (!v) return;
+  if (real.length) { const st = v.querySelector(".invstart"); if (st) st.remove(); }   // есть подарки из кейсов — заглушку «Сумка пока пустая» не показываем
   const cs = all.filter(rgIsCs).length, n = { all: all.length + real.length, tg: all.length - cs + real.length, cs };
   const tabs = `<div class="ctabs rg-kind">${[["all", "Все"], ["tg", "Telegram"], ["cs", "CS"]].map(([k, t]) => `<button data-act="rg-kind" data-v="${k}" class="${INVK === k ? "on" : ""}">${t}<em>${n[k]}</em></button>`).join("")}</div>`;
   const mine = INVK !== "cs" && real.length ? `<div class="rg-inv"><div class="sec-t">Из кейсов<span class="rg-sum">${RG.limit || RG.held ? "можно вывести на " + rgUsd(RG.left) : "вывод после первой покупки"}</span></div>

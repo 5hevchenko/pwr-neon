@@ -78,13 +78,13 @@ function invStartHTML() {
   return `<div class="invstart">
     <div class="is-art">${["Toy Bear", "Plush Pepe", "Ion Gem"].map((g, i) => `<img class="is-g g${i}" src="${A.orig(g, 128)}" alt="">`).join("")}<i class="is-glow"></i></div>
     <h2>Сумка пока пустая</h2>
-    <p>Открой кейс — выпавшие подарки лягут сюда и начнут приносить звёзды каждый час.</p>
+    <p>Открой кейс — выпавший подарок ляжет сюда. Его можно вывести в Telegram, продать или апгрейдить.</p>
     ${free ? `<button class="btn cta gold" data-act="case" data-id="free">${ic("gift")}Открыть бесплатный кейс</button>`
       : `<button class="btn cta gold" data-tab="cases">${ic("gift")}К кейсам</button>`}
     <div class="is-steps">
       <div><span>1</span><b>Открой кейс</b><small>${free ? "бесплатный доступен сейчас" : "бесплатный — каждые несколько часов"}</small></div>
-      <div><span>2</span><b>Получай доход</b><small>подарки приносят звёзды каждый час</small></div>
-      <div><span>3</span><b>Прокачивай</b><small>апгрейд, обмен, коллекции</small></div>
+      <div><span>2</span><b>Забери подарок</b><small>вывод в Telegram или продажа игре</small></div>
+      <div><span>3</span><b>Рискни</b><small>апгрейд на подарок дороже</small></div>
     </div></div>`;
 }
 function drawSelBar() {

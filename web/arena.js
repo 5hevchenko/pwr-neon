@@ -10,7 +10,7 @@ Object.assign(GAME_OPEN, { arena: () => openArena() });
 let AR = null, arPoll = null, arSpun = 0, arShown = 0, arRound = 0, arBall = 0;
 const AR_R = 84, AR_C = 2 * Math.PI * AR_R;
 async function openArena() {
-  const el = openSheet(`<div class="ghead">${gpfBtn("arena")}<img src="${AR_ICON}" alt=""><div><h2>Арена</h2><span>Больше ставка — шире сектор</span></div></div>
+  const el = openSheet(`<div class="ghead">${gpfBtn("arena")}<img src="${(GAMES.find(g => g.id === "arena") || {}).imgUrl || AR_ICON}" alt=""><div><h2>Арена</h2><span>Больше ставка — шире сектор</span></div></div>
     <div class="ar-stage"><svg viewBox="0 0 200 200" id="ar-svg" aria-hidden="true"><circle cx="100" cy="100" r="${AR_R}" class="ar-track"/><g id="ar-secs"></g>
         <g id="ar-ball" style="transform:rotate(0deg)"><circle cx="100" cy="${100 - AR_R}" r="7.5" class="ar-b"/></g></svg>
       <div class="ar-hub" id="ar-hub"></div></div>
