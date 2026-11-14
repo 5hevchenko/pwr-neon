@@ -782,6 +782,10 @@ async def bot_loop():
     while True:
         try:
             res = await tg_call("getUpdates", offset=offset, timeout=50, allowed_updates=["message", "pre_checkout_query", "managed_bot", "callback_query", "inline_query", "chosen_inline_result"])
+            if not res.get("ok"):   # Telegram отказал (другой процесс опрашивает того же бота, включён вебхук, лимит) — в журнал и пауза, а не молчаливый холостой цикл
+                print("poll:", res.get("error_code"), res.get("description"), flush=True)
+                await asyncio.sleep(5)
+                continue
             for upd in res.get("result", []):
                 offset = upd["update_id"] + 1
                 m = upd.get("message")
@@ -801,9 +805,10 @@ async def bot_loop():
                     cir = upd["chosen_inline_result"]
                     await asyncio.get_running_loop().run_in_executor(None, pay.reserve_cheque, cir["from"]["id"], cir["result_id"])
                 elif m and m.get("text", "").startswith("/"):
+                    print("cmd:", m["from"]["id"], m["text"].split()[0][:24], flush=True)
                     await on_command(m)
         except Exception as e:
-            print("poll:", e, flush=True)
+            print("poll:", type(e).__name__, e, flush=True)
             await asyncio.sleep(5)
 
 
@@ -878,11 +883,15 @@ async def on_command(m):
         img = await asyncio.get_running_loop().run_in_executor(None, notif_card, txt, ("gift", "Добро пожаловать", f"+{S(START_STARS)}", True))
         r = await tg_photo(None, uid, img, txt, kb) if img else {}
         if not r.get("ok"):
-            await tg_call("sendMessage", chat_id=uid, text=txt, parse_mode="HTML", reply_markup=kb)
+            if img:
+                print("start photo:", uid, r.get("description"), flush=True)
+            r = await tg_call("sendMessage", chat_id=uid, text=txt, parse_mode="HTML", reply_markup=kb)
+            if not r.get("ok"):
+                print("start reply:", uid, r.get("description"), flush=True)
     elif cmd.startswith("/ref"):
         link = f"https://t.me/{bot_name()}?start=ref_{uid}"
         c = refs.cfg
-        await tg_call("sendMessage", chat_id=uid, parse_mode="HTML", disable_web_page_preview=True,
+        r = await tg_call("sendMessage", chat_id=uid, parse_mode="HTML", disable_web_page_preview=True,
                       text=(f"👥 <b>Приглашай друзей</b>\n\nТвоя ссылка:\n{link}\n\n"
                             + (f"• другу сразу +{S(c('new_bonus'))} ⭐\n" if c("new_bonus") else "")
                             + (f"• тебе сразу +{S(c('join_bonus'))} ⭐\n" if c("join_bonus") else "")
@@ -892,6 +901,8 @@ async def on_command(m):
                             + ("• призы за рубежи и недельный топ — в игре: «Пригласи друга»" if c("milestones") or c("top_on") else "")
                             ).replace(",", " ") if c("on") else f"Твоя ссылка:\n{link}",
                       reply_markup={"inline_keyboard": [[{"text": "📤 Отправить другу", "url": "https://t.me/share/url?url=" + urllib.parse.quote(link)}]]})
+        if not r.get("ok"):
+            print("ref reply:", uid, r.get("description"), flush=True)
 
 
 # ============================== краш ==============================
