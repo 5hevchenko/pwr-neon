@@ -867,12 +867,11 @@ async def on_command(m):
             with tx():
                 if not q1("SELECT 1 FROM users WHERE id=?", uid):
                     db.execute("INSERT OR REPLACE INTO pending_refs VALUES(?,?,?)", (uid, int(arg[4:]), now()))
-        txt = ("🎁 <b>Кейсы с подарками и скинами CS</b>\n\nОткрывай кейсы, лови редкие модели и скины, играй в краш, плинко, башню и слоты, "
+        txt = ("🎁 <b>Кейсы с тг подарками и скинами CS</b>\n\nОткрывай кейсы, лови редкие модели и скины, играй в краш, плинко, башню и слоты, "
                "вызывай друзей на дуэли и торгуй на маркете.\n\n"
                "💰 <b>Зарабатывай звёзды</b> прямо в приложении: выполняй задания, заходи каждый день и зови друзей.\n\n"
-               f"Старт: <b>{S(START_STARS)} ⭐</b>" + (f" + <b>{S(refs.cfg('new_bonus'))} ⭐</b> за приглашение" if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("new_bonus") else "")
-               + ("\nИ ключ от кейса в подарок от друга, он уже ждёт в игре." if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("gift_on") else "")
-               + f"\n\n<i>⚠️ {esc(disclaimer())}</i>")
+               f"Даём <b>{S(START_STARS)} ⭐</b> на старт" + (f" + <b>{S(refs.cfg('new_bonus'))} ⭐</b> за приглашение" if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("new_bonus") else "")
+               + ("\nИ ключ от кейса в подарок от друга, он уже ждёт в игре." if arg.startswith("ref_") and refs.cfg("on") and refs.cfg("gift_on") else ""))
         img = await asyncio.get_running_loop().run_in_executor(None, notif_card, txt, ("gift", "Добро пожаловать", f"+{S(START_STARS)}", True))
         r = await tg_photo(None, uid, img, txt, kb) if img else {}
         if not r.get("ok"):
