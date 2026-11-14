@@ -278,12 +278,18 @@ def insight(tid: int, aid=Depends(admin)):
     try:
         import guard
         guard.flush()
+        devs = guard.same_dev(tid)
+        if devs:
+            flags.append(f"С того же устройства заходили ещё {len(devs)} акк.: " + ", ".join(str(x["name"]) for x in devs[:5]) + " — почти наверняка один человек")
+        nb = guard.blocked_refs(tid)
+        if nb:
+            flags.append(f"Не засчитано приглашений со своего же устройства: {nb} — пытался пригласить сам себя")
         same = guard.same_ip(tid)
         if same:
             mine = [x for x in same if x["ref_by"] == tid]
             flags.append(f"С тех же адресов заходили ещё {len(same)}{'+' if len(same) >= 12 else ''} акк.: " + ", ".join(str(x["name"]) for x in same[:5])
-                         + (f". Из них его рефералы: {len(mine)} — похоже на накрутку приглашений" if mine else "")
-                         + ("" if mine else ". Это подсказка, а не доказательство: общий Wi-Fi и мобильный интернет дают один адрес многим"))
+                         + (f". Из них его рефералы: {len(mine)}" if mine else "")
+                         + ". Это подсказка, а не доказательство: общий Wi-Fi и мобильный интернет дают один адрес многим")
             if u["ref_by"] and any(x["id"] == u["ref_by"] for x in same):
                 flags.append("Заходил с того же адреса, что и пригласивший его игрок")
         n = guard.hits(tid)

@@ -1,5 +1,9 @@
 """Защита от скриптов и твинков.
 
+0. Мультиаккаунт: приложение шлёт метку устройства (случайная строка в памяти приложения на телефоне). Если новый игрок
+   пришёл по ссылке с того же устройства, что и пригласивший, — это второй аккаунт того же человека: приглашение не
+   засчитывается (ни бонусов, ни «друга» для бесплатного кейса), запись — в ref_blocked. Честным игрокам ничего делать не нужно.
+   Обходится вторым телефоном — на этот случай остаются отпечатки адресов и тревога ниже.
 1. Лимит частоты запросов на игрока («ведро с жетонами»): действий (POST) — в среднем не больше POST_RATE в секунду с запасом
    POST_BURST на серию быстрых нажатий; всех запросов игрока — ALL_RATE в секунду с запасом ALL_BURST. Человек в эти рамки
    укладывается с большим запасом (мины, башня, автоспин), скрипт — упирается и получает 429. Картинки (запросы без подписи
@@ -12,6 +16,7 @@
 import asyncio
 import hashlib
 import hmac
+import re
 import time
 
 from fastapi import Request
@@ -31,7 +36,13 @@ db.executescript("""
 CREATE TABLE IF NOT EXISTS user_ips(user INTEGER, ip TEXT, first INTEGER, last INTEGER, n INTEGER DEFAULT 1, PRIMARY KEY(user, ip));
 CREATE INDEX IF NOT EXISTS user_ips_ip ON user_ips(ip);
 CREATE TABLE IF NOT EXISTS rl_hits(user INTEGER, day INTEGER, n INTEGER DEFAULT 0, PRIMARY KEY(user, day));
+CREATE TABLE IF NOT EXISTS user_devs(user INTEGER, dev TEXT, first INTEGER, PRIMARY KEY(user, dev));
+CREATE INDEX IF NOT EXISTS user_devs_dev ON user_devs(dev);
+CREATE TABLE IF NOT EXISTS ref_blocked(user INTEGER PRIMARY KEY, ref INTEGER, ts INTEGER);
+CREATE INDEX IF NOT EXISTS ref_blocked_ref ON ref_blocked(ref);
 """)
+DEVS = set()             # (игрок, устройство), уже записанные в базу
+DEV_RX = re.compile(r"^[a-f0-9]{16,40}$")
 BUCKETS = {}             # ключ → [жетоны на все запросы, жетоны на действия, время]
 HITS = {}                # игрок → сколько раз упёрся в лимит с прошлой записи в базу
 SEEN = {}                # (игрок, отпечаток) → когда отмечали
@@ -107,6 +118,18 @@ async def _guard(request: Request, call_next):
     uid = sanctions._uid(request)
     if uid is None and not post:   # картинки и прочее без подписи игрока
         return await call_next(request)
+    dev = request.headers.get("x-dev-id", "")
+    if uid and DEV_RX.match(dev) and (uid, dev) not in DEVS:
+        # сразу в базу (а не раз в минуту): регистрация по ссылке идёт в этом же запросе и должна видеть устройство
+        mark = hmac.new(A.SECRET, ("dev:" + dev).encode(), hashlib.sha256).hexdigest()[:16]
+        try:
+            with A.tx():
+                db.execute("INSERT OR IGNORE INTO user_devs(user,dev,first) VALUES(?,?,?)", (uid, mark, now()))
+            if len(DEVS) > 200_000:
+                DEVS.clear()
+            DEVS.add((uid, dev))
+        except Exception as e:
+            print("guard dev:", type(e).__name__, e, flush=True)
     ip = ip_of(request)
     if uid and ip:
         k = (uid, ip_mark(ip))
@@ -132,6 +155,28 @@ async def _loop():
 @app.on_event("startup")
 async def _start():
     asyncio.create_task(_loop())
+
+
+# ---------------- мультиаккаунт ----------------
+def same_device(a, b):
+    """Заходили ли два игрока с одного устройства."""
+    return bool(A.q1("SELECT 1 FROM user_devs x JOIN user_devs y ON y.dev=x.dev WHERE x.user=? AND y.user=? LIMIT 1", a, b))
+
+
+def ref_block(uid, ref):
+    """Приглашение не засчитано: новый игрок uid пришёл по ссылке ref с его же устройства. Вызывается внутри транзакции регистрации."""
+    db.execute("INSERT OR REPLACE INTO ref_blocked(user,ref,ts) VALUES(?,?,?)", (uid, ref, now()))
+    print(f"guard: приглашение не засчитано — игрок {uid} с того же устройства, что и пригласивший {ref}", flush=True)
+
+
+def same_dev(uid, limit=12):
+    """Другие аккаунты с тех же устройств: [{id, name}]."""
+    return [dict(r) for r in A.q("""SELECT DISTINCT b.user id, COALESCE(u.name, 'id ' || b.user) name FROM user_devs a JOIN user_devs b ON b.dev=a.dev AND b.user!=a.user
+                                    LEFT JOIN users u ON u.id=b.user WHERE a.user=? LIMIT ?""", uid, limit)]
+
+
+def blocked_refs(uid):
+    return A.q1("SELECT COUNT(*) n FROM ref_blocked WHERE ref=?", uid)["n"]
 
 
 # ---------------- для разбора игрока и тревог (ops.py) ----------------

@@ -111,9 +111,19 @@ async function apiReq(path, body, o = {}) {
   const ac = o.timeout ? new AbortController() : null, tm = ac && setTimeout(() => ac.abort(), o.timeout);
   try { return await apiFetch(path, body, o, ac); } finally { clearTimeout(tm); }
 }
+// Метка устройства: случайная строка в памяти приложения на этом телефоне. Нужна, чтобы второй аккаунт с того же телефона
+// не засчитывался «другом» самому себе (guard.py). Ничего об устройстве в ней нет.
+const DEV_ID = (() => {
+  try {
+    let v = localStorage.getItem("np_dev");
+    if (!/^[a-f0-9]{24}$/.test(v || "")) { v = [...crypto.getRandomValues(new Uint8Array(12))].map(b => b.toString(16).padStart(2, "0")).join(""); localStorage.setItem("np_dev", v); }
+    return v;
+  } catch (e) { return ""; }
+})();
 async function apiFetch(path, body, o, ac) {
   const headers = { "Content-Type": "application/json" };
   if (inTg) headers["X-Init-Data"] = tg.initData; else if (DEV_USER) headers["X-Dev-User"] = DEV_USER;
+  if (DEV_ID) headers["X-Dev-Id"] = DEV_ID;
   let r;
   try { r = await fetch("api/" + path, { method: body ? "POST" : "GET", headers, body: body ? JSON.stringify(body) : undefined, signal: ac ? ac.signal : undefined }); }
   catch (e) { const m = "Нет связи с сервером — проверь интернет"; if (body && !o.quiet) { toast(m, "err"); H.err(); } throw Object.assign(new Error(m), { status: "net" }); }   // фоновые GET — молча

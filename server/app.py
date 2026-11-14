@@ -534,6 +534,9 @@ def register(tg_user, start_param="", bid=0):
             ref = p["ref"] if p else None
         if ref == uid or not (ref and q1("SELECT 1 FROM users WHERE id=?", ref)):
             ref = None
+        if ref and "guard" in sys.modules and sys.modules["guard"].same_device(uid, ref):
+            sys.modules["guard"].ref_block(uid, ref)   # второй аккаунт с того же устройства — не друг: без бонусов и без зачёта
+            ref = None
         nb, jb = refs.bonuses(bool(ref))   # суммы — в админке «Рефералы» (refs.py)
         db.execute("INSERT INTO users(id,name,username,photo,stars,created,seen,ref_by,bot,came_bot) VALUES(?,?,?,?,?,?,?,?,?,?)",
                    (uid, name, tg_user.get("username"), tg_user.get("photo_url"),
