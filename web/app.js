@@ -22,6 +22,9 @@ const H = {
 };
 if (tg) try {
   tg.ready(); tg.expand();
+  // на телефоне — сразу во весь экран, как при запуске кнопкой «Открыть» из профиля бота: иначе через «Играть» и меню игра
+  // открывается с шапкой Telegram. На компьютере не трогаем: там полный экран занимает весь монитор.
+  try { if (tg.requestFullscreen && tg.isVersionAtLeast && tg.isVersionAtLeast("8.0") && (tg.platform === "ios" || tg.platform === "android") && !tg.isFullscreen) tg.requestFullscreen(); } catch (e) {}
   tg.disableVerticalSwipes && tg.disableVerticalSwipes();
   tg.setHeaderColor && tg.setHeaderColor("secondary_bg_color");
   tg.setBackgroundColor && tg.setBackgroundColor("secondary_bg_color");
