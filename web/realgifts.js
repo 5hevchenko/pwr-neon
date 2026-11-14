@@ -71,6 +71,7 @@ function rgCaseHTML(c) {
     <div class="rg-hero"><span class="rg-fan big">${gifts.slice(0, 3).map(x => rgArt(x)).join("")}</span></div>
     <div id="rg-roul"></div><div id="rg-won"></div>
     <div class="btns" id="rg-btns">${rgBtnHTML(c)}</div>
+    ${!c.price && !c.keys && RG && RG.freeFriends ? `<p class="hint rg-freehint">${ic("lock")}Открыть кейс можно сразу. Чтобы забрать подарок — вывести, продать или поставить в игру, — пригласи друга.</p>` : ""}
     <div class="sec-t">Что внутри</div>
     <div class="rg-grid">${c.items.map(tile).join("")}</div>
     <p class="hint">Подарки настоящие: выигранный можно вывести на свой аккаунт Telegram или продать игре за полную цену.${c.items.some(x => x.kind === "star") ? " Звёзды приходят сразу на баланс." : ""}
@@ -95,7 +96,7 @@ async function rgSpin(el) {
   if (RG_BUSY) return;
   const c = RG_CASE, sheet = el.closest(".sheet"); if (!c || c.id !== el.dataset.id || !sheet) return;
   const pay = c.keys ? 0 : c.price;
-  if (!c.price && !c.keys && !el._gateOk) {   // бесплатный кейс: сначала условия (подписка или новый друг)
+  if (!c.price && !c.keys && !el._gateOk) {   // бесплатный кейс: сначала подписка на каналы (друг нужен позже — чтобы забрать подарок)
     let g; try { g = await api(`realgifts/free/${c.id}`); } catch (e) { return; }
     if (!g.ok) return rgGate(c, g);
   }
@@ -135,9 +136,10 @@ async function rgSpin(el) {
     const w = strip.children[r.win]; if (w) { w.classList.remove("cur"); w.classList.add("hitw"); }
     H.imp(item ? "heavy" : "light"); await sleep(400);
     won.innerHTML = item
-      ? `<div class="rg-won">${rgArt(item, "big")}<b>${esc(item.title)}</b><small>⭐ ${fmt(item.value)} · ${rgUsd(rgCost(item))}</small><p>Подарок в сумке. Забери его в Telegram или продай игре.</p></div>`
+      ? `<div class="rg-won">${rgArt(item, "big")}<b>${esc(item.title)}</b><small>⭐ ${fmt(item.value)} · ${rgUsd(rgCost(item))}</small><p>${item.lock ? rgLockText(item) : "Подарок в сумке. Забери его в Telegram, продай или поставь в игре."}</p></div>`
       : `<div class="rg-won">${rgArt(prize, "big")}<b>${fmt(prize.value)} звёзд</b><p>Уже на балансе.</p></div>`;
-    btns.innerHTML = (item ? `<button class="btn ghost" data-act="rg-sell" data-id="${item.id}">Продать ⭐ ${short(item.value)}</button><button class="btn ghost" data-act="rg-out" data-id="${item.id}">Вывести</button>` : "")
+    btns.innerHTML = (!item ? "" : item.lock ? `<button class="btn gold" data-act="rg-gate-inv">${ic("userPlus")}Пригласить друга</button>`
+      : `<button class="btn ghost" data-act="rg-sell" data-id="${item.id}">Продать ⭐ ${short(item.value)}</button><button class="btn ghost" data-act="rg-out" data-id="${item.id}">Вывести</button>`)
       + rgBtnHTML(RG_CASE).replace("Открыть за", "Ещё за").replace('class="btn cta"', 'class="btn cta rg-again"').replace('class="btn ghost" disabled', 'class="btn ghost rg-again" disabled');
     if (item) { won.scrollIntoView({ behavior: "smooth", block: "center" }); H.ok(); }
   } finally { RG_BUSY = false; rgStrip(); }
@@ -159,37 +161,78 @@ const rgIsCs = g => g.src === "cs";
 const _diRg = drawInventory;
 drawInventory = function () {
   const p = MYP; if (!p) return _diRg();
-  const all = p.gifts, real = RG && RG.on ? RG.bag : [];
-  if (INVK !== "all") p.gifts = all.filter(g => rgIsCs(g) === (INVK === "cs"));
-  try { _diRg(); } finally { p.gifts = all; }
+  // подарки из кейсов лежат и в общем списке (g.real — чтобы работать во всех играх), в сумке показываем их один раз — своим блоком
+  const all = p.gifts.filter(g => !g.real), real = RG && RG.on ? RG.bag : [], full = p.gifts;
+  p.gifts = INVK === "all" ? all : all.filter(g => rgIsCs(g) === (INVK === "cs"));
+  try { _diRg(); } finally { p.gifts = full; }
   const v = $("#v-inv"); if (!v) return;
   if (real.length) { const st = v.querySelector(".invstart"); if (st) st.classList.add("has"); }   // есть подарки из кейсов — без «Сумка пока пустая», но три шага и кнопку оставляем
   const cs = all.filter(rgIsCs).length, n = { all: all.length + real.length, tg: all.length - cs + real.length, cs };
   const tabs = `<div class="ctabs rg-kind">${[["all", "Все"], ["tg", "Telegram"], ["cs", "CS"]].map(([k, t]) => `<button data-act="rg-kind" data-v="${k}" class="${INVK === k ? "on" : ""}">${t}<em>${n[k]}</em></button>`).join("")}</div>`;
   const mine = INVK !== "cs" && real.length ? `<div class="rg-inv"><div class="sec-t">Из кейсов<span class="rg-sum">${RG.limit || RG.held ? "можно вывести на " + rgUsd(RG.left) : "вывод после первой покупки"}</span></div>
-    <div class="rg-grid">${real.map(x => `<button class="rg-cell k-${x.kind}${x.status !== "bag" ? " busy" : ""}" data-act="rg-item" data-id="${x.id}">${rgArt(x)}<b>${esc(x.title)}</b><small>${x.status !== "bag" ? "отправляется" : "⭐ " + short(x.value)}</small></button>`).join("")}</div></div>` : "";
+    <div class="rg-grid">${real.map(rgCell).join("")}</div></div>` : "";
   const adm = ME && ME.admin && RG && RG.on ? `<button class="rg-more rg-admbtn" data-act="rg-open">Админ: цены, балансы и заявки на вывод</button>` : "";
   const seg = v.querySelector(".seg"), tool = v.querySelector(".itool");
   if (seg) seg.insertAdjacentHTML("afterend", tabs + (tool ? mine + adm : "")); else v.insertAdjacentHTML("afterbegin", tabs + mine + adm);
 };
 const _riRg = renderInventory;
 renderInventory = async function () {
-  if (!RG) await rgLoad().catch(() => {});
+  await rgLoad().catch(() => {});   // каждый раз: подарок мог уйти на маркет, в игру или к другому игроку
   return _riRg.apply(this, arguments);
 };
 ACT["rg-kind"] = el => { INVK = el.dataset.v; H.sel(); drawInventory(); };
 // карточка подарка из кейса: вывести в Telegram или продать — как у скина CS
+const rgFriends = n => n === 1 ? "друга" : `${n} ${plural(n, ["друга", "друзей", "друзей"])}`;
+const rgLockText = x => `Подарок из бесплатного кейса под замком. Пригласи ${rgFriends(x.lock)} по своей ссылке — и сможешь вывести его в Telegram, продать или поставить в игре.`;
+const rgLockShort = x => x.lock > 1 ? `🔒 друзей: ${x.lock}` : "🔒 нужен друг";
+const rgBadge = x => x.status !== "bag" ? "отправляется" : x.lock ? rgLockShort(x) : x.busy === "market" ? "на маркете" : x.busy ? "в игре" : "";
+const rgCell = x => { const bd = rgBadge(x); return `<button class="rg-cell k-${x.kind}${bd ? " busy" : ""}${x.lock ? " lock" : ""}" data-act="rg-item" data-id="${x.id}">${rgArt(x)}<b>${esc(x.title)}</b><small>${bd || "⭐ " + short(x.value)}</small></button>`; };
 ACT["rg-item"] = async el => {
-  if (!RG) { try { await rgLoad(); } catch (e) { return; } }   // из профиля сюда можно попасть раньше, чем открыт экран кейсов
+  if (!RG || el.closest(".gsheet")) { try { await rgLoad(); } catch (e) { return; } }   // из профиля сюда можно попасть раньше, чем открыт экран кейсов
   const x = RG && RG.bag.find(i => i.id === +el.dataset.id); if (!x) return;
   H.imp("light");
-  const busy = x.status !== "bag", usd = rgCost(x), can = RG.left + 1e-9 >= usd;
-  openSheet(`<h2 class="gtitle">Подарок</h2>
-    <div class="rg-won">${rgArt(x, "big")}<b>${esc(x.title)}</b><small>⭐ ${fmt(x.value)} · ${rgUsd(usd)}</small>
-      <p>${busy ? esc(x.text) : "Настоящий подарок Telegram. Выведи его на свой аккаунт или продай игре за полную цену."}</p></div>
-    ${busy ? "" : `<div class="btns rg-col"><button class="btn cta" data-act="rg-out" data-id="${x.id}">Вывести в Telegram</button><button class="btn ghost" data-act="rg-sell" data-id="${x.id}">Продать за ⭐ ${fmt(x.value)}</button><button class="btn ghost" data-act="rg-upg" data-id="${x.id}">${ic("trend")}Апгрейд — рискнуть ради подарка дороже</button></div>
+  if (el.closest(".gsheet")) closeSheet();
+  const sending = x.status !== "bag", usd = rgCost(x), can = RG.left + 1e-9 >= usd;
+  const head = `<h2 class="gtitle">Подарок</h2><div class="rg-won">${rgArt(x, "big")}<b>${esc(x.title)}</b><small>⭐ ${fmt(x.value)} · ${rgUsd(usd)}</small>`;
+  if (sending) return openSheet(`${head}<p>${esc(x.text)}</p></div>`, "rg-s rg-item-s");
+  if (x.lock) return openSheet(`${head}<p>${rgLockText(x)}</p></div>
+    <div class="btns rg-col"><button class="btn cta" data-act="rg-gate-inv">${ic("userPlus")}Пригласить друга</button></div>
+    <p class="hint">Друг должен зайти в игру по твоей ссылке. Как только он зайдёт, замок снимется сам.</p>`, "rg-s rg-item-s");
+  if (x.busy === "market") return openSheet(`${head}<p>Подарок выставлен на маркет. Чтобы вывести или продать его игре, сначала сними с продажи.</p></div>
+    <div class="btns rg-col"><button class="btn cta" data-act="rg-unlist" data-id="${x.gid}">Снять с продажи</button></div>`, "rg-s rg-item-s");
+  if (x.busy) return openSheet(`${head}<p>Подарок сейчас занят: стоит в игре, лежит в сейфе, в залоге или в подарке по ссылке. Вернётся в сумку, когда заберёшь его оттуда.</p></div>`, "rg-s rg-item-s");
+  openSheet(`${head}<p>Настоящий подарок Telegram. Выведи его на свой аккаунт, продай игре за полную цену или играй им, как любым подарком.</p></div>
+    <div class="btns rg-col"><button class="btn cta" data-act="rg-out" data-id="${x.id}">Вывести в Telegram</button><button class="btn ghost" data-act="rg-sell" data-id="${x.id}">Продать за ⭐ ${fmt(x.value)}</button><button class="btn ghost" data-act="rg-upg" data-id="${x.id}">${ic("trend")}Апгрейд в подарок дороже</button>${x.gid ? `<button class="btn ghost" data-act="rg-more" data-id="${x.id}">${ic("tag")}На маркет, подарить, в сейф</button>` : ""}</div>
     <p class="hint">${!RG.limit && !RG.held ? `Вывод откроется после первой покупки звёзд: вывести можно подарков на сумму до ${RG.limitK}% от покупок.`
-      : can ? `Лимит вывода: осталось ${rgUsd(RG.left)}.` : `Лимит вывода: осталось ${rgUsd(RG.left)}, а подарок стоит ${rgUsd(usd)}. Лимит растёт с покупками.`}${x.kind === "nft" ? " Модель и фон будут как у самого доступного предложения на рынке." : ""}</p>`}`, "rg-s rg-item-s");
+      : can ? `Лимит вывода: осталось ${rgUsd(RG.left)}.` : `Лимит вывода: осталось ${rgUsd(RG.left)}, а подарок стоит ${rgUsd(usd)}. Лимит растёт с покупками.`}${x.kind === "nft" ? " Модель и фон будут как у самого доступного предложения на рынке." : ""}</p>`, "rg-s rg-item-s");
+};
+// обычная карточка подарка (маркет, подарить, сейф, кредит) — для подарка из кейса
+ACT["rg-more"] = async el => {
+  const id = +el.dataset.id;
+  try { MYP = await api("user/" + ME.id); } catch (e) { return; }
+  const g = MYP.gifts.find(i => i.real === id); if (!g) return toast("Подарок сейчас занят");
+  closeSheet(); openGift({ g, mine: true });
+};
+ACT["rg-unlist"] = async el => {
+  el.disabled = true;
+  try { await post(`gift/${el.dataset.id}/unlist`); H.ok(); toast("Снято с продажи", "ok"); closeSheet(); await rgLoad(); rgRepaint(); if (TAB === "inv") renderInventory(); if (TAB === "market") loadMarket(); }
+  catch (e) { el.disabled = false; }
+};
+// в обычной карточке у подарка из кейса: вывод в Telegram и свой апгрейд (цели — настоящие подарки), без дохода в час
+const _gshRg = giftSheetHTML;
+giftSheetHTML = function (o, mine) {
+  let h = _gshRg(o, mine);
+  const g = o.g; if (!g.real) return h;
+  h = h.replace(/<div class="sub">[^<]*<\/div>/, `<div class="sub">Подарок из кейса · выводится в Telegram</div>`)
+    .replace(/<div class="row kv[^>]*><span class="k">Доход<\/span>.*?<\/div>/s, "")
+    .replace(/<div class="disc">[^<]*<\/div>/, `<div class="disc">Настоящий подарок Telegram: его можно вывести на свой аккаунт, продать за полную цену, выставить на маркет или поставить в игре.</div>`)
+    .replace(/<button data-act="q-upg" data-k="[^"]*">/, `<button data-act="rg-upg" data-id="${g.real}">`);
+  // модель, фон и узор не показываем: у обычного подарка Telegram их нет, а коллекционный на выводе покупается на рынке — какой будет доступен
+  h = h.replace(/<div class="row kv"><span class="k">(Модель|Фон|Узор)<\/span>.*?<\/div>/gs, "");
+  if (!/^Обычный/.test(g.model)) h = h.replace("выставить на маркет или поставить в игре.</div>", "выставить на маркет или поставить в игре. На выводе модель и фон будут как у самого доступного предложения на рынке.</div>");
+  if (mine && g.price == null)
+    h = h.replace('<div class="btns"><button class="btn gold" data-act="present"', `<div class="btns"><button class="btn cta" data-act="rg-item" data-id="${g.real}">${ic("send")}Вывести в Telegram</button></div><div class="btns"><button class="btn gold" data-act="present"`);
+  return h;
 };
 
 // ---------------- апгрейд подарка из кейса: ставка — подарок из сумки, цель — подарок дороже ----------------
@@ -214,7 +257,7 @@ ACT["rg-upg"] = async el => {
   try { d = await api(`realgifts/item/${id}/upgrade`); } catch (e) { return; }
   H.sel();
   RGU = { id, item: d.item, targets: d.targets, busy: false, pick: d.targets.find(t => t.chance <= 50) || d.targets[0] || null };
-  if (el.closest(".rg-item-s, .pgs")) closeSheet();
+  if (el.closest(".rg-item-s, .pgs, .pgs1, .gsheet")) closeSheet();
   openSheet(rgUpgHTML(), "rg-s rg-upg-s");
 };
 ACT["rgu-pick"] = el => {
@@ -351,10 +394,7 @@ function rgGateHTML(c, g) {
       <div class="rg-gate">${g.steps.map((x, i) => `<div class="rg-gs${x.done ? " done" : ""}"><i>${x.done ? ic("check") : i + 1}</i><b>${esc(x.title)}</b>
         ${x.url ? `<button class="btn sm gold" data-act="rg-gate-link" data-url="${esc(x.url)}">${x.done ? "Открыть" : "Подписаться"}</button>` : ""}</div>`).join("")}</div>${check}`;
   }
-  return `<h2 class="gtitle">Друг за прокрут</h2>
-    <p class="hint rg-gate-t">Первый бесплатный кейс был за подписку. Каждый следующий открывается за нового друга: он заходит в игру по твоей ссылке — и кейс твой.</p>
-    <div class="rg-gate"><div class="rg-gs${g.have >= g.need ? " done" : ""}"><i>${g.have >= g.need ? ic("check") : ic("userPlus")}</i><b>Друзей: ${Math.min(g.have, g.need)} из ${g.need}</b>
-      <button class="btn sm gold" data-act="rg-gate-inv">Пригласить</button></div></div>${check}`;
+  return "";
 }
 function rgGate(c, g) { H.sel(); const el = openSheet(rgGateHTML(c, g), "rg-s rg-gate-s"); el._case = c; }
 Object.assign(ACT, {
@@ -368,7 +408,7 @@ Object.assign(ACT, {
     const sheet = el.closest(".sheet"), c = sheet && sheet._case; if (!c) return;
     el.disabled = true;
     let g; try { g = await api(`realgifts/free/${c.id}`); } catch (e) { el.disabled = false; return; }
-    if (!g.ok) { H.err(); replaceSheet(sheet, rgGateHTML(c, g)); topSheet()._case = c; return toast(g.kind === "subs" ? "Подпишись на все каналы из списка" : "Друг ещё не зашёл в игру по твоей ссылке"); }
+    if (!g.ok) { H.err(); replaceSheet(sheet, rgGateHTML(c, g)); topSheet()._case = c; return toast("Подпишись на все каналы из списка"); }
     closeSheet();
     const btn = document.querySelector(`.sheet [data-act="rg-spin"][data-id="${c.id}"]`);
     if (btn) { btn._gateOk = true; rgSpin(btn); }

@@ -77,12 +77,11 @@ def _payer(c, uid):
 
 
 def _need_friend(u, c):
-    """Бесплатный кейс подарков со второго раза открывается только за нового друга."""
+    """В сумке лежит подарок из бесплатного кейса, который ждёт приглашённого друга (до друга его не вывести и не продать)."""
     rg = c["rg"]
     if not rg or rg.FREE_FRIENDS <= 0:
         return False
-    row = q1("SELECT opens, refs_at FROM free_gate WHERE user=? AND cid='free'", u["id"])
-    return bool(row and row["opens"] and (u["refs"] or 0) - row["refs_at"] < rg.FREE_FRIENDS)
+    return bool(q1("SELECT 1 FROM real_items WHERE user=? AND status='bag' AND need_refs>?", u["id"], u["refs"] or 0))
 
 
 def _free_ready(u, c):
@@ -91,7 +90,7 @@ def _free_ready(u, c):
 
 # ------------------------------------------------------------------ события: личное
 def ev_free_ready(u, c):
-    if not _free_ready(u, c) or _need_friend(u, c):
+    if not _free_ready(u, c):
         return None
     g = c["free_gifts"]
     return {"card": ("gift", "Бесплатный кейс", "Готов!", False), "texts": [
@@ -102,12 +101,12 @@ def ev_free_ready(u, c):
 
 
 def ev_free_friend(u, c):
-    if not _free_ready(u, c) or not _need_friend(u, c):
+    if not _need_friend(u, c):
         return None
-    return {"card": ("invite", "Бесплатный кейс", "+1 друг", False), "texts": [
-        "🎁 Бесплатный кейс с подарком готов — чтобы открыть, позови одного друга. Ссылка для приглашения в игре.",
-        f"{nm(u)}, кейс за 0 ⭐ ждёт. Один новый друг по твоей ссылке — и он открывается.",
-        "👥 Друг заходит по твоей ссылке — ты крутишь бесплатный кейс с настоящим подарком. Сегодня он ещё не открыт."]}
+    return {"card": ("invite", "Подарок ждёт", "+1 друг", False), "texts": [
+        "🎁 В сумке лежит подарок из бесплатного кейса. Позови одного друга по своей ссылке — и его можно вывести в Telegram.",
+        f"{nm(u)}, твой подарок под замком. Один новый друг по твоей ссылке — и он твой: выводи, продавай или ставь в игры.",
+        "👥 Друг заходит по твоей ссылке — подарок из бесплатного кейса открывается. Ссылка для приглашения в игре."]}
 
 
 def ev_streak_risk(u, c):

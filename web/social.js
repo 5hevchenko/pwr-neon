@@ -117,7 +117,7 @@ async function renderMarket() {
 }
 async function loadMarket() {
   const d = await api(`market?sort=${MK.sort}&col=${enc(MK.col)}&qs=${enc(MK.qs)}&mine=${MK.mine}&rare=${MK.rare}`);
-  if (TAB !== "market") return;
+  if (TAB !== "market" || !$("#mk-st")) return;   // экран маркета мог смениться на другую вкладку (витрина, скупка)
   $("#mk-st").innerHTML = `<div><b>${num(d.count)}</b><span>лотов</span></div><div><b>${d.floor ? "⭐ " + short(d.floor) : "—"}</b><span>${MK.col ? "флор коллекции" : "флор"}</span></div><div><b>⭐ ${short(d.vol24)}</b><span>оборот 24ч · ${d.sales24}</span></div>`;
   $("#mk-my").textContent = d.myCount ? ` · ${d.myCount}` : "";
   $("#mk-cols").innerHTML = [["", "Все коллекции"], ...d.cols.map(c => [c, c])].map(([k, t]) => `<span data-act="mk" data-k="col" data-v="${esc(k)}" class="${k === MK.col ? "on" : ""}">${k ? `<img src="${A.orig(k, 64)}" alt="">` : ""}${esc(t)}</span>`).join("");
@@ -232,12 +232,12 @@ function profileHTML(p, tab = "show") {
   const byValue = [...p.gifts].sort((a, b) => b.value - a.value);
   const show = p.pinned.length ? p.pinned : (p.pinnedReal || []).length ? [] : byValue.slice(0, 3);
   const cell = (g, o = {}) => `<div class="gcell" data-act="gift" data-k="${reg({ g, mine: isMe, owner: p })}">${giftHTML(g, o)}${g.price != null ? `<span class="onm">${ic("tag")}${short(g.price)}</span>` : ""}<div class="cap">${giftName(g)}</div></div>`;
-  // подарки из кейсов (настоящие) лежат отдельно от скинов и коллекций — в профиле показываем и те, и другие
-  const real = p.real || [], rcell = x => `<${isMe ? `button data-act="rg-item" data-id="${x.id}"` : "div"} class="rg-cell k-${x.kind}">${rgArt(x)}<b>${esc(x.title)}</b><small>⭐ ${short(x.value)}</small></${isMe ? "button" : "div"}>`;
+  // подарки из кейсов лежат в общем списке подарков; отдельно приходят только те, что под замком (из бесплатного кейса, ждут друга)
+  const real = p.real || [], rcell = x => `<${isMe ? `button data-act="rg-item" data-id="${x.id}"` : "div"} class="rg-cell k-${x.kind}${x.lock ? " busy lock" : ""}">${rgArt(x)}<b>${esc(x.title)}</b><small>${x.lock ? rgLockShort(x) : "⭐ " + short(x.value)}</small></${isMe ? "button" : "div"}>`;
   let body;
   if (tab === "legacy") body = lgBody(p);
-  else if (tab === "gifts") body = (real.length ? `<div class="rg-grid">${real.map(rcell).join("")}</div>` : "")
-    + (p.gifts.length ? `${real.length ? `<div class="sec-t">Скины и коллекции</div>` : ""}<div class="ggrid">${byValue.map(g => cell(g, { lite: true })).join("")}</div>` : "")
+  else if (tab === "gifts") body = (real.length ? `<div class="sec-t" style="margin-top:0">Под замком — ждут друга</div><div class="rg-grid">${real.map(rcell).join("")}</div>` : "")
+    + (p.gifts.length ? `${real.length ? `<div class="sec-t">Подарки</div>` : ""}<div class="ggrid">${byValue.map(g => cell(g, { lite: true })).join("")}</div>` : "")
     || emptyHTML("gift", isMe ? "Открой первый кейс!" : "Подарков пока нет");
   else if (tab === "ach") body = `<div class="achs">${p.ach.map(a => `<div class="ach${a.got ? " got" : ""}"><span class="ai">${ic(ACH_IC[a.t] || "award")}</span><b>${esc(a.t)}</b><span>${esc(a.d)}</span>${achPct(a)}${a.got ? `<i>${ic("check")}</i>` : ""}</div>`).join("")}</div>`;
   else if (tab === "stats") {

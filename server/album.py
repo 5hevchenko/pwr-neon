@@ -14,7 +14,7 @@ db.executescript("CREATE TABLE IF NOT EXISTS album_claims(user INTEGER, tier INT
 
 def _owned(uid, aged):
     sql = "SELECT col, COUNT(DISTINCT model) n FROM gifts WHERE owner=?" + (" AND COALESCE(acq,0)<=?" if aged else "") + " GROUP BY col"
-    return {r["col"]: r["n"] for r in (q(sql, uid, now() - 86400) if aged else q(sql, uid)) if r["col"] not in E.REMOTE}   # скины CS в альбом не входят
+    return {r["col"]: r["n"] for r in (q(sql, uid, now() - 86400) if aged else q(sql, uid)) if r["col"] not in E.REMOTE and r["col"] not in E.TGREAL}   # скины CS в альбом не входят
 
 
 @app.get(R + "/album")

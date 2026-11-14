@@ -696,7 +696,7 @@ async function refreshProfileSheets() {
 async function editProfile() {
   await loadBanners();
   MYP = await api("user/" + ME.id);
-  const ed = { bio: MYP.bio || "", banner: MYP.banner || "", pinned: MYP.pinned.map(g => g.id).concat((MYP.pinnedReal || []).map(x => -x.id)), notif: ME.notif !== false, img: MYP.bannerImg || "", newImg: null,
+  const ed = { bio: MYP.bio || "", banner: MYP.banner || "", pinned: MYP.pinned.map(g => g.id), notif: ME.notif !== false, img: MYP.bannerImg || "", newImg: null,
     nick: MYP.nick || "", ava: MYP.avatarImg || "", newAva: null };
   const el = openSheet(`<h2 class="gtitle">Профиль</h2>
     <div class="eprev" id="e-prev"></div>
@@ -722,8 +722,7 @@ async function editProfile() {
       <div class="s">бесплатный кейс, серия бонусов, твой ход</div></div><button class="sw${ed.notif ? " on" : ""}" id="e-notif"></button></div></div>
     <div class="esave"><button class="btn cta" data-act="save-profile">${ic("check")}Сохранить</button></div>`, "edit-s");
   const all = new Map(MYP.gifts.map(g => [g.id, g]));
-  const realAll = MYP.real || [];   // подарки из кейсов: на витрине они идут с отрицательным номером
-  for (const x of realAll) all.set(-x.id, { ...x, _real: true });
+  const realAll = [];   // подарки из кейсов теперь лежат в общем списке подарков и закрепляются как все
   const draw = () => {
     const curAva = ed.newAva !== null ? ed.newAva : ed.ava;       // "" — вернуть аватар из Telegram
     const pu = { ...MYP, name: ed.nick.trim() || MYP.tgName || "Игрок", photo: curAva || MYP.tgPhoto || "" };
@@ -1000,7 +999,7 @@ const ACT = {
     if (!MYP) MYP = await api("user/" + ME.id);
     const id = +el.dataset.id; let ids = MYP.pinned.map(g => g.id);
     if (ids.includes(id)) ids = ids.filter(x => x !== id); else { if (ids.length >= 6) return toast("Можно закрепить до 6 подарков"); ids.push(id); }
-    await post("profile", { bio: MYP.bio, banner: MYP.banner, pinned: ids.concat((MYP.pinnedReal || []).map(x => -x.id)) }); H.ok(); toast(ids.includes(id) ? "Закреплено" : "Откреплено", "ok");
+    await post("profile", { bio: MYP.bio, banner: MYP.banner, pinned: ids }); H.ok(); toast(ids.includes(id) ? "Закреплено" : "Откреплено", "ok");
     giftChanged();
   },
   "edit-profile": () => editProfile(),

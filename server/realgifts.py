@@ -507,18 +507,203 @@ W.EXTRA_USED.append(_used)
 STATUS = {"sending": "Отправляем", "pending": "Проверяем вручную — обычно до суток", "sent": "Отправлен в Telegram", "sold": "Продан"}
 
 
-def _item(r):
+# ---------------- подарок из кейса = обычный подарок игры ----------------
+# У каждого подарка из кейса, который лежит в сумке, есть запись-«зеркало» в общей таблице gifts (gifts.real = номер в real_items,
+# src='real' — продаётся за полную цену и не приносит дохода, как скины). Поэтому он работает везде, где работают остальные
+# подарки: маркет игроков, джекпот, столы, сейф, обмены, залог, витрина. Две таблицы держат в согласии триггеры:
+#   зеркало сменило хозяина (маркет, выигрыш, обмен) → у настоящего подарка тот же хозяин;
+#   зеркало удалено (сожгли в игре, продали банку)    → настоящий подарок сгорел;
+#   настоящий подарок ушёл из сумки (вывод, продажа)  → зеркало удалено.
+# Подарок из бесплатного кейса заблокирован, пока игрок не пригласит друга (need_refs): зеркала у него нет, вывести и продать нельзя.
+for _sql in ("ALTER TABLE real_items ADD COLUMN need_refs INTEGER DEFAULT 0",):
+    try:
+        db.execute(_sql)
+    except Exception:
+        pass
+db.executescript("""
+CREATE TABLE IF NOT EXISTS rg_cols(title TEXT, ref TEXT PRIMARY KEY);
+CREATE INDEX IF NOT EXISTS gifts_real ON gifts(real);
+CREATE TRIGGER IF NOT EXISTS gifts_real_owner AFTER UPDATE OF owner ON gifts WHEN NEW.real IS NOT NULL AND NEW.owner >= 0
+BEGIN UPDATE real_items SET user = NEW.owner WHERE id = NEW.real AND status = 'bag'; END;
+CREATE TRIGGER IF NOT EXISTS gifts_real_del AFTER DELETE ON gifts WHEN OLD.real IS NOT NULL
+BEGIN UPDATE real_items SET status = 'burned', upd = CAST(strftime('%s','now') AS INTEGER) WHERE id = OLD.real AND status = 'bag'; END;
+CREATE TRIGGER IF NOT EXISTS real_items_gone AFTER UPDATE OF status ON real_items WHEN NEW.status != 'bag'
+BEGIN DELETE FROM gifts WHERE real = NEW.id; END;
+""")
+
+
+def _reg(title, ref):
+    """Обычный подарок Telegram → «коллекция» каталога (как скины). Возвращает (коллекция, модель)."""
+    ref = str(ref)
+    row = q1("SELECT title FROM rg_cols WHERE ref=?", ref)
+    col = row["title"] if row else title
+    m = E.reg_tg(col, ref)
+    if m is None:   # название совпало с коллекцией игры
+        col = title + " 🎁"
+        m = E.reg_tg(col, ref)
+    if not row:
+        db.execute("INSERT OR IGNORE INTO rg_cols(title, ref) VALUES(?,?)", (col, ref))
+    d = E.CATALOG[col]
+    A.LOOK[col] = ({x[0]: x[1] for x in d["models"]}, {b[0]: b for b in d["backdrops"]}, {x[0]: x[1] for x in d["symbols"]})
+    return col, m
+
+
+for _r in q("SELECT title, ref FROM rg_cols ORDER BY rowid"):   # тот же порядок, что при первом появлении: имена моделей не съезжают
+    _reg(_r["title"], _r["ref"])
+
+
+def _look(kind, ref, title, seed):
+    """Вид подарка из кейса в общей таблице: (коллекция, модель, фон, узор)."""
+    rng = random.Random(f"rg:{seed}")
+    if kind == "nft" and ref in E.NATIVE:   # коллекционный: на вывод покупается самый дешёвый — показываем самую частую модель
+        d = E.CATALOG[ref]
+        return ref, max(d["models"], key=lambda x: x[1])[0], rng.choice(d["backdrops"])[0], rng.choice(d["symbols"])[0]
+    col, m = _reg(title, ref)
+    d = E.CATALOG[col]
+    rng = random.Random(f"rg:{ref}")   # одинаковые подарки выглядят одинаково
+    return col, m, rng.choice(d["backdrops"])[0], rng.choice(d["symbols"])[0]
+
+
+def _refs(uid):
+    r = q1("SELECT refs FROM users WHERE id=?", uid)
+    return (r["refs"] or 0) if r else 0
+
+
+def _mirror(it):
+    """Зеркало подарка в gifts (создаёт, если нет). Вызывать внутри транзакции."""
+    g = q1("SELECT * FROM gifts WHERE real=?", it["id"])
+    if g:
+        return g
+    col, model, bd, sym = _look(it["kind"], it["ref"], it["title"], it["id"])
+    cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created,src,real) VALUES(?,?,?,?,?,?,?,?,'real',?)",
+                     (it["user"], col, model, bd, sym, it["id"], it["value"], it["ts"] or now(), it["id"]))
+    return q1("SELECT * FROM gifts WHERE id=?", cur.lastrowid)
+
+
+def _sync(uid):
+    refs = None
+    for it in q("SELECT r.* FROM real_items r LEFT JOIN gifts g ON g.real=r.id WHERE r.user=? AND r.status='bag' AND g.id IS NULL", uid):
+        if it["need_refs"]:
+            refs = _refs(uid) if refs is None else refs
+            if it["need_refs"] > refs:
+                continue
+        _mirror(it)
+
+
+def ensure(uid):
+    """У каждого открытого (не заблокированного) подарка игрока в сумке есть зеркало в gifts."""
+    with A.LOCK:
+        if not q1("SELECT 1 FROM real_items r LEFT JOIN gifts g ON g.real=r.id WHERE r.user=? AND r.status='bag' AND g.id IS NULL LIMIT 1", uid):
+            return
+        if db.in_transaction:
+            _sync(uid)
+        else:
+            with tx():
+                _sync(uid)
+
+
+def unlocked_note(uid):
+    """Пришёл друг: какие подарки из бесплатного кейса он открыл — строка для уведомления (и сразу зеркала)."""
+    refs = _refs(uid)
+    rows = q("SELECT title FROM real_items WHERE user=? AND status='bag' AND need_refs=?", uid, refs)
+    if not rows:
+        return ""
+    try:
+        ensure(uid)
+    except Exception as e:
+        print("realgifts unlock:", type(e).__name__, e, flush=True)
+    names = ", ".join(esc(r["title"]) for r in rows[:3])
+    return f"\n\n🔓 Подарок из бесплатного кейса открыт: <b>{names}</b>. Его можно вывести в Telegram, продать или поставить в игре."
+
+
+def give(uid, x, cid, paid, need=0):
+    """Выдать игроку настоящий приз x (из _real): запись в real_items и её зеркало. Возвращает (real_items, gifts или None, если заблокирован)."""
+    t = now()
+    cur = db.execute("INSERT INTO real_items(user,kind,ref,title,xtr,value,usd,cid,paid,status,ts,upd,need_refs) VALUES(?,?,?,?,?,?,?,?,?,'bag',?,?,?)",
+                     (uid, x["kind"], x["ref"], x["title"], x["xtr"], x["value"], x["usd"], cid, paid, t, t, need))
+    it = q1("SELECT * FROM real_items WHERE id=?", cur.lastrowid)
+    return it, (None if need and need > _refs(uid) else _mirror(it))
+
+
+def give_gift(uid, x, cid, paid):
+    """То же для игр на подарках (обменник, крафт): возвращает строку gifts."""
+    return give(uid, x, cid, paid)[1]
+
+
+def _pool():
+    seen, out = set(), []
+    for x in _real({"gifts": list(NAMES)}):
+        if x["key"] not in seen:
+            seen.add(x["key"])
+            out.append(x)
+    return out
+
+
+def pick_le(value):
+    """Самый дорогой настоящий приз не дороже value (для крафта). Нет такого — None."""
+    ok = [x for x in _pool() if x["value"] <= value]
+    return max(ok, key=lambda x: x["value"]) if ok else None
+
+
+def swap_targets(g):
+    """Обменник: на что можно обменять подарок из кейса — другие настоящие подарки той же или чуть меньшей ценности."""
+    it = q1("SELECT * FROM real_items WHERE id=?", g["real"])
+    own = f"{it['kind']}:{it['ref']}" if it else ""
+    out = []
+    for x in sorted(_pool(), key=lambda x: -x["value"]):
+        if x["key"] == own or not 0.6 * g["value"] <= x["value"] <= g["value"]:
+            continue
+        col, model, bd, sym = _look(x["kind"], x["ref"], x["title"], f"{g['id']}:{x['key']}")
+        out.append({"col": col, "model": model, "backdrop": bd, "symbol": sym, "value": x["value"], "num": 1, "x": x})
+        if len(out) >= 12:
+            break
+    return out
+
+
+def _claim(uid, it):
+    """Перед выводом, продажей и апгрейдом: подарок не заблокирован и не занят в игре или на маркете. Внутри транзакции."""
+    left = (it["need_refs"] or 0) - _refs(uid)
+    if left > 0:
+        err(f"Подарок из бесплатного кейса откроется, когда пригласишь {'друга' if left == 1 else str(left) + ' друзей'} — ссылка в разделе «Друзья»", 423)
+    g = q1("SELECT * FROM gifts WHERE real=?", it["id"])
+    if g:
+        if g["owner"] != uid:
+            err("Подарок сейчас занят — в игре, сейфе, залоге или обмене. Сначала забери его оттуда")
+        if g["price"] is not None:
+            err("Подарок выставлен на маркет — сначала сними его с продажи")
+        A.unpin(uid, g["id"])
+        A.cancel_trades_with(g["id"])
+
+
+def _item(r, ctx=None):
     d = {"id": r["id"], "kind": r["kind"], "ref": r["ref"], "title": r["title"], "value": r["value"], "status": r["status"], "ts": r["ts"],
          "text": r["note"] if r["status"] == "bag" else STATUS.get(r["status"], ""), "emoji": "🎁",
          "img": r["kind"] == "nft" or r["ref"] in _THUMBS or os.path.exists(os.path.join(A.ASSET_CACHE, f"tggift_{r['ref']}.webp"))}
     if r["status"] == "bag":
         d["usd"] = _now_usd(r)
+        left = (r["need_refs"] or 0) - (ctx["refs"] if ctx else _refs(r["user"])) if r["need_refs"] else 0
+        if left > 0:   # из бесплатного кейса: ждёт приглашённого друга
+            d["lock"] = left
+        g = ctx["mir"].get(r["id"]) if ctx else q1("SELECT id, owner, price FROM gifts WHERE real=?", r["id"])
+        if g:
+            d["gid"] = g["id"]
+            if g["owner"] != r["user"]:
+                d["busy"] = "game"
+            elif g["price"] is not None:
+                d["busy"] = "market"
     return d
 
 
-def public_bag(uid):
-    """Подарки из кейсов, которые лежат у игрока в сумке, — для его профиля (дорогие первыми)."""
-    return [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status='bag' ORDER BY value DESC, id DESC LIMIT 60", uid)]
+def _ctx(uid):
+    return {"refs": _refs(uid), "mir": {g["real"]: g for g in q("SELECT g.id, g.owner, g.price, g.real FROM gifts g JOIN real_items r ON r.id=g.real WHERE r.user=?", uid)}}
+
+
+def public_bag(uid, locked=False):
+    """Подарки из кейсов в сумке игрока — для его профиля (дорогие первыми). locked — только заблокированные: остальные уже есть
+    в общем списке подарков (зеркала)."""
+    ctx = _ctx(uid)
+    out = [_item(r, ctx) for r in q("SELECT * FROM real_items WHERE user=? AND status='bag' ORDER BY value DESC, id DESC LIMIT 60", uid)]
+    return [x for x in out if x.get("lock")] if locked else out
 
 
 def _pub(x):
@@ -544,18 +729,20 @@ def _free_in(c, u):
 
 def state(uid):
     fix_keys(uid)
+    ensure(uid)
+    ctx = _ctx(uid)
     limit, used = W.budget(uid)
     cases = {}
     for c in CASES:
         b = _BUILT.get(c["id"])
         if b and not b["paused"]:
             cases[b["id"]] = {"price": b["price"], "tops": tops(b["id"])}
-    bag = [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status IN ('bag','sending','pending') ORDER BY id DESC LIMIT 200", uid)]
+    bag = [_item(r, ctx) for r in q("SELECT * FROM real_items WHERE user=? AND status IN ('bag','sending','pending') ORDER BY id DESC LIMIT 200", uid)]
     hist = [_item(r) for r in q("SELECT * FROM real_items WHERE user=? AND status IN ('sent','sold') ORDER BY upd DESC LIMIT 15", uid)]
     return {"on": enabled(), "cases": cases, "ids": sorted(IDS), "bag": bag, "history": hist, "stars": bal(uid), "limit": limit, "used": used,
             "left": round(max(0, limit - used), 2), "held": W.held(uid), "holdHours": W.HOLD_H,
             "rtp": int(RTP * 100), "limitK": int(W.LIMIT_K * 100), "freeUsd": W.FREE_USER, "usdK": W.XTR_USD / shop.RATE / MARKUP,
-            "payer": payer(uid)}
+            "payer": payer(uid), "freeFriends": FREE_FRIENDS}
 
 
 @app.get(R + "/realgifts")
@@ -660,11 +847,13 @@ async def realgifts_img(gid: str):
 
 
 # ---------------- условия бесплатного кейса ----------------
-# Первый бесплатный прокрут — за подписку на каналы (FREE_CHANNELS), каждый следующий — за нового приглашённого друга.
+# Открыть бесплатный кейс можно без друга: нужна только подписка на каналы (FREE_CHANNELS), если они заданы. Друг нужен, чтобы
+# забрать выпавший подарок: до него подарок лежит в сумке под замком (need_refs) — не выводится, не продаётся, в играх не участвует.
 # FREE_CHANNELS — через запятую: «@канал» или «id|ссылка|название» (для закрытых чатов). Бот должен быть админом в каждом,
-# иначе Telegram не отвечает, подписан ли игрок. Список пуст — первый прокрут без условий.
+# иначе Telegram не отвечает, подписан ли игрок. Список пуст — прокрут без условий.
 db.execute("CREATE TABLE IF NOT EXISTS free_gate(user INTEGER, cid TEXT, opens INTEGER DEFAULT 0, refs_at INTEGER DEFAULT 0, "
            "PRIMARY KEY(user, cid))")
+FREE_EACH = conf("realgifts.free_lock_each", True)       # True — каждому подарку из бесплатного кейса нужен свой новый друг; False — один друг открывает все накопленные
 FREE_FRIENDS = conf("realgifts.free_friends", 1)        # сколько новых друзей нужно на каждый следующий бесплатный прокрут; 0 — условие снято
 _SUB_OK = {}                                            # (игрок, канал) → время последней удачной проверки подписки
 
@@ -699,16 +888,19 @@ async def _subscribed(uid, ch):
 
 
 async def free_gate(uid, cid):
-    """Что нужно сделать перед бесплатным прокрутом: {ok, kind: subs|friend, steps|need/have}."""
-    row = q1("SELECT * FROM free_gate WHERE user=? AND cid=?", uid, cid)
-    if not row or not row["opens"]:
-        chans = [] if DEV and "TG_API_URL" not in os.environ else _channels()
-        steps = [{"title": ch["title"], "url": ch["url"], "done": await _subscribed(uid, ch)} for ch in chans]
-        return {"ok": all(x["done"] for x in steps), "kind": "subs", "steps": steps}
+    """Что нужно сделать перед бесплатным прокрутом: подписка на каналы. Друг для открытия не нужен — он нужен, чтобы забрать
+    выпавший подарок (need_refs): {ok, kind: subs, steps, friends — сколько друзей откроет подарок}."""
+    chans = [] if DEV and "TG_API_URL" not in os.environ else _channels()
+    steps = [{"title": ch["title"], "url": ch["url"], "done": await _subscribed(uid, ch)} for ch in chans]
+    return {"ok": all(x["done"] for x in steps), "kind": "subs", "steps": steps, "friends": max(0, FREE_FRIENDS)}
+
+
+def _free_need(uid, cid, refs):
+    """Порог друзей для подарка из бесплатного кейса: каждому подарку — свой новый друг."""
     if FREE_FRIENDS <= 0:
-        return {"ok": True, "kind": "friend", "need": 0, "have": 0}
-    have = max(0, (q1("SELECT refs FROM users WHERE id=?", uid)["refs"] or 0) - row["refs_at"])
-    return {"ok": have >= FREE_FRIENDS, "kind": "friend", "need": FREE_FRIENDS, "have": have}
+        return 0
+    row = q1("SELECT refs_at FROM free_gate WHERE user=? AND cid=?", uid, cid)
+    return (max(refs, row["refs_at"] if row else 0) if FREE_EACH else refs) + FREE_FRIENDS
 
 
 @app.on_event("startup")
@@ -789,7 +981,7 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
                 err(f"Следующий бесплатный кейс — через {left // 3600} ч {left % 3600 // 60} мин" if left >= 3600 else f"Следующий бесплатный кейс — через {max(1, left // 60)} мин")
             if not price:
                 db.execute("UPDATE users SET ru_free_at=? WHERE id=?" if cid in E.RU_CASES else "UPDATE users SET last_free=? WHERE id=?", (t, uid))
-                db.execute("INSERT INTO free_gate(user,cid,opens,refs_at) VALUES(?,?,1,?) ON CONFLICT(user,cid) DO UPDATE SET opens=opens+1, refs_at=excluded.refs_at",
+                db.execute("INSERT INTO free_gate(user,cid,opens,refs_at) VALUES(?,?,1,?) ON CONFLICT(user,cid) DO UPDATE SET opens=opens+1",
                            (uid, cid, u["refs"] or 0))
             paid = price
             if u["stars"] < paid:
@@ -807,9 +999,12 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
         if it["kind"] == "star":   # звёзды сразу на баланс
             db.execute("UPDATE users SET stars=stars+? WHERE id=?", (it["value"], uid))
         else:
-            cur = db.execute("INSERT INTO real_items(user,kind,ref,title,xtr,value,usd,cid,paid,status,ts,upd) VALUES(?,?,?,?,?,?,?,?,?,'bag',?,?)",
-                             (uid, it["kind"], it["ref"], it["title"], it["xtr"], it["value"], it["usd"], cid, paid, t, t))
-            row = q1("SELECT * FROM real_items WHERE id=?", cur.lastrowid)
+            need = 0
+            if not price and not key:   # бесплатный кейс: подарок ждёт нового друга
+                need = _free_need(uid, cid, u["refs"] or 0)
+                if need:
+                    db.execute("UPDATE free_gate SET refs_at=? WHERE user=? AND cid=?", (need, uid, cid))
+            row = give(uid, it, cid, paid, need)[0]
         db.execute("UPDATE users SET stars=stars-?, opened=opened+1 WHERE id=?", (paid, uid))
         if key:
             event(uid, "gift", it["value"])
@@ -831,6 +1026,7 @@ def realgifts_sell(iid: int, uid=Depends(auth)):
         it = q1("SELECT * FROM real_items WHERE id=? AND user=?", iid, uid) or err("Это не твой подарок")
         if it["status"] != "bag":
             err("Этот подарок уже продан или отправляется")
+        _claim(uid, it)
         db.execute("UPDATE real_items SET status='sold', upd=? WHERE id=?", (now(), iid))
         db.execute("UPDATE users SET stars=stars+? WHERE id=?", (it["value"], uid))
     return {"paid": it["value"], **state(uid)}
@@ -879,6 +1075,7 @@ async def realgifts_upgrade(iid: int, req: Request, uid=Depends(auth)):
             err("Этот подарок уже продан или отправляется")
         hit = next(((x, p) for x, p in _upg_targets(uid, it["value"]) if x["key"] == key), None) or err("Эта цель сейчас недоступна — выбери другую")
         tg, chance = hit
+        _claim(uid, it)
         if A.SELF_GUARD:
             A.SELF_GUARD(uid, 0)
         rr, pf = fair.rolls(uid, "upgrade", ref=f"rg{iid}", n=1)
@@ -886,9 +1083,7 @@ async def realgifts_upgrade(iid: int, req: Request, uid=Depends(auth)):
         db.execute("UPDATE real_items SET status='burned', upd=? WHERE id=?", (t, iid))
         new = None
         if win:
-            cur = db.execute("INSERT INTO real_items(user,kind,ref,title,xtr,value,usd,cid,paid,status,ts,upd) VALUES(?,?,?,?,?,?,?,?,?,'bag',?,?)",
-                             (uid, tg["kind"], tg["ref"], tg["title"], tg["xtr"], tg["value"], tg["usd"], "upgrade", it["value"], t, t))
-            new = _item(q1("SELECT * FROM real_items WHERE id=?", cur.lastrowid))
+            new = _item(give(uid, tg, "upgrade", it["value"])[0])
         event(uid, "upgrade", (tg["value"] if win else 0) - it["value"], stake=it["value"], pf=pf, res={"p": round(chance, 6), "win": win})
         lvl = A.add_xp(uid, max(5, it["value"] // 20))
     return {"win": win, "chance": round(chance * 100, 2), "item": new, "target": _pub(tg), "levelup": lvl, "pf": pf, **state(uid)}
@@ -898,6 +1093,9 @@ async def realgifts_upgrade(iid: int, req: Request, uid=Depends(auth)):
 def _back(iid, note):
     with tx():
         db.execute("UPDATE real_items SET status='bag', note=?, upd=? WHERE id=? AND status='sending'", (note[:200], now(), iid))
+        it = q1("SELECT * FROM real_items WHERE id=? AND status='bag'", iid)
+        if it:
+            _mirror(it)
 
 
 def _to_admin(iid, uid, it, why):
@@ -987,6 +1185,7 @@ async def realgifts_withdraw(iid: int, uid=Depends(auth)):
         it = q1("SELECT * FROM real_items WHERE id=? AND user=?", iid, uid) or err("Это не твой подарок")
         if it["status"] != "bag":
             err("Этот подарок уже продан или отправляется")
+        _claim(uid, it)
         limit, used = W.budget(uid)
         if not limit:
             held = W.held(uid)
@@ -1051,6 +1250,7 @@ async def admin_resolve(iid: int, what: str, req: Request, aid=Depends(admin)):
             db.execute("UPDATE real_items SET status='sent', cost=?, note='', upd=? WHERE id=?", (round(cost, 4), now(), iid))
         else:
             db.execute("UPDATE real_items SET status='bag', note='', upd=? WHERE id=?", (now(), iid))
+            _mirror(q1("SELECT * FROM real_items WHERE id=?", iid))
     notify(it["user"], f"🎁 Подарок <b>{esc(it['title'])}</b> отправлен на твой аккаунт Telegram." if what == "done" else
            f"↩️ Подарок <b>{esc(it['title'])}</b> не получилось отправить — он снова в сумке. Попробуй вывести ещё раз или продай его.")
     return admin_state(aid)
@@ -1075,3 +1275,23 @@ async def _start():
     with tx():   # сервер перезапустился посреди отправки: исход неизвестен — на ручную проверку
         db.execute("UPDATE real_items SET status='pending', note='сервер перезапустился во время отправки' WHERE status='sending'")
     asyncio.create_task(loop())
+    try:
+        _migrate()
+    except Exception as e:
+        print("realgifts migrate:", type(e).__name__, e, flush=True)
+
+
+def _migrate():
+    """Подарки из кейсов, выигранные до появления зеркал, заводим в общую таблицу; подарки из бесплатного кейса — под замок до друга."""
+    free = [c["id"] for c in CASES if not c["price"]]
+    with tx():
+        if not A.kv_get("rg_free_lock") and FREE_FRIENDS > 0 and free:
+            marks = ",".join("?" * len(free))
+            db.execute(f"UPDATE real_items SET need_refs=(SELECT COALESCE(refs,0) FROM users WHERE id=real_items.user)+? "
+                       f"WHERE status='bag' AND paid=0 AND COALESCE(need_refs,0)=0 AND cid IN ({marks}) "
+                       f"AND NOT EXISTS(SELECT 1 FROM gifts g WHERE g.real=real_items.id)", (FREE_FRIENDS, *free))
+        db.execute("INSERT OR REPLACE INTO kv(k,v) VALUES('rg_free_lock','1')")
+        # зеркало в игре или на маркете, а подарок уже не в сумке — такого быть не должно, но висеть оно не будет
+        db.execute("DELETE FROM gifts WHERE real IS NOT NULL AND NOT EXISTS(SELECT 1 FROM real_items r WHERE r.id=gifts.real AND r.status='bag')")
+        for r in q("SELECT DISTINCT user FROM real_items WHERE status='bag' AND user>0"):
+            _sync(r["user"])

@@ -14,6 +14,7 @@ import os
 import random
 import re
 import sqlite3
+import sys
 import threading
 import time
 import urllib.parse
@@ -367,13 +368,15 @@ for _d in E.CATALOG.values():
 
 
 def gift_out(r, owner=False):
-    ml, bl, sl = LOOK[r["col"]]
-    b = bl.get(r["backdrop"]) or BACKDROPS.get(r["backdrop"])
+    ml, bl, sl = LOOK.get(r["col"]) or LOOK[E.CUSTOM_DONOR]
+    b = bl.get(r["backdrop"]) or BACKDROPS.get(r["backdrop"]) or next(iter(bl.values()))
     g = {"id": r["id"], "col": r["col"], "model": r["model"], "backdrop": r["backdrop"], "symbol": r["symbol"],
          "num": r["num"], "value": r["value"], "price": r["price"],
          "mp": ml.get(r["model"], 0), "bp": b[1], "sp": sl.get(r["symbol"], 0), "c": b[2:6]}
     if "src" in r.keys() and r["src"]:
         g["src"] = r["src"]
+    if "real" in r.keys() and r["real"]:   # подарок из кейса (настоящий): его запись в real_items; выводится в Telegram
+        g["real"] = r["real"]
     if owner:
         g["owner"] = r["owner"]
     return g
@@ -542,7 +545,8 @@ def register(tg_user, start_param="", bid=0):
     if ref:
         L1, B1 = refs.cfg("l1_level"), refs.cfg("l1_bonus")
         notify(ref, f"🎉 По твоей ссылке пришёл <b>{esc(name)}</b>." + (f" Тебе +{S(jb)} ⭐" if jb else "")
-               + (f"\n\nКогда он дойдёт до {L1} уровня — ещё +{S(B1)} ⭐" if refs.cfg("on") and B1 else ""))
+               + (f"\n\nКогда он дойдёт до {L1} уровня — ещё +{S(B1)} ⭐" if refs.cfg("on") and B1 else "")
+               + (sys.modules["realgifts"].unlocked_note(ref) if "realgifts" in sys.modules else ""))
     return uid, ref
 
 
@@ -1038,7 +1042,8 @@ def look_of(col, seed):
     return {"c": b[2:6], "symbol": s[0]}
 
 
-for _sql in ("ALTER TABLE gifts ADD COLUMN src TEXT",                       # откуда подарок: 'cs' — кейс или пропуск SKINBOX, 'ru' — кейс RubUp (продаются за 100% ценности)
+for _sql in ("ALTER TABLE gifts ADD COLUMN real INTEGER",                   # подарок из кейса (настоящий): номер его записи в real_items (realgifts.py)
+             "ALTER TABLE gifts ADD COLUMN src TEXT",                       # откуда подарок: 'cs' — кейс или пропуск SKINBOX, 'ru' — кейс RubUp (продаются за 100% ценности)
              "ALTER TABLE users ADD COLUMN ru_free_at INTEGER DEFAULT 0"):   # когда открыт бесплатный кейс RubUp
     try:
         db.execute(_sql)
@@ -1247,10 +1252,18 @@ def friend_status(a, b):
 @app.get(R + "/user/{tid}")
 def profile(tid: int, uid=Depends(auth)):
     u = q1("SELECT * FROM users WHERE id=?", tid) or err("игрок не найден", 404)
+    if "realgifts" in __import__("sys").modules:
+        __import__("sys").modules["realgifts"].ensure(tid)   # подарки из кейсов — в общую таблицу подарков
     gifts = [gift_out(r) for r in q("SELECT * FROM gifts WHERE owner=? ORDER BY id DESC", tid)]
     pin_ids = json.loads(u["pinned"] or "[]")
+    if any(pid < 0 for pid in pin_ids):   # раньше подарки из кейсов закреплялись отрицательным номером — теперь это обычные подарки
+        by_real = {g["real"]: g["id"] for g in gifts if g.get("real")}
+        pin_ids = [by_real.get(-pid) if pid < 0 else pid for pid in pin_ids]
+        pin_ids = [pid for pid in pin_ids if pid]
+        db.execute("UPDATE users SET pinned=? WHERE id=?", (json.dumps(pin_ids), tid))
     pinned = [g for pid in pin_ids for g in gifts if g["id"] == pid]
-    real = __import__("sys").modules["realgifts"].public_bag(tid) if "realgifts" in __import__("sys").modules else []
+    # подарки из кейсов лежат в общем списке gifts; отдельно — только те, что ждут приглашённого друга (из бесплатного кейса)
+    real = __import__("sys").modules["realgifts"].public_bag(tid, locked=True) if "realgifts" in __import__("sys").modules else []
     fr = q1("SELECT COUNT(*) n FROM friends WHERE (a=? OR b=?) AND status='ok'", tid, tid)["n"]
     worth = net_worth(tid)
     games = {r["kind"]: r["n"] for r in q(f"SELECT kind, COUNT(*) n FROM events WHERE user=? AND kind IN {GAME_KINDS} GROUP BY kind", tid)}
@@ -1262,7 +1275,7 @@ def profile(tid: int, uid=Depends(auth)):
             "avatarImg": u["avatar"] if "avatar" in u.keys() else "", "tgPhoto": u["photo"] or "",
             "stats": {"games": games, "won": won, "lost": lost, "best": best, "rounds": sum(games.values())}, **user_brief(u), "lv": level_info(u["xp"]), "bio": u["bio"], "banner": u["banner"],
             "pinned": pinned, "gifts": gifts, "worth": worth, "opened": u["opened"],
-            "real": real, "pinnedReal": [x for pid in pin_ids if pid < 0 for x in real if x["id"] == -pid],   # подарки из кейсов (настоящие) и какие из них на витрине
+            "real": real, "pinnedReal": [],
             "badges": json.loads(u["p_badges"] or "[]") if "p_badges" in u.keys() else [], "cover": u["p_cover"] if "p_cover" in u.keys() else 0,
             "bestCrash": u["best_crash"], "friends": fr, "refs": u["refs"], "since": u["created"],
             "seen": u["seen"] or 0, "now": now(),   # последний онлайн (seen обновляется при входе, не чаще раза в минуту)
@@ -1401,8 +1414,6 @@ async def edit_profile(req: Request, uid=Depends(auth)):
             err("Ник — минимум 2 символа")
     with tx():
         own = {r["id"] for r in q("SELECT id FROM gifts WHERE owner=?", uid)}
-        if "realgifts" in __import__("sys").modules:   # подарки из кейсов на витрине — с отрицательным номером
-            own |= {-r["id"] for r in q("SELECT id FROM real_items WHERE user=? AND status='bag'", uid)}
         pinned = [p for p in pinned if p in own]
         db.execute("UPDATE users SET bio=?, banner=?, pinned=? WHERE id=?", (bio, banner, json.dumps(pinned), uid))
         if set_nick:
@@ -1708,6 +1719,8 @@ async def upgrade(req: Request, uid=Depends(auth)):
         gifts = [own_gift(g, uid) for g in gids]
         if any(g["price"] is not None for g in gifts):
             err("сначала сними подарки с маркета")
+        if any(g["real"] for g in gifts):
+            err("Подарок из кейса апгрейдится в настоящий подарок — открой его карточку в сумке и нажми «Апгрейд»")
         sv, tv = sum(g["value"] for g in gifts), sum(t[3] for t in targets)
         if tv < 1.2 * sv:
             err("цель должна быть дороже ставки хотя бы в 1.2 раза")
@@ -1871,6 +1884,10 @@ def swap_options(gid: int, uid=Depends(auth)):
     if g["price"] is not None:
         err("сначала сними подарок с маркета")
     v = g["value"]
+    if g["real"]:   # подарок из кейса меняется на другой настоящий подарок той же или меньшей ценности
+        found = __import__("sys").modules["realgifts"].swap_targets(g)
+        SWAP[uid] = {"gid": gid, "targets": found, "ts": time.time(), "real": True}
+        return [preview_out(d["col"], d) for d in found]
     found, seen = [], {(g["col"], g["model"])}
     cols = list(E.NATIVE)
     for _ in range(1500):
@@ -1898,12 +1915,17 @@ async def swap(req: Request, uid=Depends(auth)):
         g = own_gift(gid, uid)
         if g["price"] is not None:
             err("сначала сними подарок с маркета")
-        db.execute("DELETE FROM gifts WHERE id=?", (gid,))
+        if bool(g["real"]) != bool(st.get("real")):
+            err("обнови варианты обмена")
+        db.execute("DELETE FROM gifts WHERE id=?", (gid,))   # у подарка из кейса вместе с записью сгорает и он сам (триггер gifts_real_del)
         unpin(uid, gid)
         cancel_trades_with(gid)
-        cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created) VALUES(?,?,?,?,?,?,?,?)",
-                         (uid, t["col"], t["model"], t["backdrop"], t["symbol"], t["num"], t["value"], now()))
-        new = gift_out(q1("SELECT * FROM gifts WHERE id=?", cur.lastrowid))
+        if st.get("real"):
+            new = gift_out(__import__("sys").modules["realgifts"].give_gift(uid, t["x"], "swap", g["value"]))
+        else:
+            cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created) VALUES(?,?,?,?,?,?,?,?)",
+                             (uid, t["col"], t["model"], t["backdrop"], t["symbol"], t["num"], t["value"], now()))
+            new = gift_out(q1("SELECT * FROM gifts WHERE id=?", cur.lastrowid))
     SWAP.pop(uid, None)
     return {"gift": new}
 
@@ -3009,6 +3031,15 @@ def _custom_asset(raw, request):
     """Картинка своего подарка → Response; узор своего подарка → путь у донора; обычный подарок → None."""
     parts = [urllib.parse.unquote(x) for x in raw.split("/")]
     kind, col = parts[0], parts[1].removesuffix(".png").removesuffix(".json") if len(parts) > 1 else ""
+    if col in E.TGREAL:   # обычный подарок Telegram из кейса: картинка — его стикер (realgifts), узор — у донора
+        if kind == "pattern":
+            return "pattern/" + urllib.parse.quote(E.CUSTOM_DONOR) + "/" + "/".join(raw.split("/")[2:])
+        if raw.endswith(".json"):
+            return Response(status_code=404)
+        from fastapi.responses import RedirectResponse
+        refs = E.TGREAL[col]
+        model = parts[2].removesuffix(".png") if kind == "model" and len(parts) > 2 else ""
+        return RedirectResponse(R + "/realgifts/img/" + (refs.get(model) or next(iter(refs.values()))), status_code=302)
     if col in E.REMOTE:   # скины SKINBOX: картинка со Steam CDN (кэшируется ниже, как подарки Telegram), узор — у донора
         if kind == "pattern":
             return "pattern/" + urllib.parse.quote(E.CUSTOM_DONOR) + "/" + "/".join(raw.split("/")[2:])

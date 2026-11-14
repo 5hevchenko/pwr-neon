@@ -202,7 +202,9 @@ def _do_wipe(by):
         db.execute("UPDATE sf_rounds SET status='cancelled' WHERE status='open'")
         db.execute("DELETE FROM jp_tickets WHERE day>=?", (A.day_start(),))
         if CFG["gifts"]:
-            db.execute("DELETE FROM gifts")
+            db.execute("DELETE FROM gifts WHERE real IS NULL")   # подарки из кейсов (настоящие, выводятся в Telegram) вайп не трогает:
+            db.execute("UPDATE gifts SET price=NULL, listed=NULL, owner=COALESCE((SELECT user FROM real_items r WHERE r.id=gifts.real), owner) "
+                       "WHERE real IS NOT NULL")   # возвращаем их хозяевам из отменённых игр, сейфа и с маркета
             db.execute("DELETE FROM feed")
             db.execute("DELETE FROM sales")
             db.execute("DELETE FROM vault")

@@ -288,22 +288,37 @@ async def craft(req: Request, uid=Depends(auth)):
         cols = {g["col"] for g in gs}
         if col not in cols:
             err("коллекция должна быть одной из выбранных")
+        real = [bool(g["real"]) for g in gs]
+        if any(real) and not all(real):
+            err("Подарки из кейсов и коллекционные в одном крафте не смешиваются — выбери что-то одно")
         total = sum(g["value"] for g in gs)
         rr, pf = fair.rolls(uid, "craft", col, 3)
         k = _craft_target(rr)
         target = total * k
         rng = random.Random(f"{rr[2]:.15f}")   # вид подарка: подбор детерминирован третьим броском ставки
-        model, backdrop, symbol, value = _craft_variant(col, target, rng)
-        # коллекция не дотягивает до выпавшей ценности (дешёвая) — разницу доплачиваем звёздами
-        bonus = int(target - value) if value < target * 0.9 else 0
+        rx = None
+        if all(real):   # из подарков из кейсов получается настоящий подарок: самый дорогой не дороже выпавшей ценности, остаток — звёздами
+            rx = __import__("sys").modules["realgifts"].pick_le(target)
+            value = rx["value"]
+            bonus = max(0, int(target - value))
+        else:
+            model, backdrop, symbol, value = _craft_variant(col, target, rng)
+            # коллекция не дотягивает до выпавшей ценности (дешёвая) — разницу доплачиваем звёздами
+            bonus = int(target - value) if value < target * 0.9 else 0
         if bonus:
             db.execute("UPDATE users SET stars=stars+? WHERE id=?", (bonus, uid))
         for g in gs:
             db.execute("DELETE FROM gifts WHERE id=?", (g["id"],))
             unpin(uid, g["id"])
             cancel_trades_with(g["id"])
-        cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created) VALUES(?,?,?,?,?,?,?,?)",
-                         (uid, col, model, backdrop, symbol, rng.randint(1, E.supply(col)), value, now()))
+        if rx:
+            row = __import__("sys").modules["realgifts"].give_gift(uid, rx, "craft", total)
+
+            class cur:   # дальше нужен только номер новой записи
+                lastrowid = row["id"]
+        else:
+            cur = db.execute("INSERT INTO gifts(owner,col,model,backdrop,symbol,num,value,created) VALUES(?,?,?,?,?,?,?,?)",
+                             (uid, col, model, backdrop, symbol, rng.randint(1, E.supply(col)), value, now()))
         new = gift_out(q1("SELECT * FROM gifts WHERE id=?", cur.lastrowid))
         event(uid, "craft", value + bonus - total, stake=total, pf=pf, res={"k": round(k, 6), "value": value, "bonus": bonus})
         db.execute("INSERT INTO feed(user,gift,cs,ts) VALUES(?,?,?,?)", (uid, cur.lastrowid, "craft", now()))

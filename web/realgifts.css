@@ -178,3 +178,10 @@ html.cur-usd :is(.amtf,.ca-in,.pay-ai,.pay-st,.lim-own,.cur-keep) .xtr::before{c
 /* сумка с подарками из кейсов: от стартового блока остаются кнопка и три шага, без картинки и слов «пока пустая» */
 .invstart.has .is-art,.invstart.has h2,.invstart.has p{display:none}
 .invstart.has{padding-top:6px}
+/* подарок под замком (из бесплатного кейса, ждёт приглашённого друга), на маркете или в игре */
+.rg-cell.busy small{color:var(--hint)}
+.rg-cell.lock{opacity:.78}
+.rg-cell.lock .rg-art{filter:grayscale(.55)}
+.rg-freehint{display:flex;align-items:flex-start;gap:8px;margin:10px 2px 0;text-align:left;font-size:12.5px;line-height:1.4}
+.rg-freehint svg{flex:none;width:16px;height:16px;margin-top:1px;opacity:.75}
+.sheet.pgs .gtitle,.sheet.pgs1 .gtitle{font-size:19px!important;max-width:calc(100% - 212px)!important}   /* заголовок окна выбора не заезжает под кнопку звука */

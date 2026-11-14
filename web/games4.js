@@ -155,16 +155,20 @@ function fillCraft(el) {
   const total = CR.gifts.reduce((s, g) => s + g.value, 0);
   const cols = [...new Set(CR.gifts.map(g => g.col))];
   if (!cols.includes(CR.col)) CR.col = cols[0] || null;
+  // подарки из кейсов (настоящие) крафтятся в настоящий подарок; с коллекционными в одном крафте не смешиваются
+  const realN = CR.gifts.filter(g => g.real).length, allReal = realN > 0 && realN === CR.gifts.length, mixed = realN > 0 && !allReal;
   el.querySelector("#cr-body").innerHTML = `
     <div class="cr-pot">${CR.gifts.length ? CR.gifts.map(g => `<div class="cr-g">${giftHTML(g, { lite: true, plain: true })}</div>`).join("") : `<div class="hint bk-empty">Выбери от 3 до 10 своих подарков</div>`}</div>
     <button class="btn ghost" style="width:100%" data-act="cr-pick">${ic("plus")}${CR.gifts.length ? "Изменить выбор" : "Выбрать подарки"}</button>
     ${CR.gifts.length ? `<div class="cr-sum"><span>Сумма ценностей</span><b>⭐ ${fmt(total)}</b></div>
-      <div class="fx-lbl">Во что крафтим</div>
-      <div class="fx-coins sm">${cols.map(c => `<button data-act="cr-col" data-v="${esc(c)}" class="${c === CR.col ? "on" : ""}"><img src="${A.orig(c, 64)}" alt="" style="width:22px;height:22px;object-fit:contain">${esc(c)}</button>`).join("")}</div>` : ""}
+      ${mixed ? `<p class="hint" style="margin:10px 0;color:var(--red,#ff5c7a)">Подарки из кейсов и коллекционные в одном крафте не смешиваются — выбери что-то одно.</p>`
+        : allReal ? `<p class="hint" style="margin:10px 0">Из подарков из кейсов получится настоящий подарок Telegram на выпавшую ценность. Остаток доплатим звёздами.</p>`
+        : `<div class="fx-lbl">Во что крафтим</div>
+      <div class="fx-coins sm">${cols.map(c => `<button data-act="cr-col" data-v="${esc(c)}" class="${c === CR.col ? "on" : ""}"><img src="${A.orig(c, 64)}" alt="" style="width:22px;height:22px;object-fit:contain">${esc(c)}</button>`).join("")}</div>`}` : ""}
     <div class="cr-odds"><div><b>72%</b><span>⭐ ${total ? short(Math.round(total * .55)) + "–" + short(Math.round(total * .9)) : "×0,55–0,9"}</span></div>
       <div class="mid"><b>23%</b><span>⭐ ${total ? short(Math.round(total * .95)) + "–" + short(Math.round(total * 1.5)) : "×0,95–1,5"}</span></div>
       <div class="top"><b>5%</b><span>⭐ ${total ? short(Math.round(total * 1.5)) + "–" + short(Math.round(total * 2.5)) : "×1,5–2,5"}</span></div></div>
-    <button class="btn cta gold" data-act="cr-go" ${CR.gifts.length >= 3 ? "" : "disabled"}>${ic("flame")}Скрафтить${CR.gifts.length ? ` ${CR.gifts.length} → 1` : ""}</button>
+    <button class="btn cta gold" data-act="cr-go" ${CR.gifts.length >= 3 && !mixed ? "" : "disabled"}>${ic("flame")}Скрафтить${CR.gifts.length ? ` ${CR.gifts.length} → 1` : ""}</button>
 `;
 }
 
@@ -209,7 +213,7 @@ Object.assign(ACT, {
   "cr-col": el => { CR.col = el.dataset.v; H.sel(); fillCraft(); },
   "cr-go": async el => {
     if (CR.busy || CR.gifts.length < 3) return;
-    if (!await confirmM("Скрафтить?", `${CR.gifts.length} ${plural(CR.gifts.length, ["подарок сгорит", "подарка сгорят", "подарков сгорят"])}. Взамен — один подарок ${esc(CR.col)}.`, "Крафт")) return;
+    if (!await confirmM("Скрафтить?", `${CR.gifts.length} ${plural(CR.gifts.length, ["подарок сгорит", "подарка сгорят", "подарков сгорят"])}. Взамен — ${CR.gifts.every(g => g.real) ? "один настоящий подарок Telegram" : "один подарок " + esc(CR.col)}.`, "Крафт")) return;
     CR.busy = true; el.disabled = true;
     try {
       const pot = $(".cr-pot"); pot.classList.add("burn"); H.imp("heavy"); await sleep(900);

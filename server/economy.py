@@ -160,6 +160,31 @@ def mult(col, pm, pb, ps):
     return min(8.0, max(0.6, k))
 
 
+TGREAL = {}   # обычный (не коллекционный) подарок Telegram из кейса: название → {модель: id подарка в Telegram}. В каталоге он —
+TG_MODEL = "Обычный"   # «коллекция», как скины CS: так подарки из кейсов живут в общей таблице gifts и работают во всех играх на подарках.
+
+
+def reg_tg(title, ref):
+    """Завести обычный подарок Telegram в каталоге и вернуть имя его модели (NATIVE не трогаем: в альбом, витрину банка
+    и цели апгрейда он не попадает). None — название совпало с настоящей коллекцией."""
+    ref = str(ref)
+    if title in CATALOG and title not in TGREAL:
+        return None
+    if title not in TGREAL:
+        d = CATALOG[CUSTOM_DONOR]
+        CATALOG[title] = {"released": 0, "models": [], "backdrops": d["backdrops"], "symbols": d["symbols"]}
+        _MED[title] = (30, _MED[CUSTOM_DONOR][1], _MED[CUSTOM_DONOR][2])
+        TGREAL[title] = {}
+    for m, r in TGREAL[title].items():
+        if r == ref:
+            return m
+    m = TG_MODEL if not TGREAL[title] else f"{TG_MODEL} {len(TGREAL[title]) + 1}"   # у двух разных подарков одно название
+    TGREAL[title][m] = ref
+    CATALOG[title]["models"].append([m, 30])
+    _CUM.pop((title, "models"), None)
+    return m
+
+
 def supply(col):
     return int(min(300000, max(1000, 4e6 / base(col) ** 0.6)))
 
