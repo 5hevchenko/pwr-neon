@@ -121,6 +121,13 @@ def _levels():
                 db.execute("INSERT INTO ref_pay(friend,stage,ref,amount,ts) VALUES(?,?,?,?,?)", (f["id"], stage, f["ref_by"], bonus, now()))
                 if bonus:
                     msgs.append(_pay(f["ref_by"], bonus, "ref_lvl", f"🎯 Твой друг <b>{esc(f['name'])}</b> дошёл до {L} уровня — тебе +{S(bonus)} ⭐"))
+            if stage == "l1":   # активный друг снимает замок с подарка из бесплатного кейса (realgifts.py)
+                rg = __import__("sys").modules.get("realgifts")
+                note = rg.unlocked_note(f["ref_by"], "level") if rg else ""
+                if note and bonus and msgs and msgs[-1][0] == f["ref_by"]:
+                    msgs[-1] = (f["ref_by"], msgs[-1][1] + note)
+                elif note:
+                    msgs.append((f["ref_by"], f"🎯 Твой друг <b>{esc(f['name'])}</b> дошёл до {L} уровня." + note))
     return msgs
 
 

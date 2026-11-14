@@ -31,8 +31,13 @@ ALERTS = {   # вид → (название, описание порога, зн
     "game": ("Игра в минусе за сегодня", "игра отдала игрокам больше, чем забрала, на ⭐", 1_000_000),
     "adminstars": ("Крупная выдача админом", "админ выдал или снял за раз от, ⭐", 1_000_000),
     "server": ("Сервер на пределе", "свободно памяти или диска меньше, %", 10),
+    "wdone": ("Крупный вывод", "один вывод подарка или скина от, $", 5),
+    "wduser": ("Игрок много вывел", "один игрок вывел за 24 ч на сумму от, $", 10),
+    "wdday": ("Выводы за сутки", "все игроки вывели за 24 ч на сумму от, $", 20),
+    "sameip": ("Аккаунты с одного адреса", "новых аккаунтов с одного IP за 24 ч от", 4),
 }
-COOLDOWN = {"bigwin": 0, "hour": 6 * 3600, "bank": 6 * 3600, "game": 12 * 3600, "adminstars": 0, "server": 6 * 3600}
+COOLDOWN = {"bigwin": 0, "hour": 6 * 3600, "bank": 6 * 3600, "game": 12 * 3600, "adminstars": 0, "server": 6 * 3600,
+            "wdone": 0, "wduser": 12 * 3600, "wdday": 6 * 3600, "sameip": 12 * 3600}
 
 
 def alerts_cfg():
@@ -119,11 +124,50 @@ def _check():
             _raise("server", "server", f"Свободно памяти {mem:.0f}%, диска {disk:.0f}%")
 
 
+def _outs(since):
+    """Выводы с момента since: [(ключ, игрок, $, что)] — настоящие подарки (отправлены или ждут ручной отправки) и скины CS."""
+    out = []
+    if q1("SELECT name FROM sqlite_master WHERE name='real_items'"):
+        out += [(f"wdg{r['id']}", r["user"], r["usd"] or 0, "подарок «" + str(r["title"]) + "»")
+                for r in q("SELECT id, user, usd, title FROM real_items WHERE status IN ('sent','pending') AND upd>=?", since)]
+    if q1("SELECT name FROM sqlite_master WHERE name='withdraws'"):
+        out += [(f"wds{r['id']}", r["user"], max(r["usd"] or 0, r["market_usd"] or 0), "скин «" + str(r["gift"]) + "»")
+                for r in q("SELECT id, user, usd, market_usd, gift FROM withdraws WHERE stage IN ('0','1','2') AND ts>=?", since)]
+    return out
+
+
+def _check_out():
+    """Тревоги на вывод и на пачки новых аккаунтов с одного адреса."""
+    c, t = alerts_cfg(), now()
+    outs = _outs(t - 86400) if c["wdone"]["on"] or c["wduser"]["on"] or c["wdday"]["on"] else []
+    usd = lambda x: f"${x:,.2f}".replace(",", " ")
+    if c["wdone"]["on"]:
+        for key, uid, v, what in outs:
+            if v >= c["wdone"]["min"]:
+                _raise("wdone", key, f"{_name(uid)} выводит {what} за {usd(v)}")
+    by = {}
+    for _, uid, v, _w in outs:
+        by[uid] = by.get(uid, 0) + v
+    if c["wduser"]["on"]:
+        for uid, v in by.items():
+            if v >= c["wduser"]["min"]:
+                _raise("wduser", f"wdu{uid}", f"{_name(uid)} вывел за сутки на {usd(v)}")
+    if c["wdday"]["on"] and sum(by.values()) >= c["wdday"]["min"]:
+        _raise("wdday", "wdday", f"Выводы за 24 ч: {usd(sum(by.values()))} — {len(outs)} шт., игроков {len(by)}")
+    if c["sameip"]["on"] and q1("SELECT name FROM sqlite_master WHERE name='user_ips'"):
+        for r in q("SELECT i.ip, COUNT(DISTINCT i.user) cnt, GROUP_CONCAT(DISTINCT i.user) ids FROM user_ips i JOIN users u ON u.id=i.user "
+                   "WHERE u.created>=? GROUP BY i.ip HAVING COUNT(DISTINCT i.user)>=?", t - 86400, c["sameip"]["min"]):
+            ids = [int(x) for x in str(r["ids"]).split(",")[:6]]
+            _raise("sameip", f"ip{r['ip']}", f"С одного адреса за сутки появилось {r['cnt']} новых аккаунтов: " + ", ".join(_name(i) for i in ids)
+                   + (" и другие" if r["cnt"] > len(ids) else "") + ". Возможно, твинки (или общий Wi-Fi) — посмотри разбор игрока")
+
+
 async def _loop():
     await asyncio.sleep(30)
     while True:
         try:
             await asyncio.get_running_loop().run_in_executor(None, _check)
+            await asyncio.get_running_loop().run_in_executor(None, _check_out)
         except Exception as e:
             print("alerts:", e, flush=True)
         await asyncio.sleep(60)
@@ -229,7 +273,29 @@ def insight(tid: int, aid=Depends(admin)):
     adm = sum(k["sum"] for k in kinds if k["kind"] == "admin")
     if adm:
         flags.append(f"Начислено администрацией: ⭐ {S(adm)}")
-    return {"kinds": kinds, "games": games, "peers": peers, "flags": flags, "stars": u["stars"]}
+    # тот же адрес (отпечаток IP) и лимит запросов — guard.py
+    same = []
+    try:
+        import guard
+        guard.flush()
+        same = guard.same_ip(tid)
+        if same:
+            mine = [x for x in same if x["ref_by"] == tid]
+            flags.append(f"С тех же адресов заходили ещё {len(same)}{'+' if len(same) >= 12 else ''} акк.: " + ", ".join(str(x["name"]) for x in same[:5])
+                         + (f". Из них его рефералы: {len(mine)} — похоже на накрутку приглашений" if mine else "")
+                         + ("" if mine else ". Это подсказка, а не доказательство: общий Wi-Fi и мобильный интернет дают один адрес многим"))
+            if u["ref_by"] and any(x["id"] == u["ref_by"] for x in same):
+                flags.append("Заходил с того же адреса, что и пригласивший его игрок")
+        n = guard.hits(tid)
+        if n >= 20:
+            flags.append(f"Упирался в лимит частоты запросов {n} раз за неделю — так бывает у скриптов")
+    except Exception as e:
+        print("insight guard:", type(e).__name__, e, flush=True)
+    outs = [(v, w) for _k, uid2, v, w in _outs(now() - 30 * 86400) if uid2 == tid]
+    if outs:
+        flags.append(f"Вывел за 30 дней: {len(outs)} шт. на ${sum(v for v, _ in outs):,.2f}".replace(",", " "))
+    return {"kinds": kinds, "games": games, "peers": peers, "flags": flags, "stars": u["stars"],
+            "sameIp": [{"id": x["id"], "name": x["name"], "shared": x["shared"]} for x in same]}
 
 
 # ---------------- отмена действий админа ----------------

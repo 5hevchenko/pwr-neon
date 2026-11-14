@@ -6,7 +6,7 @@ const ADM_ACT = { stars: "Звёзды", ban: "Бан", unban: "Разбан", g
   undo: "Отмена", admin_on: "Выдал админку", admin_off: "Снял админку", alerts: "Тревоги", claw: "Кран", broadcast: "Рассылка", promo: "Акция",
   event: "Ивент", gift_rm: "Забрал подарок", cosm_rm: "Забрал оформление", wipe: "Вайп", fees: "Комиссии", shop: "Продажи",
   freeze: "Заморозил кошелёк", unfreeze: "Разморозил кошелёк", comp: "Компенсация", addr: "Адрес кошелька" };
-const ALERT_IC = { bigwin: "trophy", hour: "flame", bank: "bank", game: "games", adminstars: "users", server: "activity" };
+const ALERT_IC = { bigwin: "trophy", hour: "flame", bank: "bank", game: "games", adminstars: "users", server: "activity", wdone: "send", wduser: "send", wdday: "send", sameip: "users" };
 
 // ---------------- пульт ----------------
 function admPulseHTML(p) {

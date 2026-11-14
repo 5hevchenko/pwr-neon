@@ -564,9 +564,27 @@ def _look(kind, ref, title, seed):
     return col, m, rng.choice(d["backdrops"])[0], rng.choice(d["symbols"])[0]
 
 
+def friend_level():
+    """До какого уровня должен дойти приглашённый, чтобы пойти в зачёт для замка бесплатного кейса (0 — достаточно зайти в игру).
+    Уровень тот же, что в программе приглашений (refs: l1_level) — «активный друг». Защита от накрутки пустыми аккаунтами."""
+    r = __import__("sys").modules.get("refs")
+    return int(r.cfg("l1_level")) if FREE_ACTIVE and r else 0
+
+
 def _refs(uid):
+    """Сколько друзей игрока идут в зачёт: активные (дошли до уровня) или все зашедшие по ссылке."""
+    if friend_level():
+        return __import__("sys").modules["refs"]._active_count(uid)
     r = q1("SELECT refs FROM users WHERE id=?", uid)
     return (r["refs"] or 0) if r else 0
+
+
+def lock_text(left):
+    """Что нужно, чтобы замок снялся — одной фразой (для ошибок и уведомлений)."""
+    who = "друг" if left == 1 else f"{left} друзей"
+    L = friend_level()
+    return (f"когда {who} по твоей ссылке {'дойдёт' if left == 1 else 'дойдут'} до {L} уровня" if L
+            else f"когда {who} {'зайдёт' if left == 1 else 'зайдут'} в игру по твоей ссылке")
 
 
 def _mirror(it):
@@ -602,10 +620,14 @@ def ensure(uid):
                 _sync(uid)
 
 
-def unlocked_note(uid):
-    """Пришёл друг: какие подарки из бесплатного кейса он открыл — строка для уведомления (и сразу зеркала)."""
+def unlocked_note(uid, on="join"):
+    """Друг пошёл в зачёт (on: join — зашёл в игру, level — дорос до уровня): какие подарки из бесплатного кейса это открыло —
+    строка для уведомления (и сразу зеркала). Событие не то, по которому считаются друзья, — пустая строка."""
+    if (on == "level") != bool(friend_level()):
+        return ""
     refs = _refs(uid)
-    rows = q("SELECT title FROM real_items WHERE user=? AND status='bag' AND need_refs=?", uid, refs)
+    rows = q("SELECT r.title FROM real_items r LEFT JOIN gifts g ON g.real=r.id "   # замок снят, а зеркала ещё нет — значит, открылся только что
+             "WHERE r.user=? AND r.status='bag' AND r.need_refs>0 AND r.need_refs<=? AND g.id IS NULL", uid, refs)
     if not rows:
         return ""
     try:
@@ -664,7 +686,7 @@ def _claim(uid, it):
     """Перед выводом, продажей и апгрейдом: подарок не заблокирован и не занят в игре или на маркете. Внутри транзакции."""
     left = (it["need_refs"] or 0) - _refs(uid)
     if left > 0:
-        err(f"Подарок из бесплатного кейса откроется, когда пригласишь {'друга' if left == 1 else str(left) + ' друзей'} — ссылка в разделе «Друзья»", 423)
+        err(f"Подарок из бесплатного кейса откроется, {lock_text(left)}", 423)
     g = q1("SELECT * FROM gifts WHERE real=?", it["id"])
     if g:
         if g["owner"] != uid:
@@ -742,7 +764,7 @@ def state(uid):
     return {"on": enabled(), "cases": cases, "ids": sorted(IDS), "bag": bag, "history": hist, "stars": bal(uid), "limit": limit, "used": used,
             "left": round(max(0, limit - used), 2), "held": W.held(uid), "holdHours": W.HOLD_H,
             "rtp": int(RTP * 100), "limitK": int(W.LIMIT_K * 100), "freeUsd": W.FREE_USER, "usdK": W.XTR_USD / shop.RATE / MARKUP,
-            "payer": payer(uid), "freeFriends": FREE_FRIENDS}
+            "payer": payer(uid), "freeFriends": FREE_FRIENDS, "freeLevel": friend_level()}
 
 
 @app.get(R + "/realgifts")
@@ -853,6 +875,7 @@ async def realgifts_img(gid: str):
 # иначе Telegram не отвечает, подписан ли игрок. Список пуст — прокрут без условий.
 db.execute("CREATE TABLE IF NOT EXISTS free_gate(user INTEGER, cid TEXT, opens INTEGER DEFAULT 0, refs_at INTEGER DEFAULT 0, "
            "PRIMARY KEY(user, cid))")
+FREE_ACTIVE = conf("realgifts.free_friend_active", True)   # True — друг идёт в зачёт, когда дорос до уровня программы приглашений (refs l1_level); False — как только зашёл
 FREE_EACH = conf("realgifts.free_lock_each", True)       # True — каждому подарку из бесплатного кейса нужен свой новый друг; False — один друг открывает все накопленные
 FREE_FRIENDS = conf("realgifts.free_friends", 1)        # сколько новых друзей нужно на каждый следующий бесплатный прокрут; 0 — условие снято
 _SUB_OK = {}                                            # (игрок, канал) → время последней удачной проверки подписки
@@ -982,7 +1005,7 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
             if not price:
                 db.execute("UPDATE users SET ru_free_at=? WHERE id=?" if cid in E.RU_CASES else "UPDATE users SET last_free=? WHERE id=?", (t, uid))
                 db.execute("INSERT INTO free_gate(user,cid,opens,refs_at) VALUES(?,?,1,?) ON CONFLICT(user,cid) DO UPDATE SET opens=opens+1",
-                           (uid, cid, u["refs"] or 0))
+                           (uid, cid, _refs(uid)))
             paid = price
             if u["stars"] < paid:
                 err("Не хватает звёзд")
@@ -1001,7 +1024,7 @@ async def realgifts_open(cid: str, req: Request, uid=Depends(auth)):
         else:
             need = 0
             if not price and not key:   # бесплатный кейс: подарок ждёт нового друга
-                need = _free_need(uid, cid, u["refs"] or 0)
+                need = _free_need(uid, cid, _refs(uid))
                 if need:
                     db.execute("UPDATE free_gate SET refs_at=? WHERE user=? AND cid=?", (need, uid, cid))
             row = give(uid, it, cid, paid, need)[0]
@@ -1291,6 +1314,20 @@ def _migrate():
                        f"WHERE status='bag' AND paid=0 AND COALESCE(need_refs,0)=0 AND cid IN ({marks}) "
                        f"AND NOT EXISTS(SELECT 1 FROM gifts g WHERE g.real=real_items.id)", (FREE_FRIENDS, *free))
         db.execute("INSERT OR REPLACE INTO kv(k,v) VALUES('rg_free_lock','1')")
+        if friend_level() and not A.kv_get("rg_lock_active"):
+            # друзья теперь считаются по-новому (активные, а не все зашедшие): пересчитываем пороги замков. Что уже открыто — остаётся открытым
+            for r in q("SELECT DISTINCT user FROM real_items WHERE status='bag' AND need_refs>0 AND user>0"):
+                uid = r["user"]
+                old = (q1("SELECT refs FROM users WHERE id=?", uid) or {"refs": 0})["refs"] or 0
+                act, k = _refs(uid), 0
+                for it in q("SELECT id, need_refs FROM real_items WHERE user=? AND status='bag' AND need_refs>0 ORDER BY need_refs, id", uid):
+                    if it["need_refs"] <= old:
+                        db.execute("UPDATE real_items SET need_refs=0 WHERE id=?", (it["id"],))
+                    else:
+                        k += 1
+                        db.execute("UPDATE real_items SET need_refs=? WHERE id=?", (act + (k if FREE_EACH else 1) * FREE_FRIENDS, it["id"]))
+                db.execute("UPDATE free_gate SET refs_at=? WHERE user=?", (act + k * FREE_FRIENDS, uid))
+        db.execute("INSERT OR REPLACE INTO kv(k,v) VALUES('rg_lock_active','1')")
         # зеркало в игре или на маркете, а подарок уже не в сумке — такого быть не должно, но висеть оно не будет
         db.execute("DELETE FROM gifts WHERE real IS NOT NULL AND NOT EXISTS(SELECT 1 FROM real_items r WHERE r.id=gifts.real AND r.status='bag')")
         for r in q("SELECT DISTINCT user FROM real_items WHERE status='bag' AND user>0"):

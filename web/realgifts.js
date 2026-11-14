@@ -71,7 +71,7 @@ function rgCaseHTML(c) {
     <div class="rg-hero"><span class="rg-fan big">${gifts.slice(0, 3).map(x => rgArt(x)).join("")}</span></div>
     <div id="rg-roul"></div><div id="rg-won"></div>
     <div class="btns" id="rg-btns">${rgBtnHTML(c)}</div>
-    ${!c.price && !c.keys && RG && RG.freeFriends ? `<p class="hint rg-freehint">${ic("lock")}Открыть кейс можно сразу. Чтобы забрать подарок — вывести, продать или поставить в игру, — пригласи друга.</p>` : ""}
+    ${!c.price && !c.keys && RG && RG.freeFriends ? `<p class="hint rg-freehint">${ic("lock")}Открыть кейс можно сразу. Чтобы забрать подарок — вывести, продать или поставить в игру, — пригласи друга${RG.freeLevel ? `: он должен дойти до ${RG.freeLevel} уровня` : ""}.</p>` : ""}
     <div class="sec-t">Что внутри</div>
     <div class="rg-grid">${c.items.map(tile).join("")}</div>
     <p class="hint">Подарки настоящие: выигранный можно вывести на свой аккаунт Telegram или продать игре за полную цену.${c.items.some(x => x.kind === "star") ? " Звёзды приходят сразу на баланс." : ""}
@@ -183,7 +183,7 @@ renderInventory = async function () {
 ACT["rg-kind"] = el => { INVK = el.dataset.v; H.sel(); drawInventory(); };
 // карточка подарка из кейса: вывести в Telegram или продать — как у скина CS
 const rgFriends = n => n === 1 ? "друга" : `${n} ${plural(n, ["друга", "друзей", "друзей"])}`;
-const rgLockText = x => `Подарок из бесплатного кейса под замком. Пригласи ${rgFriends(x.lock)} по своей ссылке — и сможешь вывести его в Telegram, продать или поставить в игре.`;
+const rgLockText = x => `Подарок из бесплатного кейса под замком. Пригласи ${rgFriends(x.lock)} по своей ссылке${RG && RG.freeLevel ? ` — когда ${x.lock === 1 ? "он дойдёт" : "они дойдут"} до ${RG.freeLevel} уровня, ты` : " — и"} сможешь вывести его в Telegram, продать или поставить в игре.`;
 const rgLockShort = x => x.lock > 1 ? `🔒 друзей: ${x.lock}` : "🔒 нужен друг";
 const rgBadge = x => x.status !== "bag" ? "отправляется" : x.lock ? rgLockShort(x) : x.busy === "market" ? "на маркете" : x.busy ? "в игре" : "";
 const rgCell = x => { const bd = rgBadge(x); return `<button class="rg-cell k-${x.kind}${bd ? " busy" : ""}${x.lock ? " lock" : ""}" data-act="rg-item" data-id="${x.id}">${rgArt(x)}<b>${esc(x.title)}</b><small>${bd || "⭐ " + short(x.value)}</small></button>`; };
@@ -197,7 +197,7 @@ ACT["rg-item"] = async el => {
   if (sending) return openSheet(`${head}<p>${esc(x.text)}</p></div>`, "rg-s rg-item-s");
   if (x.lock) return openSheet(`${head}<p>${rgLockText(x)}</p></div>
     <div class="btns rg-col"><button class="btn cta" data-act="rg-gate-inv">${ic("userPlus")}Пригласить друга</button></div>
-    <p class="hint">Друг должен зайти в игру по твоей ссылке. Как только он зайдёт, замок снимется сам.</p>`, "rg-s rg-item-s");
+    <p class="hint">${RG.freeLevel ? `Друг должен зайти в игру по твоей ссылке и дойти до ${RG.freeLevel} уровня — для этого достаточно немного поиграть. Замок снимется сам.` : "Друг должен зайти в игру по твоей ссылке. Как только он зайдёт, замок снимется сам."}</p>`, "rg-s rg-item-s");
   if (x.busy === "market") return openSheet(`${head}<p>Подарок выставлен на маркет. Чтобы вывести или продать его игре, сначала сними с продажи.</p></div>
     <div class="btns rg-col"><button class="btn cta" data-act="rg-unlist" data-id="${x.gid}">Снять с продажи</button></div>`, "rg-s rg-item-s");
   if (x.busy) return openSheet(`${head}<p>Подарок сейчас занят: стоит в игре, лежит в сейфе, в залоге или в подарке по ссылке. Вернётся в сумку, когда заберёшь его оттуда.</p></div>`, "rg-s rg-item-s");

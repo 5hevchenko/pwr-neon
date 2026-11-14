@@ -81,7 +81,7 @@ def _need_friend(u, c):
     rg = c["rg"]
     if not rg or rg.FREE_FRIENDS <= 0:
         return False
-    return bool(q1("SELECT 1 FROM real_items WHERE user=? AND status='bag' AND need_refs>?", u["id"], u["refs"] or 0))
+    return bool(q1("SELECT 1 FROM real_items WHERE user=? AND status='bag' AND need_refs>?", u["id"], rg._refs(u["id"])))
 
 
 def _free_ready(u, c):
@@ -103,10 +103,12 @@ def ev_free_ready(u, c):
 def ev_free_friend(u, c):
     if not _need_friend(u, c):
         return None
+    L = c["rg"].friend_level()
+    how = f"Позови друга по своей ссылке: когда он дойдёт до {L} уровня" if L else "Позови одного друга по своей ссылке"
     return {"card": ("invite", "Подарок ждёт", "+1 друг", False), "texts": [
-        "🎁 В сумке лежит подарок из бесплатного кейса. Позови одного друга по своей ссылке — и его можно вывести в Telegram.",
-        f"{nm(u)}, твой подарок под замком. Один новый друг по твоей ссылке — и он твой: выводи, продавай или ставь в игры.",
-        "👥 Друг заходит по твоей ссылке — подарок из бесплатного кейса открывается. Ссылка для приглашения в игре."]}
+        f"🎁 В сумке лежит подарок из бесплатного кейса. {how} — и его можно вывести в Telegram.",
+        f"{nm(u)}, твой подарок под замком. {how} — и он твой: выводи, продавай или ставь в игры.",
+        f"👥 {how} — подарок из бесплатного кейса откроется. Ссылка для приглашения в игре."]}
 
 
 def ev_streak_risk(u, c):
